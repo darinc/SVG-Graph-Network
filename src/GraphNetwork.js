@@ -77,6 +77,7 @@ export class GraphNetwork {
         this.lastTouchEndTime = 0;
         this.touchTarget = null;
         this.dragStartPosition = null;
+        this.wasNodeFixed = false;
 
         // Initialize the graph
         this.setupContainer();
@@ -757,10 +758,13 @@ export class GraphNetwork {
      */
     handleNodeMouseDown(e, node) {
         e.preventDefault();
-        if (node.isFixed) return;
         
         this.isDragging = true;
         this.dragNode = node;
+        // Fix the node during dragging so physics doesn't interfere
+        this.wasNodeFixed = node.isFixed;
+        node.fix();
+        
         this.emit('nodeMouseDown', { node, event: e });
     }
 
@@ -820,8 +824,12 @@ export class GraphNetwork {
     handleSvgMouseMove(e) {
         if (this.isDragging && this.dragNode) {
             const rect = this.svg.getBoundingClientRect();
-            this.dragNode.position.x = (e.clientX - rect.left - this.transformState.x) / this.transformState.scale;
-            this.dragNode.position.y = (e.clientY - rect.top - this.transformState.y) / this.transformState.scale;
+            const newX = (e.clientX - rect.left - this.transformState.x) / this.transformState.scale;
+            const newY = (e.clientY - rect.top - this.transformState.y) / this.transformState.scale;
+            
+            
+            this.dragNode.position.x = newX;
+            this.dragNode.position.y = newY;
             this.showTooltip(this.dragNode);
             this.tooltip.style.left = `${e.clientX + 10}px`;
             this.tooltip.style.top = `${e.clientY + 10}px`;
@@ -838,9 +846,16 @@ export class GraphNetwork {
      * Handle SVG mouse up (stop dragging/panning)
      */
     handleSvgMouseUp() {
+        if (this.isDragging && this.dragNode) {
+            // Restore the node's original fixed state
+            if (!this.wasNodeFixed) {
+                this.dragNode.unfix();
+            }
+        }
         this.isDragging = false;
         this.dragNode = null;
         this.isPanning = false;
+        this.wasNodeFixed = false;
     }
 
     /**
@@ -923,11 +938,14 @@ export class GraphNetwork {
      */
     handleNodeTouchStart(e, node) {
         e.preventDefault();
-        if (node.isFixed || e.touches.length > 1) return;
+        if (e.touches.length > 1) return;
         
         console.log('Node touch start:', node.data.name); // Debug log
         this.isDragging = true;
         this.dragNode = node;
+        // Fix the node during dragging so physics doesn't interfere
+        this.wasNodeFixed = node.isFixed;
+        node.fix();
         // Store initial position to detect actual movement
         this.dragStartPosition = { x: node.position.x, y: node.position.y };
         // touchStartTime already set in handleTouchStart
@@ -1066,11 +1084,18 @@ export class GraphNetwork {
         
         // Clean up touch states
         if (e.touches.length === 0) {
+            if (this.isDragging && this.dragNode) {
+                // Restore the node's original fixed state
+                if (!this.wasNodeFixed) {
+                    this.dragNode.unfix();
+                }
+            }
             this.isDragging = false;
             this.dragNode = null;
             this.dragStartPosition = null;
             this.isPanning = false;
             this.isPinching = false;
+            this.wasNodeFixed = false;
             this.hideTooltip();
         } else if (e.touches.length === 1) {
             // One finger still down - switch from pinch to pan
@@ -1333,9 +1358,10 @@ export class GraphNetwork {
     updatePositions() {
         const dt = 1;
         const nodesArray = Array.from(this.nodes.values());
+        
 
         nodesArray.forEach(node => {
-            if (node.isFixed || node === this.dragNode) return;
+            if (node.isFixed) return;
             if (this.filteredNodes && !this.filteredNodes.has(node.data.id)) return;
             
             node.velocity = node.velocity.add(node.force.multiply(dt));
@@ -1421,7 +1447,7 @@ export class GraphNetwork {
      * Animation loop
      */
     animate() {
-        if (!this.isDragging && !this.isPanning) {
+        if (!this.isPanning) {  // Allow physics during drag, but not during pan
             this.updateForces();
             this.updatePositions();
         }
