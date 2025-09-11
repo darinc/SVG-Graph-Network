@@ -135,6 +135,11 @@ export class SVGRenderer {
      * Create SVG elements for all nodes and links
      */
     createElements(nodes, links) {
+        // Ensure SVG structure exists before creating elements
+        if (!this.linkGroup || !this.labelGroup || !this.nodeGroup) {
+            this.createSVGContainer();
+        }
+        
         this.clearElements();
         this.createLinkElements(links);
         this.createNodeElements(nodes);
@@ -144,6 +149,8 @@ export class SVGRenderer {
      * Create SVG elements for links
      */
     createLinkElements(links) {
+        if (!this.linkGroup || !this.labelGroup) return;
+        
         links.forEach(link => {
             const linkEl = document.createElementNS('http://www.w3.org/2000/svg', 'line');
             linkEl.classList.add('link');
@@ -179,6 +186,8 @@ export class SVGRenderer {
      * Create SVG elements for nodes
      */
     createNodeElements(nodes) {
+        if (!this.nodeGroup) return;
+        
         const nodesArray = Array.from(nodes.values());
         
         nodesArray.forEach(node => {
@@ -441,10 +450,16 @@ export class SVGRenderer {
      * Clear all SVG elements
      */
     clearElements() {
-        // Clear groups
-        this.linkGroup.innerHTML = '';
-        this.labelGroup.innerHTML = '';
-        this.nodeGroup.innerHTML = '';
+        // Clear groups with null safety checks
+        if (this.linkGroup) {
+            this.linkGroup.innerHTML = '';
+        }
+        if (this.labelGroup) {
+            this.labelGroup.innerHTML = '';
+        }
+        if (this.nodeGroup) {
+            this.nodeGroup.innerHTML = '';
+        }
         
         // Clear tracking maps
         this.nodeElements.clear();

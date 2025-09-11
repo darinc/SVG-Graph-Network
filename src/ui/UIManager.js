@@ -334,6 +334,15 @@ export class UIManager {
                 step: 0.5,
                 value: 10,
                 description: 'Same-type grouping force'
+            },
+            { 
+                key: 'filterDepth', 
+                label: 'Filter Depth', 
+                min: 1, 
+                max: 5, 
+                step: 1,
+                value: 1,
+                description: 'Connection levels to show when filtering'
             }
         ];
 
@@ -461,6 +470,8 @@ export class UIManager {
                 return numValue / 10000;
             case 'groupingStrength':
                 return numValue / 10000;
+            case 'filterDepth':
+                return parseInt(numValue); // No conversion needed, use raw value
             default:
                 return numValue;
         }

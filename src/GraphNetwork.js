@@ -164,6 +164,25 @@ export class GraphNetwork {
         // Update UI with new data
         this.ui.createLegend(Array.from(this.nodes.values()));
         
+        // Reset node positions to ensure they're spread out properly
+        this.resetAllNodePositions();
+        
+        // Ensure physics engine is initialized
+        if (!this.physics) {
+            console.log('Re-initializing physics engine');
+            this.physics = new PhysicsEngine({
+                damping: this.config.damping,
+                repulsionStrength: this.config.repulsionStrength,
+                attractionStrength: this.config.attractionStrength,
+                groupingStrength: this.config.groupingStrength
+            });
+        }
+        
+        // Ensure animation is running for new data
+        if (!this.isAnimating) {
+            this.startAnimation();
+        }
+        
         this.updateGraphView();
         this.emit('dataLoaded', { nodes: this.nodes.size, links: this.links.length });
     }
@@ -183,12 +202,15 @@ export class GraphNetwork {
         const containerWidth = rect.width || 800;
         const containerHeight = rect.height || 600;
         
+        console.log(`Container dimensions: ${containerWidth}x${containerHeight}`);
+        
         nodes.forEach(nodeData => {
             if (!nodeData.id || !nodeData.name) {
                 throw new Error('Each node must have an id and name');
             }
             
             const node = new Node(nodeData, containerWidth, containerHeight);
+            console.log(`Node ${nodeData.name} created at position: (${node.position.x.toFixed(2)}, ${node.position.y.toFixed(2)})`);
             this.nodes.set(nodeData.id, node);
         });
 
@@ -220,7 +242,19 @@ export class GraphNetwork {
      */
     updatePhysicsConfig(key, value) {
         this.config[key] = value;
-        this.physics.updateConfig({ [key]: value });
+        
+        // Handle filterDepth changes specially
+        if (key === 'filterDepth') {
+            // If we currently have a filter active, re-apply it with the new depth
+            if (this.currentFilterNodeId) {
+                this.filterByNode(this.currentFilterNodeId, value);
+            }
+        } else {
+            // For physics parameters, update the physics engine
+            if (this.physics) {
+                this.physics.updateConfig({ [key]: value });
+            }
+        }
     }
 
     /**
@@ -248,6 +282,12 @@ export class GraphNetwork {
      */
     animate() {
         if (!this.isAnimating) return;
+        
+        // Ensure physics engine exists
+        if (!this.physics) {
+            console.error('Physics engine not initialized');
+            return;
+        }
         
         // Run physics simulation (unless panning)
         const transform = this.events.getTransform();
@@ -336,17 +376,24 @@ export class GraphNetwork {
     }
 
     /**
-     * Reset view and layout
+     * Reset all node positions to random locations
      */
-    resetViewAndLayout() {
-        // Reset all nodes to new random positions
+    resetAllNodePositions() {
         const rect = this.container.getBoundingClientRect();
-        const containerWidth = rect.width;
-        const containerHeight = rect.height;
+        const containerWidth = rect.width || 800;
+        const containerHeight = rect.height || 600;
         
         this.nodes.forEach(node => {
             node.resetPosition(containerWidth, containerHeight);
         });
+    }
+
+    /**
+     * Reset view and layout
+     */
+    resetViewAndLayout() {
+        // Reset all nodes to new random positions
+        this.resetAllNodePositions();
         
         // Reset view transform
         this.renderer.setTransform(0, 0, 1);

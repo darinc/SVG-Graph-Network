@@ -16,8 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Previous graph instance cleanup skipped');
         }
     }
+
     // Historical diplomatic network data from 1914
-    const diplomaticNetworkData = {
+    const diplomaticNetwork1914 = {
         nodes: [
             // Major Powers
             { id: "germany", name: "German Empire", type: "major_power", shape: "rectangle", size: 50 },
@@ -83,11 +84,119 @@ document.addEventListener('DOMContentLoaded', () => {
         ]
     };
 
+    // Modern European diplomatic network data (2024)
+    const diplomaticNetwork2024 = {
+        nodes: [
+            // Major Powers
+            { id: "usa", name: "United States", type: "major_power", shape: "rectangle", size: 55 },
+            { id: "china", name: "China", type: "major_power", shape: "rectangle", size: 50 },
+            { id: "russia", name: "Russia", type: "major_power", shape: "rectangle", size: 45 },
+            { id: "germany", name: "Germany", type: "major_power", shape: "rectangle", size: 40 },
+            { id: "france", name: "France", type: "major_power", shape: "rectangle", size: 35 },
+            { id: "uk", name: "United Kingdom", type: "major_power", shape: "rectangle", size: 35 },
+            
+            // Regional Powers
+            { id: "turkey", name: "Turkey", type: "regional_power", shape: "rectangle", size: 30 },
+            { id: "italy", name: "Italy", type: "regional_power", shape: "rectangle", size: 25 },
+            { id: "poland", name: "Poland", type: "regional_power", shape: "rectangle", size: 25 },
+            { id: "spain", name: "Spain", type: "regional_power", shape: "rectangle", size: 20 },
+            { id: "netherlands", name: "Netherlands", type: "regional_power", shape: "rectangle", size: 18 },
+            
+            // Smaller Nations
+            { id: "ukraine", name: "Ukraine", type: "small_nation", shape: "rectangle", size: 25 },
+            { id: "sweden", name: "Sweden", type: "small_nation", shape: "rectangle", size: 15 },
+            { id: "norway", name: "Norway", type: "small_nation", shape: "rectangle", size: 12 },
+            { id: "finland", name: "Finland", type: "small_nation", shape: "rectangle", size: 12 },
+            { id: "czech", name: "Czech Republic", type: "small_nation", shape: "rectangle", size: 15 },
+            { id: "greece", name: "Greece", type: "small_nation", shape: "rectangle", size: 15 },
+            
+            // Key Organizations/Issues
+            { id: "nato", name: "NATO", type: "territory", shape: "rectangle", size: 40 },
+            { id: "eu", name: "European Union", type: "territory", shape: "rectangle", size: 45 },
+            { id: "energy", name: "Energy Security", type: "territory", shape: "rectangle", size: 25 },
+            { id: "arctic", name: "Arctic Region", type: "territory", shape: "rectangle", size: 20 }
+        ],
+        links: [
+            // NATO Alliance
+            { source: "usa", target: "nato", label: "leads", weight: 6, line_type: 'solid' },
+            { source: "uk", target: "nato", label: "member", weight: 5, line_type: 'solid' },
+            { source: "france", target: "nato", label: "member", weight: 5, line_type: 'solid' },
+            { source: "germany", target: "nato", label: "member", weight: 5, line_type: 'solid' },
+            { source: "italy", target: "nato", label: "member", weight: 4, line_type: 'solid' },
+            { source: "poland", target: "nato", label: "member", weight: 4, line_type: 'solid' },
+            { source: "turkey", target: "nato", label: "member", weight: 4, line_type: 'solid' },
+            { source: "netherlands", target: "nato", label: "member", weight: 3, line_type: 'solid' },
+            { source: "norway", target: "nato", label: "member", weight: 3, line_type: 'solid' },
+            { source: "czech", target: "nato", label: "member", weight: 3, line_type: 'solid' },
+            { source: "greece", target: "nato", label: "member", weight: 3, line_type: 'solid' },
+            
+            // European Union
+            { source: "germany", target: "eu", label: "leads", weight: 6, line_type: 'solid' },
+            { source: "france", target: "eu", label: "leads", weight: 6, line_type: 'solid' },
+            { source: "italy", target: "eu", label: "member", weight: 4, line_type: 'solid' },
+            { source: "spain", target: "eu", label: "member", weight: 4, line_type: 'solid' },
+            { source: "netherlands", target: "eu", label: "member", weight: 4, line_type: 'solid' },
+            { source: "poland", target: "eu", label: "member", weight: 4, line_type: 'solid' },
+            { source: "sweden", target: "eu", label: "member", weight: 3, line_type: 'solid' },
+            { source: "finland", target: "eu", label: "member", weight: 3, line_type: 'solid' },
+            { source: "czech", target: "eu", label: "member", weight: 3, line_type: 'solid' },
+            { source: "greece", target: "eu", label: "member", weight: 3, line_type: 'solid' },
+            
+            // Major Power Relations
+            { source: "usa", target: "uk", label: "special relationship", weight: 5, line_type: 'solid' },
+            { source: "usa", target: "germany", label: "strategic partner", weight: 4, line_type: 'solid' },
+            { source: "usa", target: "france", label: "alliance", weight: 4, line_type: 'solid' },
+            { source: "usa", target: "china", label: "strategic competition", weight: 5, line_type: 'dashed' },
+            { source: "usa", target: "russia", label: "adversarial", weight: 4, line_type: 'dashed' },
+            
+            // Tensions and Conflicts
+            { source: "russia", target: "ukraine", label: "war", weight: 6, line_type: 'dashed' },
+            { source: "nato", target: "russia", label: "deterrence", weight: 5, line_type: 'dashed' },
+            { source: "china", target: "eu", label: "trade tensions", weight: 3, line_type: 'dashed' },
+            { source: "turkey", target: "eu", label: "strained relations", weight: 3, line_type: 'dashed' },
+            
+            // Energy Dependencies
+            { source: "germany", target: "energy", label: "vulnerability", weight: 4, line_type: 'dotted' },
+            { source: "russia", target: "energy", label: "exports", weight: 5, line_type: 'solid' },
+            { source: "norway", target: "energy", label: "supplies EU", weight: 4, line_type: 'solid' },
+            
+            // Support Networks
+            { source: "usa", target: "ukraine", label: "military aid", weight: 5, line_type: 'solid' },
+            { source: "eu", target: "ukraine", label: "support", weight: 4, line_type: 'solid' },
+            { source: "poland", target: "ukraine", label: "border support", weight: 4, line_type: 'solid' },
+            
+            // Arctic Competition
+            { source: "russia", target: "arctic", label: "expansion", weight: 4, line_type: 'solid' },
+            { source: "norway", target: "arctic", label: "claims", weight: 3, line_type: 'solid' },
+            { source: "usa", target: "arctic", label: "presence", weight: 3, line_type: 'dotted' },
+            
+            // Regional Partnerships
+            { source: "germany", target: "france", label: "Franco-German axis", weight: 5, line_type: 'solid' },
+            { source: "uk", target: "france", label: "post-Brexit cooperation", weight: 3, line_type: 'dotted' },
+            { source: "poland", target: "czech", label: "Visegrad partnership", weight: 3, line_type: 'solid' },
+            { source: "sweden", target: "finland", label: "Nordic cooperation", weight: 4, line_type: 'solid' },
+            { source: "sweden", target: "norway", label: "Nordic cooperation", weight: 4, line_type: 'solid' },
+            { source: "finland", target: "norway", label: "Nordic cooperation", weight: 3, line_type: 'solid' }
+        ]
+    };
+
+    // Current era state
+    let isModernEra = false;
+
+    // Function to get current data and title based on era
+    function getCurrentNetworkData() {
+        return isModernEra ? diplomaticNetwork2024 : diplomaticNetwork1914;
+    }
+    
+    function getCurrentTitle() {
+        return isModernEra ? 'European Diplomatic Network 2024' : 'European Diplomatic Network 1914';
+    }
+
     // Initialize the advanced graph with full features
     const graph = new GraphNetwork('graph-container', {
-        data: diplomaticNetworkData,
+        data: getCurrentNetworkData(),
         config: {
-            title: 'European Diplomatic Network 1914',
+            title: getCurrentTitle(),
             theme: 'dark',
             showControls: true,
             showLegend: true,
@@ -98,6 +207,40 @@ document.addEventListener('DOMContentLoaded', () => {
             attractionStrength: 0.001,
             filterDepth: 2
         }
+    });
+
+    // Toggle functionality
+    const eraCheckbox = document.getElementById('era-checkbox');
+    const toggleSwitch = document.getElementById('toggle-switch');
+    
+    function updateEra() {
+        isModernEra = eraCheckbox.checked;
+        
+        // Update toggle visual state
+        if (isModernEra) {
+            toggleSwitch.classList.add('active');
+        } else {
+            toggleSwitch.classList.remove('active');
+        }
+        
+        // Update graph data and title
+        graph.setData(getCurrentNetworkData());
+        graph.config.title = getCurrentTitle();
+        
+        // Update the title element if it exists
+        const titleElement = document.querySelector('.graph-network-title');
+        if (titleElement) {
+            titleElement.textContent = getCurrentTitle();
+        }
+        
+        console.log(`Switched to ${isModernEra ? '2024' : '1914'} diplomatic network`);
+    }
+    
+    // Add event listeners for toggle
+    eraCheckbox.addEventListener('change', updateEra);
+    toggleSwitch.addEventListener('click', () => {
+        eraCheckbox.checked = !eraCheckbox.checked;
+        updateEra();
     });
 
     // Event listeners for advanced interactions
@@ -125,7 +268,8 @@ document.addEventListener('DOMContentLoaded', () => {
     window.graph = graph;
 
     // Start the simulation
-    console.log('European Diplomatic Network 1914 loaded');
+    console.log('European Diplomatic Networks loaded (1914 & 2024)');
+    console.log('- Use the toggle at the top to switch between 1914 and 2024 eras');
     console.log('- Double-click nodes to explore their relationships');
     console.log('- Use controls to adjust physics parameters');
     console.log('- Pan with mouse drag, zoom with wheel');
