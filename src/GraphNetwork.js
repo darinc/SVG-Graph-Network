@@ -56,10 +56,14 @@ export class GraphNetwork {
         this.nodes = new Map();
         this.links = [];
         this.filteredNodes = null;
+        this.currentFilterNodeId = null;
         
         // Animation
         this.animationFrame = null;
         this.isAnimating = false;
+
+        // Setup container
+        this.setupContainer();
 
         // Initialize modules
         this.initializeModules();
@@ -70,6 +74,18 @@ export class GraphNetwork {
         }
         
         this.startAnimation();
+    }
+
+    /**
+     * Setup container with proper CSS classes and attributes
+     */
+    setupContainer() {
+        // Clean up any existing graph content (prevents duplication on HMR)
+        this.container.innerHTML = '';
+        
+        // Add CSS classes and theme attribute
+        this.container.classList.add('graph-network-container');
+        this.container.setAttribute('data-theme', this.config.theme);
     }
 
     /**
@@ -106,19 +122,31 @@ export class GraphNetwork {
             getNodeElements: () => this.renderer.getNodeElements(),
             fixNode: (node) => node.fix(),
             unfixNode: (node) => node.unfix(),
-            filterByNode: (nodeId) => this.filterByNode(nodeId),
+            filterByNode: (nodeId) => {
+                // If double-clicking the same filtered node, reset to all
+                if (this.currentFilterNodeId === nodeId) {
+                    this.resetFilter();
+                } else {
+                    this.filterByNode(nodeId);
+                }
+            },
             resetFilter: () => this.resetFilter(),
             updateTransform: (x, y, scale) => this.renderer.setTransform(x, y, scale),
             showTooltip: (node, position) => this.showTooltip(node, position),
             hideTooltip: () => this.hideTooltip(),
+            closeSettings: () => this.ui.closeSettings(),
             resize: () => this.handleResize()
         };
         
         this.events = new EventManager(this.config);
+        this.eventCallbacks = eventCallbacks;
         // Note: events.initialize() will be called after SVG and nodes are ready
         
         // Create tooltip element
         this.createTooltip();
+        
+        // Set initial theme after all modules are initialized
+        this.setTheme(this.config.theme);
     }
 
     /**
@@ -129,11 +157,12 @@ export class GraphNetwork {
         this.parseData(data);
         this.renderer.createElements(this.nodes, this.links);
         
-        // Initialize event handling after elements are created
-        this.events.initialize(this.renderer.getSVGElement(), this.nodes, this.events.callbacks);
+        // Initialize event handling after elements are created  
+        this.events.callbacks = this.eventCallbacks;
+        this.events.initialize(this.renderer.getSVGElement(), this.nodes);
         
         // Update UI with new data
-        this.ui.updateLegend(Array.from(this.nodes.values()));
+        this.ui.createLegend(Array.from(this.nodes.values()));
         
         this.updateGraphView();
         this.emit('dataLoaded', { nodes: this.nodes.size, links: this.links.length });
@@ -228,7 +257,7 @@ export class GraphNetwork {
         }
         
         // Render current state
-        this.renderer.render(this.nodes, this.links);
+        this.renderer.render(this.nodes, this.links, this.filteredNodes);
         
         // Schedule next frame
         this.animationFrame = requestAnimationFrame(() => this.animate());
@@ -268,6 +297,7 @@ export class GraphNetwork {
         }
         
         this.filteredNodes = visibleNodes;
+        this.currentFilterNodeId = nodeId;
         this.updateGraphView();
         
         // Update breadcrumbs
@@ -285,6 +315,7 @@ export class GraphNetwork {
      */
     resetFilter() {
         this.filteredNodes = null;
+        this.currentFilterNodeId = null;
         this.updateGraphView();
         
         const breadcrumbPath = [{ name: 'All Nodes', action: null }];
@@ -450,6 +481,7 @@ export class GraphNetwork {
         this.nodes.clear();
         this.links = [];
         this.filteredNodes = null;
+        this.currentFilterNodeId = null;
         this.renderer.clearElements();
     }
 

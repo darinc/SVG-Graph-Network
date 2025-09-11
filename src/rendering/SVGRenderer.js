@@ -9,6 +9,7 @@ export class SVGRenderer {
         this.config = config;
         
         // SVG elements
+        this.canvas = null;
         this.svg = null;
         this.transformGroup = null;
         this.linkGroup = null;
@@ -43,15 +44,20 @@ export class SVGRenderer {
      * Create main SVG container and groups
      */
     createSVGContainer() {
-        // Remove any existing SVG (for HMR)
-        const existingSVG = this.container.querySelector('svg');
-        if (existingSVG) {
-            existingSVG.remove();
+        // Remove any existing canvas/SVG (for HMR)
+        const existingCanvas = this.container.querySelector('.graph-network-canvas');
+        if (existingCanvas) {
+            existingCanvas.remove();
         }
         
         const rect = this.container.getBoundingClientRect();
         const containerWidth = rect.width;
         const containerHeight = rect.height;
+        
+        // Create canvas wrapper for grid background
+        this.canvas = document.createElement('div');
+        this.canvas.className = 'graph-network-canvas';
+        this.container.appendChild(this.canvas);
         
         this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         this.svg.setAttribute('width', containerWidth);
@@ -83,7 +89,7 @@ export class SVGRenderer {
         // Create arrowhead marker
         this.createArrowMarker();
         
-        this.container.appendChild(this.svg);
+        this.canvas.appendChild(this.svg);
     }
 
     /**
@@ -93,17 +99,17 @@ export class SVGRenderer {
         const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
         const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
         marker.setAttribute('id', `arrowhead-${this.containerId}`);
-        marker.setAttribute('markerWidth', '10');
-        marker.setAttribute('markerHeight', '7');
-        marker.setAttribute('refX', '9');
-        marker.setAttribute('refY', '3.5');
+        marker.setAttribute('viewBox', '0 -5 10 10');
+        marker.setAttribute('refX', '8');
+        marker.setAttribute('refY', '0');
         marker.setAttribute('orient', 'auto');
+        marker.setAttribute('markerUnits', 'strokeWidth');
         
-        const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-        polygon.setAttribute('points', '0 0, 10 3.5, 0 7');
-        polygon.setAttribute('fill', 'var(--link-color)');
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', 'M0,-5L10,0L0,5');
+        path.setAttribute('fill', '#5a5a5a');
         
-        marker.appendChild(polygon);
+        marker.appendChild(path);
         defs.appendChild(marker);
         this.svg.appendChild(defs);
     }
@@ -268,6 +274,7 @@ export class SVGRenderer {
         
         // Apply node styling
         shapeElement.classList.add('node');
+        shapeElement.classList.add(`node-${node.data.type}`);
         shapeElement.setAttribute('data-type', node.data.type);
         
         return { shapeElement, hiddenIndicator };
@@ -289,25 +296,33 @@ export class SVGRenderer {
     /**
      * Update positions of all elements during animation
      */
-    render(nodes, links) {
+    render(nodes, links, filteredNodes = null) {
         // Update transform for pan/zoom
         this.transformGroup.style.transform = 
             `translate(${this.transformState.x}px, ${this.transformState.y}px) scale(${this.transformState.scale})`;
 
         // Update link positions
-        this.updateLinkPositions(links);
+        this.updateLinkPositions(links, filteredNodes);
         
-        // Update node positions
-        this.updateNodePositions(nodes);
+        // Update node positions and visibility
+        this.updateNodePositions(nodes, filteredNodes);
     }
 
     /**
      * Update link positions and edge intersections
      */
-    updateLinkPositions(links) {
+    updateLinkPositions(links, filteredNodes = null) {
         links.forEach(link => {
             const elements = this.linkElements.get(link);
             if (!elements) return;
+            
+            // Handle filtering visibility for links
+            const isVisible = !filteredNodes || 
+                (filteredNodes.has(link.source.data.id) && filteredNodes.has(link.target.data.id));
+            
+            elements.linkEl.style.opacity = isVisible ? '1' : '0.1';
+            elements.labelText.style.opacity = isVisible ? '1' : '0.1';
+            elements.labelBackground.style.opacity = isVisible ? '1' : '0.1';
             
             const sourcePos = link.source.position;
             const targetPos = link.target.position;
@@ -381,13 +396,17 @@ export class SVGRenderer {
     }
 
     /**
-     * Update node positions
+     * Update node positions and visibility
      */
-    updateNodePositions(nodes) {
+    updateNodePositions(nodes, filteredNodes = null) {
         Array.from(nodes.values()).forEach(node => {
             const elements = this.nodeElements.get(node);
             if (elements) {
                 elements.group.setAttribute('transform', `translate(${node.position.x},${node.position.y})`);
+                
+                // Handle filtering visibility for nodes
+                const isVisible = !filteredNodes || filteredNodes.has(node.data.id);
+                elements.group.style.opacity = isVisible ? '1' : '0.1';
             }
         });
     }
@@ -457,11 +476,12 @@ export class SVGRenderer {
      * Clean up resources
      */
     destroy() {
-        if (this.svg && this.svg.parentNode) {
-            this.svg.parentNode.removeChild(this.svg);
+        if (this.canvas && this.canvas.parentNode) {
+            this.canvas.parentNode.removeChild(this.canvas);
         }
         
         this.clearElements();
+        this.canvas = null;
         this.svg = null;
         this.transformGroup = null;
         this.linkGroup = null;

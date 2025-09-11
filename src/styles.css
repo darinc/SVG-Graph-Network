@@ -9,6 +9,7 @@
     --node-regional: #2a2a2a;
     --node-small: #2a2a2a;
     --node-territory: #2a2a2a;
+    --node-auxiliary: #2a2a2a;
     --link-color: #5a5a5a;
     --panel-bg: rgba(42, 42, 42, 0.9);
 }
@@ -24,6 +25,7 @@
     --node-regional: #ffffff;
     --node-small: #ffffff;
     --node-territory: #ffffff;
+    --node-auxiliary: #ffffff;
     --link-color: #333333;
     --panel-bg: rgba(255, 255, 255, 0.9);
 }
@@ -90,7 +92,8 @@
     z-index: 1;
 }
 
-.node-text {
+.node-text,
+.node-label {
     font-size: 14px;
     fill: var(--text-primary);
     pointer-events: none;
@@ -139,7 +142,7 @@
     stroke-width: 2px;
 }
 .node-auxiliary { 
-    fill: var(--node-territory);
+    fill: var(--node-auxiliary);
     stroke: #ED8936;
     stroke-width: 2px;
     stroke-dasharray: 4, 2;
@@ -453,21 +456,33 @@
     margin-bottom: 0;
 }
 
-.legend-item {
+.legend-item,
+.graph-network-legend-item {
     display: flex;
     align-items: center;
     margin-bottom: 8px;
     gap: 8px;
 }
 
-.legend-item:last-child {
+.legend-item:last-child,
+.graph-network-legend-item:last-child {
     margin-bottom: 0;
 }
 
-.legend-shape {
+.legend-shape,
+.graph-network-legend-shape {
     width: 16px;
     height: 16px;
     flex-shrink: 0;
+    border-radius: 3px;
+}
+
+.graph-network-legend-shape.graph-network-legend-circle {
+    border-radius: 50%;
+}
+
+.graph-network-legend-shape.graph-network-legend-rectangle {
+    border-radius: 2px;
 }
 
 .legend-color {

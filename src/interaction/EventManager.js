@@ -40,10 +40,9 @@ export class EventManager {
     /**
      * Initialize event manager with required references
      */
-    initialize(svg, nodes, callbacks = {}) {
+    initialize(svg, nodes) {
         this.svg = svg;
         this.nodes = nodes;
-        this.callbacks = callbacks;
         this.setupEventListeners();
     }
 
@@ -137,6 +136,11 @@ export class EventManager {
      */
     handleSvgMouseDown(e) {
         if (this.isDragging) return;
+        
+        // Close settings panel if it's open (when clicking background)
+        if (this.callbacks.closeSettings) {
+            this.callbacks.closeSettings();
+        }
         
         this.isPanning = true;
         this.lastMouseX = e.clientX;
@@ -277,6 +281,11 @@ export class EventManager {
                     this.touchTarget = { type: 'node', node, element: nodeGroup };
                 }
             } else {
+                // Close settings panel if it's open (when touching background)
+                if (this.callbacks.closeSettings) {
+                    this.callbacks.closeSettings();
+                }
+                
                 this.touchTarget = { type: 'background' };
                 this.isPanning = true;
             }

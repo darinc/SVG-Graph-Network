@@ -286,6 +286,11 @@ export class UIManager {
         // Create physics control sliders
         this.createPhysicsControls();
         
+        // Prevent settings panel from closing when clicked inside
+        this.settingsPanel.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+        
         this.container.appendChild(this.settingsPanel);
     }
 
@@ -297,33 +302,37 @@ export class UIManager {
             { 
                 key: 'damping', 
                 label: 'Damping', 
-                min: 0.1, 
-                max: 1.0, 
-                step: 0.01,
+                min: 0, 
+                max: 20, 
+                step: 0.5,
+                value: 10,
                 description: 'Velocity decay factor'
             },
             { 
                 key: 'repulsionStrength', 
                 label: 'Repulsion', 
-                min: 1000, 
-                max: 20000, 
-                step: 100,
+                min: 0, 
+                max: 20, 
+                step: 0.5,
+                value: 13,
                 description: 'Node repulsion force'
             },
             { 
                 key: 'attractionStrength', 
                 label: 'Attraction', 
-                min: 0.0001, 
-                max: 0.01, 
-                step: 0.0001,
+                min: 0, 
+                max: 20, 
+                step: 0.1,
+                value: 10,
                 description: 'Link attraction force'
             },
             { 
                 key: 'groupingStrength', 
                 label: 'Grouping', 
                 min: 0, 
-                max: 0.01, 
-                step: 0.0001,
+                max: 20, 
+                step: 0.5,
+                value: 10,
                 description: 'Same-type grouping force'
             }
         ];
@@ -340,17 +349,18 @@ export class UIManager {
             slider.min = control.min;
             slider.max = control.max;
             slider.step = control.step;
-            slider.value = this.config[control.key];
+            slider.value = control.value;
             
             const value = document.createElement('span');
             this.setElementClass(value, 'graph-network-control-value');
-            value.textContent = this.config[control.key];
+            value.textContent = control.value.toFixed(1);
             
             slider.addEventListener('input', (e) => {
-                const newValue = parseFloat(e.target.value);
-                value.textContent = newValue;
+                const userValue = parseFloat(e.target.value);
+                const actualValue = this.convertUserValueToPhysics(control.key, userValue);
+                value.textContent = userValue.toFixed(1);
                 if (this.callbacks.onConfigChange) {
-                    this.callbacks.onConfigChange(control.key, newValue);
+                    this.callbacks.onConfigChange(control.key, actualValue);
                 }
             });
             
@@ -368,8 +378,27 @@ export class UIManager {
         if (!this.settingsPanel) return;
         
         this.settingsVisible = !this.settingsVisible;
-        this.settingsPanel.style.display = this.settingsVisible ? 'block' : 'none';
+        
+        if (this.settingsVisible) {
+            this.settingsPanel.classList.add('is-open');
+        } else {
+            this.settingsPanel.classList.remove('is-open');
+        }
+        
         this.settingsToggle.textContent = this.settingsVisible ? 'v' : '^';
+    }
+
+    /**
+     * Close settings panel
+     */
+    closeSettings() {
+        if (!this.settingsPanel || !this.settingsVisible) return;
+        
+        this.settingsVisible = false;
+        this.settingsPanel.classList.remove('is-open');
+        if (this.settingsToggle) {
+            this.settingsToggle.textContent = '^';
+        }
     }
 
     /**
@@ -410,6 +439,31 @@ export class UIManager {
             });
             this.breadcrumbsElement.appendChild(breadcrumb);
         });
+    }
+
+    /**
+     * Convert user-friendly 0-20 scale values to actual physics values
+     */
+    convertUserValueToPhysics(key, userValue) {
+        const numValue = parseFloat(userValue);
+        
+        switch (key) {
+            case 'damping':
+                if (numValue === 0) {
+                    return 1.0;
+                } else {
+                    const t = numValue / 20;
+                    return Math.exp(Math.log(1.0) * (1 - t) + Math.log(0.35) * t);
+                }
+            case 'repulsionStrength':
+                return numValue * 500;
+            case 'attractionStrength':
+                return numValue / 10000;
+            case 'groupingStrength':
+                return numValue / 10000;
+            default:
+                return numValue;
+        }
     }
 
     /**
