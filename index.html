@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beliefs & Values Graph</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #graph-container {
+            width: 90%;
+            max-width: 800px;
+            aspect-ratio: 16 / 9;
+            background-color: #2a2a2a;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            position: relative;
+        }
+
+        #graph-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .node-text {
+            font-size: 14px;
+            fill: #f0f0f0;
+            pointer-events: none;
+            text-anchor: middle;
+            font-weight: bold;
+            user-select: none;
+        }
+
+        .node-self { fill: #E53E3E; } /* Red */
+        .node-principals { fill: #4299E1; } /* Blue */
+        .node-values { fill: #38A169; } /* Green */
+        .node-patterns { fill: #F6E05E; } /* Yellow */
+        .node-needs { fill: #ED8936; } /* Orange */
+        .node-emotions { fill: #9F7AEA; } /* Purple */
+        .node-strengths { fill: #319795; } /* Teal */
+        .node-experiences { fill: #ED64A6; } /* Pink */
+        
+        /* New class for the subtle outline */
+        .node-shape.has-hidden-link {
+            stroke: #4299E1; /* A light blue color */
+            stroke-width: 2px;
+            stroke-dasharray: 4, 2;
+        }
+
+        .link {
+            stroke: #5a5a5a;
+            stroke-width: 1.5px;
+        }
+
+        .edge-label-text {
+            font-size: 10px;
+            fill: #f0f0f0;
+            text-anchor: middle;
+            font-weight: bold;
+            user-select: none;
+        }
+
+        .node-shape:hover {
+            stroke: #fff;
+            stroke-width: 2px;
+        }
+
+        .node-shape:hover + .node-text {
+            fill: #fff;
+        }
+
+        .tooltip {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.75);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+        }
+        
+        #settings {
+            position: absolute;
+            bottom: 60px;
+            right: 20px;
+            background-color: rgba(42, 42, 42, 0.9);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 200px;
+            z-index: 50;
+            
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+        }
+
+        #settings.is-open {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .control-group label {
+            font-size: 12px;
+            margin-bottom: 5px;
+            color: #a0a0a0;
+        }
+
+        .control-group input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 5px;
+            background: #5a5a5a;
+            outline: none;
+            border-radius: 5px;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 15px;
+            height: 15px;
+            background: #f0f0f0;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .control-group input[type="range"]::-moz-range-thumb {
+            width: 15px;
+            height: 15px;
+            background: #f0f0f0;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        #reset-button {
+            padding: 8px 15px;
+            background-color: #38A169;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s ease;
+        }
+
+        #reset-button:hover {
+            background-color: #2F855A;
+        }
+
+        #settings-toggle {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background-color: #38A169;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, background-color 0.2s ease;
+            z-index: 51;
+        }
+
+        #settings-toggle:hover {
+            background-color: #2F855A;
+            transform: scale(1.1);
+        }
+
+        #view-info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #f0f0f0;
+            font-size: 14px;
+            z-index: 20;
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+            align-items: center;
+            
+        }
+
+        .breadcrumb-link {
+            color: #4299E1;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .breadcrumb-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div id="graph-container">
+        <svg id="graph-svg">
+            <defs>
+                <marker id="arrowhead" viewBox="0 -5 10 10" refX="8" refY="0" orient="auto" markerUnits="strokeWidth">
+                    <path d="M0,-5L10,0L0,5" fill="#5a5a5a"></path>
+                </marker>
+            </defs>
+            <g id="transform-group">
+                <!-- Links will be added here -->
+                <!-- Nodes will be added here -->
+                <!-- Edge labels will be added here -->
+            </g>
+        </svg>
+        <div id="tooltip" class="tooltip"></div>
+        <div id="settings-toggle">^</div>
+        <div id="settings">
+            <h3>Simulation Controls</h3>
+            <div class="control-group">
+                <label for="damping-slider">Damping (<span id="damping-value">0.9</span>)</label>
+                <input type="range" id="damping-slider" min="0.1" max="1" value="0.9" step="0.05">
+            </div>
+            <div class="control-group">
+                <label for="repulsion-slider">Repulsion (<span id="repulsion-value">3200</span>)</label>
+                <input type="range" id="repulsion-slider" min="100" max="5000" value="3200" step="100">
+            </div>
+            <div class="control-group">
+                <label for="attraction-slider">Attraction (<span id="attraction-value">0.005</span>)</label>
+                <input type="range" id="attraction-slider" min="0.001" max="0.1" value="0.005" step="0.001">
+            </div>
+            <div class="control-group">
+                <label for="zoom-sensitivity-slider">Zoom Sensitivity (<span id="zoom-sensitivity-value">1.01</span>)</label>
+                <input type="range" id="zoom-sensitivity-slider" min="0.01" max="2" value="1.01" step="0.01">
+            </div>
+            <button id="reset-button">Reset View & Layout</button>
+        </div>
+        <div id="view-info"></div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const graphData = {
+                nodes: [
+                    { id: "self", name: "Self", type: "self", shape: "circle", size: 40 },
+                    { id: "honesty", name: "Honesty", type: "principals", shape: "square", size: 25 },
+                    { id: "integrity", name: "Integrity", type: "principals", shape: "square", size: 20 },
+                    { id: "empathy", name: "Empathy", type: "values", shape: "circle", size: 25 },
+                    { id: "loyalty", name: "Loyalty", type: "values", shape: "circle", size: 20 },
+                    { id: "commitment", name: "Commitment", type: "values", shape: "circle", size: 20 },
+                    { id: "fear-of-unknown", name: "Fear of Unknown", type: "emotions", shape: "triangle", size: 20 },
+                    { id: "creativity-pattern", name: "Creative Problem-Solving", type: "patterns", shape: "triangle", size: 25 },
+                    { id: "self-trust", name: "Self-Trust", type: "strengths", shape: "square", size: 20 },
+                    { id: "lost-job", name: "Experience: Lost First Job", type: "experiences", shape: "triangle", size: 20 },
+                    { id: "security-need", name: "Need for Security", type: "needs", shape: "circle", size: 20 },
+                    { id: "belonging-need", name: "Need for Belonging", type: "needs", shape: "circle", size: 20 }
+                ],
+                links: [
+                    { source: "self", target: "self-trust", label: "possesses", weight: 3, line_type: 'solid' },
+                    { source: "self", target: "empathy", label: "aligns with", weight: 1, line_type: 'solid' },
+                    { source: "self", target: "loyalty", label: "exhibits", weight: 4, line_type: 'solid' },
+                    { source: "self-trust", target: "fear-of-unknown", label: "overcomes", weight: 2, line_type: 'dashed' },
+                    { source: "lost-job", target: "security-need", label: "leads to", weight: 1, line_type: 'dotted' },
+                    { source: "lost-job", target: "empathy", label: "triggers", weight: 2, line_type: 'solid' },
+                    { source: "empathy", target: "belonging-need", label: "seeks", weight: 3, line_type: 'solid' },
+                    { source: "security-need", target: "integrity", label: "aligns with", weight: 3, line_type: 'solid' },
+                    { source: "creativity-pattern", target: "self-trust", label: "is built on", weight: 2, line_type: 'dashed' },
+                    { source: "self", target: "integrity", label: "aligns with", weight: 5, line_type: 'solid' },
+                    { source: "self", target: "honesty", label: "aligns with", weight: 5, line_type: 'solid' },
+                    { source: "self", target: "commitment", label: "exhibits", weight: 5, line_type: 'solid' }
+                ]
+            };
+
+            const svg = document.getElementById('graph-svg');
+            const tooltip = document.getElementById('tooltip');
+            const viewInfo = document.getElementById('view-info');
+            const { width, height } = svg.getBoundingClientRect();
+            const centerX = width / 2;
+            const centerY = height / 2;
+
+            // Pan/Zoom State
+            let transformState = { x: 0, y: 0, scale: 1 };
+            const transformGroup = document.getElementById('transform-group');
+
+            const settingsPanel = document.getElementById('settings');
+            const settingsToggle = document.getElementById('settings-toggle');
+
+            settingsToggle.addEventListener('click', () => {
+                const isOpen = settingsPanel.classList.toggle('is-open');
+                settingsToggle.textContent = isOpen ? 'v' : '^';
+            });
+
+            // Simple Vector class for physics calculations
+            class Vector {
+                constructor(x = 0, y = 0) {
+                    this.x = x;
+                    this.y = y;
+                }
+                add(v) { return new Vector(this.x + v.x, this.y + v.y); }
+                subtract(v) { return new Vector(this.x - v.x, this.y - v.y); }
+                multiply(s) { return new Vector(this.x * s, this.y * s); }
+                magnitude() { return Math.sqrt(this.x * this.x + this.y * this.y); }
+                normalize() {
+                    const mag = this.magnitude();
+                    return mag > 0 ? new Vector(this.x / mag, this.y / mag) : new Vector(0, 0);
+                }
+            }
+
+            // Node class
+            class Node {
+                constructor(data) {
+                    this.data = data;
+                    this.position = new Vector(Math.random() * width, Math.random() * height);
+                    this.velocity = new Vector();
+                    this.force = new Vector();
+                    this.size = data.size || 20;
+                }
+            }
+
+            // Main simulation
+            class GraphSimulation {
+                constructor(graphData) {
+                    this.nodes = new Map();
+                    this.links = [];
+                    this.adjList = new Map();
+                    this.parseData(graphData);
+                    this.setupSVG();
+                    this.isDragging = false;
+                    this.dragNode = null;
+                    this.isPanning = false;
+                    this.lastMouse = { x: 0, y: 0 };
+                    this.filteredNodes = null;
+                    
+                    this.config = {
+                        damping: 0.9,
+                        repulsionStrength: 3200,
+                        attractionStrength: 0.005,
+                        zoomSensitivity: 1.01
+                    };
+                    
+                    this.setupControls();
+                    this.renderBreadcrumbs(null); // Initialize with only the "All" button
+                }
+
+                parseData(data) {
+                    // Create nodes from data
+                    data.nodes.forEach(d => {
+                        const node = new Node(d);
+                        if (d.type === 'self') {
+                            node.isFixed = true;
+                            node.position = new Vector(centerX, centerY);
+                        }
+                        this.nodes.set(d.id, node);
+                        this.adjList.set(d.id, []);
+                    });
+
+                    // Create links from data and build adjacency list
+                    data.links.forEach(linkData => {
+                        const sourceNode = this.nodes.get(linkData.source);
+                        const targetNode = this.nodes.get(linkData.target);
+                        if (sourceNode && targetNode) {
+                            const newLink = {
+                                source: sourceNode,
+                                target: targetNode,
+                                label: linkData.label,
+                                weight: linkData.weight,
+                                line_type: linkData.line_type
+                            };
+                            this.links.push(newLink);
+                            this.adjList.get(linkData.source).push({ node: targetNode.data.id, link: newLink });
+                            // For bidirectional traversal
+                            this.adjList.get(linkData.target).push({ node: sourceNode.data.id, link: newLink });
+                        }
+                    });
+                }
+
+                setupSVG() {
+                    this.linkGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                    this.nodeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                    this.labelGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                    
+                    transformGroup.appendChild(this.linkGroup);
+                    transformGroup.appendChild(this.nodeGroup);
+                    transformGroup.appendChild(this.labelGroup);
+
+                    this.nodeElements = new Map();
+                    this.linkElements = new Map();
+                    
+                    const nodesArray = Array.from(this.nodes.values());
+
+                    // Create links
+                    this.links.forEach(link => {
+                        const linkEl = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                        linkEl.classList.add('link');
+                        linkEl.setAttribute('marker-end', 'url(#arrowhead)');
+                        if (link.weight) {
+                            linkEl.style.strokeWidth = `${link.weight}px`;
+                        }
+                        if (link.line_type === 'dashed') {
+                            linkEl.style.strokeDasharray = '5, 5';
+                        } else if (link.line_type === 'dotted') {
+                            linkEl.style.strokeDasharray = '2, 2';
+                        }
+                        this.linkGroup.appendChild(linkEl);
+
+                        const labelText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                        labelText.textContent = link.label;
+                        labelText.classList.add('edge-label-text');
+                        this.labelGroup.appendChild(labelText);
+                        
+                        this.linkElements.set(link, { linkEl, labelText });
+                    });
+
+                    // Create nodes
+                    nodesArray.forEach(node => {
+                        const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                        group.setAttribute('data-id', node.data.id);
+                        
+                        let shapeElement;
+                        switch(node.data.shape) {
+                            case 'square':
+                                const squareSize = node.size * 1.4; // Adjust size for visual balance
+                                shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                                shapeElement.setAttribute('x', -squareSize / 2);
+                                shapeElement.setAttribute('y', -squareSize / 2);
+                                shapeElement.setAttribute('width', squareSize);
+                                shapeElement.setAttribute('height', squareSize);
+                                shapeElement.setAttribute('rx', 5);
+                                break;
+                            case 'triangle':
+                                const triangleSize = node.size * 1.4;
+                                const triPoints = [
+                                    `${0},${-triangleSize * 0.577}`, 
+                                    `${-triangleSize * 0.5},${triangleSize * 0.288}`, 
+                                    `${triangleSize * 0.5},${triangleSize * 0.288}`
+                                ].join(' ');
+                                shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                                shapeElement.setAttribute('points', triPoints);
+                                break;
+                            case 'circle':
+                            default:
+                                shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                                shapeElement.setAttribute('r', node.size);
+                                break;
+                        }
+                        
+                        shapeElement.classList.add('node-shape', `node-${node.data.type}`);
+                        group.appendChild(shapeElement);
+
+                        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                        text.textContent = node.data.name;
+                        text.classList.add('node-text');
+                        group.appendChild(text);
+
+                        this.nodeGroup.appendChild(group);
+                        this.nodeElements.set(node, { group, shape: shapeElement, text });
+
+                        // Add mouse events for dragging and filtering
+                        group.addEventListener('mousedown', (e) => this.handleNodeMouseDown(e, node));
+                        group.addEventListener('dblclick', (e) => this.handleNodeDoubleClick(e, node));
+                        group.addEventListener('mouseenter', () => this.showTooltip(node));
+                        group.addEventListener('mouseleave', () => this.hideTooltip());
+                    });
+
+                    // Add pan/zoom events to the main SVG element
+                    svg.addEventListener('mousedown', (e) => this.handleSvgMouseDown(e));
+                    svg.addEventListener('mousemove', (e) => this.handleSvgMouseMove(e));
+                    svg.addEventListener('mouseup', () => this.handleSvgMouseUp());
+                    svg.addEventListener('wheel', (e) => this.handleWheel(e));
+                }
+
+                setupControls() {
+                    const dampingSlider = document.getElementById('damping-slider');
+                    const repulsionSlider = document.getElementById('repulsion-slider');
+                    const attractionSlider = document.getElementById('attraction-slider');
+                    const zoomSlider = document.getElementById('zoom-sensitivity-slider');
+                    const resetButton = document.getElementById('reset-button');
+
+                    dampingSlider.addEventListener('input', (e) => {
+                        this.config.damping = parseFloat(e.target.value);
+                        document.getElementById('damping-value').textContent = this.config.damping.toFixed(2);
+                    });
+
+                    repulsionSlider.addEventListener('input', (e) => {
+                        this.config.repulsionStrength = parseFloat(e.target.value);
+                        document.getElementById('repulsion-value').textContent = this.config.repulsionStrength;
+                    });
+                    
+                    attractionSlider.addEventListener('input', (e) => {
+                        this.config.attractionStrength = parseFloat(e.target.value);
+                        document.getElementById('attraction-value').textContent = this.config.attractionStrength.toFixed(3);
+                    });
+
+                    zoomSlider.addEventListener('input', (e) => {
+                        this.config.zoomSensitivity = parseFloat(e.target.value);
+                        document.getElementById('zoom-sensitivity-value').textContent = this.config.zoomSensitivity.toFixed(2);
+                    });
+
+                    resetButton.addEventListener('click', () => {
+                        this.resetViewAndLayout();
+                    });
+                }
+                
+                resetViewAndLayout() {
+                    // Reset all nodes to a random position and clear velocity
+                    Array.from(this.nodes.values()).forEach(node => {
+                        if (!node.isFixed) {
+                            node.position = new Vector(Math.random() * width, Math.random() * height);
+                            node.velocity = new Vector();
+                        }
+                    });
+
+                    // Reset pan/zoom state
+                    transformState.x = 0;
+                    transformState.y = 0;
+                    transformState.scale = 1;
+
+                    // Clear any filtering
+                    this.filteredNodes = null;
+                    
+                    // Update breadcrumbs to show only "All"
+                    this.renderBreadcrumbs(null);
+                    
+                    // Force a render
+                    this.render();
+                    
+                    // Make all nodes visible and remove the hidden link class
+                    this.nodes.forEach(node => {
+                        const elements = this.nodeElements.get(node);
+                        elements.group.style.display = 'block';
+                        elements.shape.classList.remove('has-hidden-link');
+                    });
+                    this.links.forEach(link => {
+                        const elements = this.linkElements.get(link);
+                        elements.linkEl.style.display = 'block';
+                        elements.labelText.style.display = 'block';
+                    });
+                }
+
+                showTooltip(node) {
+                    tooltip.textContent = node.data.name;
+                    tooltip.style.opacity = 1;
+                }
+
+                hideTooltip() {
+                    tooltip.style.opacity = 0;
+                }
+
+                handleNodeMouseDown(e, node) {
+                    e.preventDefault();
+                    // Special case: dragging the "Self" node should pan the entire graph.
+                    if (node.data.id === 'self') {
+                        this.isPanning = true;
+                        this.lastMouse = { x: e.clientX, y: e.clientY };
+                        return;
+                    }
+
+                    // For all other fixed nodes, do nothing.
+                    if (node.isFixed) return;
+
+                    // For regular nodes, start a drag operation.
+                    this.isDragging = true;
+                    this.dragNode = node;
+                }
+
+                handleNodeDoubleClick(e, node) {
+                    e.preventDefault();
+                    if (node.data.id === 'self') {
+                        this.resetViewAndLayout();
+                    } else {
+                        this.filterGraph(node.data.id);
+                    }
+                }
+
+                handleSvgMouseDown(e) {
+                    if (e.target.closest('.node-shape') || e.target.closest('.edge-label-text')) {
+                        return;
+                    }
+                    this.isPanning = true;
+                    this.lastMouse = { x: e.clientX, y: e.clientY };
+                    e.preventDefault();
+                }
+
+                handleSvgMouseMove(e) {
+                    if (this.isDragging && this.dragNode) {
+                        const rect = svg.getBoundingClientRect();
+                        this.dragNode.position.x = (e.clientX - rect.left - transformState.x) / transformState.scale;
+                        this.dragNode.position.y = (e.clientY - rect.top - transformState.y) / transformState.scale;
+                        this.updatePositions();
+                        this.showTooltip(this.dragNode);
+                        tooltip.style.left = `${e.clientX + 10}px`;
+                        tooltip.style.top = `${e.clientY + 10}px`;
+                    } else if (this.isPanning) {
+                        const dx = e.clientX - this.lastMouse.x;
+                        const dy = e.clientY - this.lastMouse.y;
+                        transformState.x += dx;
+                        transformState.y += dy;
+                        this.lastMouse = { x: e.clientX, y: e.clientY };
+                        this.render();
+                    }
+                }
+
+                handleSvgMouseUp() {
+                    this.isDragging = false;
+                    this.dragNode = null;
+                    this.isPanning = false;
+                }
+
+                handleWheel(e) {
+                    e.preventDefault();
+                    const rect = svg.getBoundingClientRect();
+                    const mouseX = e.clientX - rect.left;
+                    const mouseY = e.clientY - rect.top;
+                    
+                    const oldScale = transformState.scale;
+                    const newScale = e.deltaY < 0 ? oldScale * this.config.zoomSensitivity : oldScale / this.config.zoomSensitivity;
+                    
+                    // Clamp scale to prevent issues
+                    transformState.scale = Math.max(0.2, Math.min(2.0, newScale));
+
+                    // Recalculate pan to keep point under mouse stationary
+                    transformState.x = mouseX - ((mouseX - transformState.x) * (transformState.scale / oldScale));
+                    transformState.y = mouseY - ((mouseY - transformState.y) * (transformState.scale / oldScale));
+                    
+                    this.render();
+                }
+
+                filterGraph(startNodeId) {
+                    const startNode = this.nodes.get(startNodeId);
+                    if (!startNode) return;
+                    
+                    const visibleNodes = new Set([startNode.data.id]);
+                    const pathMap = new Map();
+                    pathMap.set(startNode.data.id, null);
+
+                    const queue = [{ id: startNode.data.id, depth: 0 }];
+                    let head = 0;
+                    
+                    while (head < queue.length) {
+                        const { id, depth } = queue[head++];
+                        if (depth >= 2) continue;
+                        
+                        this.adjList.get(id).forEach(neighbor => {
+                            if (!visibleNodes.has(neighbor.node)) {
+                                visibleNodes.add(neighbor.node);
+                                pathMap.set(neighbor.node, id);
+                                queue.push({ id: neighbor.node, depth: depth + 1 });
+                            }
+                        });
+                    }
+
+                    this.filteredNodes = visibleNodes;
+                    this.updateGraphView(startNodeId);
+                }
+
+                updateGraphView(targetNodeId) {
+                    const nodesToDisplay = this.filteredNodes;
+                    
+                    this.nodes.forEach(node => {
+                        const isVisible = nodesToDisplay.has(node.data.id);
+                        const elements = this.nodeElements.get(node);
+                        elements.group.style.display = isVisible ? 'block' : 'none';
+
+                        // Check for hidden links and apply outline
+                        if (isVisible) {
+                            let hasHiddenLink = false;
+                            this.adjList.get(node.data.id).forEach(neighbor => {
+                                if (!nodesToDisplay.has(neighbor.node)) {
+                                    hasHiddenLink = true;
+                                }
+                            });
+                            if (hasHiddenLink) {
+                                elements.shape.classList.add('has-hidden-link');
+                            } else {
+                                elements.shape.classList.remove('has-hidden-link');
+                            }
+                        } else {
+                           elements.shape.classList.remove('has-hidden-link');
+                        }
+                    });
+                    
+                    this.links.forEach(link => {
+                        const isVisible = nodesToDisplay.has(link.source.data.id) && nodesToDisplay.has(link.target.data.id);
+                        this.linkElements.get(link).linkEl.style.display = isVisible ? 'block' : 'none';
+                        this.linkElements.get(link).labelText.style.display = isVisible ? 'block' : 'none';
+                    });
+
+                    // Build and show breadcrumbs
+                    if (targetNodeId) {
+                        const path = this.findPathToSelf(targetNodeId);
+                        this.renderBreadcrumbs(path);
+                    }
+                }
+
+                findPathToSelf(endNodeId) {
+                    const path = [];
+                    let currentNodeId = endNodeId;
+                    const visited = new Set();
+                    const queue = [{ id: 'self', path: ['self'] }];
+                    let head = 0;
+                    
+                    if (endNodeId === 'self') {
+                        return ['self'];
+                    }
+                    
+                    visited.add('self');
+
+                    while (head < queue.length) {
+                        const { id, path: currentPath } = queue[head++];
+                        if (id === endNodeId) {
+                            return currentPath;
+                        }
+
+                        this.adjList.get(id).forEach(neighbor => {
+                            if (!visited.has(neighbor.node)) {
+                                visited.add(neighbor.node);
+                                queue.push({ id: neighbor.node, path: [...currentPath, neighbor.node] });
+                            }
+                        });
+                    }
+                    return null; // Path not found
+                }
+
+                renderBreadcrumbs(path) {
+                    viewInfo.innerHTML = ''; // Clear existing breadcrumbs
+
+                    const allLink = document.createElement('a');
+                    allLink.textContent = 'All';
+                    allLink.href = '#';
+                    allLink.classList.add('breadcrumb-link');
+                    allLink.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.resetViewAndLayout();
+                    });
+                    viewInfo.appendChild(allLink);
+
+                    if (!path) {
+                        return; // Only show "All" if no path is provided
+                    }
+                    
+                    path.forEach((nodeId, index) => {
+                        viewInfo.appendChild(document.createTextNode(' > '));
+                        const nodeName = this.nodes.get(nodeId).data.name;
+                        const link = document.createElement('a');
+                        link.textContent = nodeName;
+                        link.href = '#';
+                        link.classList.add('breadcrumb-link');
+                        link.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            if (nodeId === 'self') {
+                                this.resetViewAndLayout();
+                            } else {
+                                this.filterGraph(nodeId);
+                            }
+                        });
+                        viewInfo.appendChild(link);
+                    });
+                }
+
+                updateForces() {
+                    const nodesArray = Array.from(this.nodes.values());
+                    nodesArray.forEach(node => node.force = new Vector());
+
+                    for (let i = 0; i < nodesArray.length; i++) {
+                        for (let j = i + 1; j < nodesArray.length; j++) {
+                            const nodeA = nodesArray[i];
+                            const nodeB = nodesArray[j];
+                            if (this.filteredNodes && (!this.filteredNodes.has(nodeA.data.id) || !this.filteredNodes.has(nodeB.data.id))) {
+                                continue;
+                            }
+
+                            // Repulsion force between all visible nodes
+                            const diff = nodeA.position.subtract(nodeB.position);
+                            const distance = diff.magnitude();
+                            const repulsionForce = diff.normalize().multiply(this.config.repulsionStrength / (distance * distance));
+                            nodeA.force = nodeA.force.add(repulsionForce);
+                            nodeB.force = nodeB.force.subtract(repulsionForce);
+
+                            // Attraction force by type
+                            if (nodeA.data.type === nodeB.data.type && nodeA.data.type !== 'self') {
+                                const attractionForce = diff.normalize().multiply(-this.config.attractionStrength * distance);
+                                nodeA.force = nodeA.force.add(attractionForce);
+                                nodeB.force = nodeB.force.subtract(attractionForce);
+                            }
+                        }
+                    }
+
+                    // Attraction force for links
+                    this.links.forEach(link => {
+                        if (this.filteredNodes && (!this.filteredNodes.has(link.source.data.id) || !this.filteredNodes.has(link.target.data.id))) {
+                             return;
+                        }
+                        const diff = link.source.position.subtract(link.target.position);
+                        const distance = diff.magnitude();
+                        const attractionForce = diff.normalize().multiply(this.config.attractionStrength * distance);
+                        link.source.force = link.source.force.subtract(attractionForce);
+                        link.target.force = link.target.force.add(attractionForce);
+                    });
+                }
+
+                updatePositions() {
+                    const dt = 1;
+                    const nodesArray = Array.from(this.nodes.values());
+
+                    nodesArray.forEach(node => {
+                        if (node.isFixed || node === this.dragNode) return;
+                        if (this.filteredNodes && !this.filteredNodes.has(node.data.id)) return;
+                        
+                        node.velocity = node.velocity.add(node.force.multiply(dt));
+                        node.velocity = node.velocity.multiply(this.config.damping);
+                        node.position = node.position.add(node.velocity.multiply(dt));
+                    });
+                }
+
+                render() {
+                    transformGroup.style.transform = `translate(${transformState.x}px, ${transformState.y}px) scale(${transformState.scale})`;
+
+                    this.links.forEach(link => {
+                        const elements = this.linkElements.get(link);
+                        
+                        // Calculate a vector that ends at the edge of the target node
+                        const sourcePos = link.source.position;
+                        const targetPos = link.target.position;
+                        const targetSize = link.target.size;
+                        const targetShape = link.target.data.shape;
+                        
+                        const diff = targetPos.subtract(sourcePos);
+                        const distance = diff.magnitude();
+                        
+                        let newX2 = targetPos.x;
+                        let newY2 = targetPos.y;
+                        
+                        if (targetShape === 'circle') {
+                            if (distance > targetSize) {
+                                const ratio = (distance - targetSize) / distance;
+                                newX2 = sourcePos.x + diff.x * ratio;
+                                newY2 = sourcePos.y + diff.y * ratio;
+                            }
+                        } else if (targetShape === 'square') {
+                            const halfSize = targetSize * 1.4 / 2;
+                            if (distance > halfSize) {
+                                const angle = Math.atan2(diff.y, diff.x);
+                                const absAngle = Math.abs(angle);
+                                let dx = halfSize;
+                                let dy = halfSize;
+                                if (absAngle > Math.PI / 4 && absAngle < Math.PI * 3 / 4) {
+                                    dx = halfSize / Math.tan(absAngle);
+                                } else {
+                                    dy = halfSize * Math.tan(absAngle);
+                                }
+                                newX2 = targetPos.x - dx * Math.sign(diff.x);
+                                newY2 = targetPos.y - dy * Math.sign(diff.y);
+                            }
+                        } else if (targetShape === 'triangle') {
+                            const halfSize = targetSize * 1.4 / 2;
+                             if (distance > halfSize) {
+                                const angle = Math.atan2(diff.y, diff.x);
+                                newX2 = targetPos.x - halfSize * Math.cos(angle);
+                                newY2 = targetPos.y - halfSize * Math.sin(angle);
+                            }
+                        }
+
+                        // Update link position
+                        elements.linkEl.setAttribute('x1', link.source.position.x);
+                        elements.linkEl.setAttribute('y1', link.source.position.y);
+                        elements.linkEl.setAttribute('x2', newX2);
+                        elements.linkEl.setAttribute('y2', newY2);
+
+                        // Update label position
+                        const midX = (link.source.position.x + newX2) / 2;
+                        const midY = (link.source.position.y + newY2) / 2;
+                        elements.labelText.setAttribute('x', midX);
+                        elements.labelText.setAttribute('y', midY);
+                    });
+
+                    const nodesArray = Array.from(this.nodes.values());
+                    nodesArray.forEach(node => {
+                        const elements = this.nodeElements.get(node);
+                        elements.group.setAttribute('transform', `translate(${node.position.x},${node.position.y})`);
+                    });
+                }
+
+                animate() {
+                    if (!this.isDragging && !this.isPanning) {
+                        this.updateForces();
+                        this.updatePositions();
+                    }
+                    this.render();
+                    requestAnimationFrame(this.animate.bind(this));
+                }
+            }
+
+            const simulation = new GraphSimulation(graphData);
+            simulation.animate();
+        });
+    </script>
+</body>
+</html>
+
