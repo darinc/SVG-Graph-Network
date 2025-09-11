@@ -3,11 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beliefs & Values Graph</title>
+    <title>European Diplomatic Network 1914</title>
     <style>
+        :root {
+            /* Dark theme (default) */
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2a2a2a;
+            --text-primary: #f0f0f0;
+            --text-secondary: #a0a0a0;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --node-major: #2a2a2a;
+            --node-regional: #2a2a2a;
+            --node-small: #2a2a2a;
+            --node-territory: #2a2a2a;
+            --link-color: #5a5a5a;
+            --panel-bg: rgba(42, 42, 42, 0.9);
+        }
+
+        [data-theme="light"] {
+            /* Light theme */
+            --bg-primary: #fafafa;
+            --bg-secondary: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666666;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --node-major: #ffffff;
+            --node-regional: #ffffff;
+            --node-small: #ffffff;
+            --node-territory: #ffffff;
+            --link-color: #333333;
+            --panel-bg: rgba(255, 255, 255, 0.9);
+        }
+
         body {
-            background-color: #1a1a1a;
-            color: #f0f0f0;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
             font-family: 'Inter', sans-serif;
             display: flex;
             justify-content: center;
@@ -16,70 +46,141 @@
             margin: 0;
             overflow: hidden;
             position: relative;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Graph paper background for both themes */
+        #graph-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            border-radius: 12px;
+        }
+
+        /* Light mode grid */
+        [data-theme="light"] #graph-container::before {
+            background-image: 
+                linear-gradient(rgba(59, 130, 246, 0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.3) 1px, transparent 1px),
+                linear-gradient(rgba(59, 130, 246, 0.15) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.15) 1px, transparent 1px);
+            background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
+        }
+
+        /* Dark mode grid */
+        #graph-container::before {
+            background-image: 
+                linear-gradient(rgba(59, 130, 246, 0.15) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.15) 1px, transparent 1px),
+                linear-gradient(rgba(59, 130, 246, 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.08) 1px, transparent 1px);
+            background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
         }
 
         #graph-container {
-            width: 90%;
-            max-width: 1600px;
-            aspect-ratio: 16 / 9;
-            background-color: #2a2a2a;
+            width: 95%;
+            height: 90vh;
+            max-width: none;
+            background-color: var(--bg-secondary);
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
             position: relative;
+            transition: background-color 0.3s ease;
         }
 
         #graph-svg {
             width: 100%;
             height: 100%;
+            position: relative;
+            z-index: 1;
         }
 
         .node-text {
             font-size: 14px;
-            fill: #f0f0f0;
+            fill: var(--text-primary);
             pointer-events: none;
             text-anchor: middle;
             font-weight: bold;
             user-select: none;
+            transition: fill 0.3s ease;
         }
 
-        .node-major_power { fill: #E53E3E; } /* Red */
-        .node-regional_power { fill: #4299E1; } /* Blue */
-        .node-small_nation { fill: #38A169; } /* Green */
-        .node-territory { fill: #ED8936; } /* Orange */
-        
-        /* New class for the subtle outline */
-        .node-shape.has-hidden-link {
-            stroke: #4299E1; /* A light blue color */
+        .node-major_power { 
+            fill: var(--node-major);
+            stroke: #E53E3E;
+            stroke-width: 4px;
+        }
+        .node-regional_power { 
+            fill: var(--node-regional);
+            stroke: #4299E1;
+            stroke-width: 3px;
+        }
+        .node-small_nation { 
+            fill: var(--node-small);
+            stroke: #38A169;
+            stroke-width: 2px;
+        }
+        .node-territory { 
+            fill: var(--node-territory);
+            stroke: #ED8936;
             stroke-width: 2px;
             stroke-dasharray: 4, 2;
         }
+        
+        /* Hidden connection indicator background */
+        .hidden-connection-indicator {
+            fill: transparent;
+            stroke: #4299E1;
+            stroke-width: 4px;
+            stroke-dasharray: 6, 3;
+            stroke-opacity: 0.9;
+        }
 
         .link {
-            stroke: #5a5a5a;
+            stroke: var(--link-color);
             stroke-width: 1.5px;
+            transition: stroke 0.3s ease;
         }
 
         .edge-label-text {
             font-size: 10px;
-            fill: #f0f0f0;
+            fill: var(--text-primary);
             text-anchor: middle;
             font-weight: bold;
             user-select: none;
+            transition: fill 0.3s ease;
         }
 
         .node-shape:hover {
             stroke: #fff;
-            stroke-width: 2px;
+            stroke-width: 3px;
         }
 
         .node-shape:hover + .node-text {
             fill: #fff;
+            font-weight: bold;
+        }
+
+        /* Light mode hover styles */
+        [data-theme="light"] .node-shape:hover {
+            stroke: #000;
+            stroke-width: 5px;
+        }
+
+        [data-theme="light"] .node-shape:hover + .node-text {
+            fill: #000;
+            font-weight: 900;
         }
 
         .tooltip {
             position: absolute;
-            background-color: rgba(0, 0, 0, 0.75);
-            color: #fff;
+            background-color: var(--panel-bg);
+            color: var(--text-primary);
             padding: 8px 12px;
             border-radius: 8px;
             pointer-events: none;
@@ -94,7 +195,8 @@
             position: absolute;
             bottom: 60px;
             right: 20px;
-            background-color: rgba(42, 42, 42, 0.9);
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 15px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
@@ -107,7 +209,7 @@
             opacity: 0;
             visibility: hidden;
             transform: translateY(20px);
-            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s, background-color 0.3s ease, border-color 0.3s ease;
         }
 
         #settings.is-open {
@@ -124,7 +226,8 @@
         .control-group label {
             font-size: 12px;
             margin-bottom: 5px;
-            color: #a0a0a0;
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
         }
 
         .control-group input[type="range"] {
@@ -169,43 +272,62 @@
             background-color: #2F855A;
         }
 
-        #settings-toggle {
+        .control-buttons {
             position: absolute;
             bottom: 20px;
             right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 51;
+        }
+
+        #settings-toggle, #theme-toggle {
             background-color: #38A169;
             color: white;
             width: 40px;
             height: 40px;
+            border: none;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 24px;
+            font-size: 20px;
             font-weight: bold;
             cursor: pointer;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
             transition: transform 0.3s ease, background-color 0.2s ease;
-            z-index: 51;
         }
 
-        #settings-toggle:hover {
+        #settings-toggle:hover, #theme-toggle:hover {
             background-color: #2F855A;
             transform: scale(1.1);
         }
 
-        #view-info {
+        #graph-title {
             position: absolute;
             top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--text-primary);
+            font-size: 24px;
+            font-weight: bold;
+            z-index: 20;
+            text-align: center;
+            transition: color 0.3s ease;
+        }
+
+        #view-info {
+            position: absolute;
+            top: 60px;
             left: 20px;
-            color: #f0f0f0;
+            color: var(--text-primary);
             font-size: 14px;
             z-index: 20;
             display: flex;
             flex-direction: row;
             gap: 10px;
             align-items: center;
-            
+            transition: color 0.3s ease;
         }
 
         .breadcrumb-link {
@@ -221,13 +343,15 @@
             position: absolute;
             top: 20px;
             right: 20px;
-            background-color: rgba(42, 42, 42, 0.9);
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 15px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-            color: #f0f0f0;
+            color: var(--text-primary);
             font-size: 12px;
-            width: 180px;
+            width: auto;
+            min-width: 120px;
             z-index: 40;
             transition: all 0.3s ease;
         }
@@ -254,16 +378,20 @@
         #legend-toggle {
             background: none;
             border: none;
-            color: #f0f0f0;
+            color: var(--text-primary);
             cursor: pointer;
             font-size: 14px;
             padding: 2px;
             border-radius: 3px;
-            transition: background-color 0.2s ease;
+            transition: background-color 0.2s ease, color 0.3s ease;
         }
 
         #legend-toggle:hover {
             background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="light"] #legend-toggle:hover {
+            background-color: rgba(0, 0, 0, 0.1);
         }
 
         #legend-content {
@@ -315,6 +443,7 @@
         .legend-text {
             font-size: 11px;
         }
+
     </style>
 </head>
 <body>
@@ -332,7 +461,10 @@
             </g>
         </svg>
         <div id="tooltip" class="tooltip"></div>
-        <div id="settings-toggle">^</div>
+        <div class="control-buttons">
+            <button id="theme-toggle">🌞</button>
+            <div id="settings-toggle">^</div>
+        </div>
         <div id="settings">
             <h3>Simulation Controls</h3>
             <div class="control-group">
@@ -361,6 +493,7 @@
             </div>
             <button id="reset-button">Reset View & Layout</button>
         </div>
+        <div id="graph-title">European Diplomatic Network 1914</div>
         <div id="view-info"></div>
         <div id="legend">
             <div id="legend-header">
@@ -386,32 +519,6 @@
                         <span class="legend-text">Territories</span>
                     </div>
                 </div>
-                <div class="legend-section">
-                    <div class="legend-item">
-                        <svg class="legend-shape" viewBox="0 0 16 16">
-                            <rect x="1" y="4" width="14" height="8" rx="2" fill="#ccc" />
-                        </svg>
-                        <span class="legend-text">Major Powers</span>
-                    </div>
-                    <div class="legend-item">
-                        <svg class="legend-shape" viewBox="0 0 16 16">
-                            <rect x="2" y="2" width="12" height="12" rx="2" fill="#ccc" />
-                        </svg>
-                        <span class="legend-text">Regional Powers</span>
-                    </div>
-                    <div class="legend-item">
-                        <svg class="legend-shape" viewBox="0 0 16 16">
-                            <circle cx="8" cy="8" r="6" fill="#ccc" />
-                        </svg>
-                        <span class="legend-text">Small Nations</span>
-                    </div>
-                    <div class="legend-item">
-                        <svg class="legend-shape" viewBox="0 0 16 16">
-                            <polygon points="8,2 14,12 2,12" fill="#ccc" />
-                        </svg>
-                        <span class="legend-text">Territories</span>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -428,20 +535,20 @@
                     { id: "austria-hungary", name: "Austria-Hungary", type: "major_power", shape: "rectangle", size: 35 },
                     
                     // Regional Powers
-                    { id: "ottoman", name: "Ottoman Empire", type: "regional_power", shape: "square", size: 30 },
-                    { id: "italy", name: "Kingdom of Italy", type: "regional_power", shape: "square", size: 25 },
-                    { id: "serbia", name: "Kingdom of Serbia", type: "regional_power", shape: "square", size: 20 },
+                    { id: "ottoman", name: "Ottoman Empire", type: "regional_power", shape: "rectangle", size: 30 },
+                    { id: "italy", name: "Kingdom of Italy", type: "regional_power", shape: "rectangle", size: 25 },
+                    { id: "serbia", name: "Kingdom of Serbia", type: "regional_power", shape: "rectangle", size: 20 },
                     
                     // Smaller Nations
-                    { id: "belgium", name: "Belgium", type: "small_nation", shape: "circle", size: 15 },
-                    { id: "bulgaria", name: "Bulgaria", type: "small_nation", shape: "circle", size: 18 },
-                    { id: "romania", name: "Romania", type: "small_nation", shape: "circle", size: 20 },
-                    { id: "montenegro", name: "Montenegro", type: "small_nation", shape: "circle", size: 12 },
+                    { id: "belgium", name: "Belgium", type: "small_nation", shape: "rectangle", size: 15 },
+                    { id: "bulgaria", name: "Bulgaria", type: "small_nation", shape: "rectangle", size: 18 },
+                    { id: "romania", name: "Romania", type: "small_nation", shape: "rectangle", size: 20 },
+                    { id: "montenegro", name: "Montenegro", type: "small_nation", shape: "rectangle", size: 12 },
                     
                     // Key Regions/Issues
-                    { id: "alsace-lorraine", name: "Alsace-Lorraine", type: "territory", shape: "triangle", size: 25 },
-                    { id: "balkans", name: "Balkan Peninsula", type: "territory", shape: "triangle", size: 30 },
-                    { id: "morocco", name: "Morocco", type: "territory", shape: "triangle", size: 20 }
+                    { id: "alsace-lorraine", name: "Alsace-Lorraine", type: "territory", shape: "rectangle", size: 25 },
+                    { id: "balkans", name: "Balkan Peninsula", type: "territory", shape: "rectangle", size: 30 },
+                    { id: "morocco", name: "Morocco", type: "territory", shape: "rectangle", size: 20 }
                 ],
                 links: [
                     // Triple Alliance
@@ -586,6 +693,23 @@
                     });
                 }
 
+                measureTextWidth(text) {
+                    // Create a temporary text element to measure width
+                    const tempText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    tempText.textContent = text;
+                    tempText.setAttribute('font-size', '14px');
+                    tempText.setAttribute('font-weight', 'bold');
+                    tempText.setAttribute('font-family', 'Inter, sans-serif');
+                    tempText.style.visibility = 'hidden';
+                    
+                    // Add to DOM temporarily to measure
+                    svg.appendChild(tempText);
+                    const width = tempText.getBBox().width;
+                    svg.removeChild(tempText);
+                    
+                    return width;
+                }
+
                 setupSVG() {
                     this.linkGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
                     this.nodeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -629,10 +753,33 @@
                         group.setAttribute('data-id', node.data.id);
                         
                         let shapeElement;
+                        let hiddenIndicator = null;
+                        
                         switch(node.data.shape) {
                             case 'rectangle':
-                                const rectWidth = node.size * 2.8; // 2x wider than tall
+                                // Measure text width and add padding
+                                const textWidth = this.measureTextWidth(node.data.name);
+                                const padding = 20;
+                                const minWidth = node.size * 2;
+                                const rectWidth = Math.max(minWidth, textWidth + padding);
                                 const rectHeight = node.size * 1.4;
+                                
+                                // Store dimensions on node for later use
+                                node.dynamicWidth = rectWidth;
+                                node.dynamicHeight = rectHeight;
+                                
+                                // Create hidden connection indicator background if needed
+                                // (We'll determine this in the render method)
+                                const indicatorPadding = 4;
+                                hiddenIndicator = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                                hiddenIndicator.setAttribute('x', -(rectWidth + indicatorPadding) / 2);
+                                hiddenIndicator.setAttribute('y', -(rectHeight + indicatorPadding) / 2);
+                                hiddenIndicator.setAttribute('width', rectWidth + indicatorPadding);
+                                hiddenIndicator.setAttribute('height', rectHeight + indicatorPadding);
+                                hiddenIndicator.setAttribute('rx', 5);
+                                hiddenIndicator.classList.add('hidden-connection-indicator');
+                                hiddenIndicator.style.display = 'none'; // Hidden by default
+                                
                                 shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
                                 shapeElement.setAttribute('x', -rectWidth / 2);
                                 shapeElement.setAttribute('y', -rectHeight / 2);
@@ -667,15 +814,21 @@
                         }
                         
                         shapeElement.classList.add('node-shape', `node-${node.data.type}`);
+                        
+                        // Add elements to group in proper order (background indicator first if it exists)
+                        if (hiddenIndicator) {
+                            group.appendChild(hiddenIndicator);
+                        }
                         group.appendChild(shapeElement);
 
                         const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
                         text.textContent = node.data.name;
                         text.classList.add('node-text');
+                        text.setAttribute('dominant-baseline', 'central');
                         group.appendChild(text);
 
                         this.nodeGroup.appendChild(group);
-                        this.nodeElements.set(node, { group, shape: shapeElement, text });
+                        this.nodeElements.set(node, { group, shape: shapeElement, text, hiddenIndicator });
 
                         // Add mouse events for dragging and filtering
                         group.addEventListener('mousedown', (e) => this.handleNodeMouseDown(e, node));
@@ -780,11 +933,13 @@
                     // Force a render
                     this.render();
                     
-                    // Make all nodes visible and remove the hidden link class
+                    // Make all nodes visible and hide hidden link indicators
                     this.nodes.forEach(node => {
                         const elements = this.nodeElements.get(node);
                         elements.group.style.display = 'block';
-                        elements.shape.classList.remove('has-hidden-link');
+                        if (elements.hiddenIndicator) {
+                            elements.hiddenIndicator.style.display = 'none';
+                        }
                     });
                     this.links.forEach(link => {
                         const elements = this.linkElements.get(link);
@@ -814,13 +969,28 @@
 
                 handleNodeDoubleClick(e, node) {
                     e.preventDefault();
-                    this.filterGraph(node.data.id);
+                    
+                    // If we're already filtering on this node, reset to show all
+                    if (this.currentFilterNodeId === node.data.id) {
+                        this.resetViewAndLayout();
+                    } else {
+                        this.filterGraph(node.data.id);
+                    }
                 }
 
                 handleSvgMouseDown(e) {
                     if (e.target.closest('.node-shape') || e.target.closest('.edge-label-text')) {
                         return;
                     }
+                    
+                    // Close settings panel if it's open
+                    const settingsPanel = document.getElementById('settings');
+                    const settingsToggle = document.getElementById('settings-toggle');
+                    if (settingsPanel.classList.contains('is-open')) {
+                        settingsPanel.classList.remove('is-open');
+                        settingsToggle.textContent = '^';
+                    }
+                    
                     this.isPanning = true;
                     this.lastMouse = { x: e.clientX, y: e.clientY };
                     e.preventDefault();
@@ -908,21 +1078,17 @@
                         const elements = this.nodeElements.get(node);
                         elements.group.style.display = isVisible ? 'block' : 'none';
 
-                        // Check for hidden links and apply outline
-                        if (isVisible) {
+                        // Check for hidden links and show/hide indicator
+                        if (isVisible && elements.hiddenIndicator) {
                             let hasHiddenLink = false;
                             this.adjList.get(node.data.id).forEach(neighbor => {
                                 if (!nodesToDisplay.has(neighbor.node)) {
                                     hasHiddenLink = true;
                                 }
                             });
-                            if (hasHiddenLink) {
-                                elements.shape.classList.add('has-hidden-link');
-                            } else {
-                                elements.shape.classList.remove('has-hidden-link');
-                            }
-                        } else {
-                           elements.shape.classList.remove('has-hidden-link');
+                            elements.hiddenIndicator.style.display = hasHiddenLink ? 'block' : 'none';
+                        } else if (elements.hiddenIndicator) {
+                            elements.hiddenIndicator.style.display = 'none';
                         }
                     });
                     
@@ -1057,8 +1223,9 @@
                                 newY2 = sourcePos.y + diff.y * ratio;
                             }
                         } else if (targetShape === 'rectangle') {
-                            const halfWidth = targetSize * 2.8 / 2;
-                            const halfHeight = targetSize * 1.4 / 2;
+                            // Use stored dynamic dimensions
+                            const halfWidth = (link.target.dynamicWidth || targetSize * 2.8) / 2;
+                            const halfHeight = (link.target.dynamicHeight || targetSize * 1.4) / 2;
                             if (distance > Math.min(halfWidth, halfHeight)) {
                                 const angle = Math.atan2(diff.y, diff.x);
                                 const absAngle = Math.abs(angle);
@@ -1126,7 +1293,38 @@
                 }
             }
 
+            // Load saved settings before creating simulation
+            const savedSettings = {
+                damping: localStorage.getItem('graph-damping'),
+                repulsionStrength: localStorage.getItem('graph-repulsionStrength'),
+                attractionStrength: localStorage.getItem('graph-attractionStrength'),
+                zoomSensitivity: localStorage.getItem('graph-zoomSensitivity'),
+                filterDepth: localStorage.getItem('graph-filterDepth'),
+                groupingStrength: localStorage.getItem('graph-groupingStrength')
+            };
+
             const simulation = new GraphSimulation(graphData);
+            
+            // Apply saved settings immediately after creation
+            if (savedSettings.damping !== null) {
+                simulation.config.damping = parseFloat(savedSettings.damping);
+            }
+            if (savedSettings.repulsionStrength !== null) {
+                simulation.config.repulsionStrength = parseFloat(savedSettings.repulsionStrength);
+            }
+            if (savedSettings.attractionStrength !== null) {
+                simulation.config.attractionStrength = parseFloat(savedSettings.attractionStrength);
+            }
+            if (savedSettings.zoomSensitivity !== null) {
+                simulation.config.zoomSensitivity = parseFloat(savedSettings.zoomSensitivity);
+            }
+            if (savedSettings.filterDepth !== null) {
+                simulation.config.filterDepth = parseInt(savedSettings.filterDepth);
+            }
+            if (savedSettings.groupingStrength !== null) {
+                simulation.config.groupingStrength = parseFloat(savedSettings.groupingStrength);
+            }
+
             simulation.animate();
 
             // Legend toggle functionality
@@ -1136,6 +1334,84 @@
             legendToggle.addEventListener('click', () => {
                 const isMinimized = legend.classList.toggle('minimized');
                 legendToggle.textContent = isMinimized ? '+' : '−';
+            });
+
+            // Theme toggle functionality
+            const themeToggle = document.getElementById('theme-toggle');
+            
+            // Load saved theme
+            const savedTheme = localStorage.getItem('graph-theme') || 'dark';
+            document.body.setAttribute('data-theme', savedTheme);
+            themeToggle.textContent = savedTheme === 'light' ? '🌙' : '🌞';
+            
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = document.body.getAttribute('data-theme') || 'dark';
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                document.body.setAttribute('data-theme', newTheme);
+                themeToggle.textContent = newTheme === 'light' ? '🌙' : '🌞';
+                localStorage.setItem('graph-theme', newTheme);
+            });
+
+            // Update UI to reflect loaded settings
+            if (savedSettings.damping !== null) {
+                const dampingSliderValue = (simulation.config.damping === 1.0) ? 0 : 
+                    20 * (Math.log(simulation.config.damping) - Math.log(1.0)) / (Math.log(0.35) - Math.log(1.0));
+                document.getElementById('damping-slider').value = dampingSliderValue;
+                document.getElementById('damping-value').textContent = dampingSliderValue.toFixed(1);
+            }
+            
+            if (savedSettings.repulsionStrength !== null) {
+                const repulsionSliderValue = simulation.config.repulsionStrength / 500;
+                document.getElementById('repulsion-slider').value = repulsionSliderValue;
+                document.getElementById('repulsion-value').textContent = repulsionSliderValue.toFixed(1);
+            }
+            
+            if (savedSettings.attractionStrength !== null) {
+                const attractionSliderValue = simulation.config.attractionStrength * 10000;
+                document.getElementById('attraction-slider').value = attractionSliderValue;
+                document.getElementById('attraction-value').textContent = attractionSliderValue.toFixed(1);
+            }
+            
+            if (savedSettings.zoomSensitivity !== null) {
+                document.getElementById('zoom-sensitivity-slider').value = simulation.config.zoomSensitivity;
+                document.getElementById('zoom-sensitivity-value').textContent = simulation.config.zoomSensitivity.toFixed(2);
+            }
+            
+            if (savedSettings.filterDepth !== null) {
+                document.getElementById('filter-depth-slider').value = simulation.config.filterDepth;
+                document.getElementById('filter-depth-value').textContent = simulation.config.filterDepth;
+            }
+            
+            if (savedSettings.groupingStrength !== null) {
+                const groupingSliderValue = simulation.config.groupingStrength * 10000;
+                document.getElementById('grouping-slider').value = groupingSliderValue;
+                document.getElementById('grouping-value').textContent = groupingSliderValue.toFixed(1);
+            }
+
+            // Add localStorage saving to existing sliders
+            document.getElementById('damping-slider').addEventListener('input', () => {
+                localStorage.setItem('graph-damping', simulation.config.damping);
+            });
+            
+            document.getElementById('repulsion-slider').addEventListener('input', () => {
+                localStorage.setItem('graph-repulsionStrength', simulation.config.repulsionStrength);
+            });
+            
+            document.getElementById('attraction-slider').addEventListener('input', () => {
+                localStorage.setItem('graph-attractionStrength', simulation.config.attractionStrength);
+            });
+            
+            document.getElementById('zoom-sensitivity-slider').addEventListener('input', () => {
+                localStorage.setItem('graph-zoomSensitivity', simulation.config.zoomSensitivity);
+            });
+            
+            document.getElementById('filter-depth-slider').addEventListener('input', () => {
+                localStorage.setItem('graph-filterDepth', simulation.config.filterDepth);
+            });
+            
+            document.getElementById('grouping-slider').addEventListener('input', () => {
+                localStorage.setItem('graph-groupingStrength', simulation.config.groupingStrength);
             });
         });
     </script>
