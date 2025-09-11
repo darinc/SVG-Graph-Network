@@ -6,11 +6,13 @@ An interactive SVG graph visualization library with force-directed layout and ph
 
 - 🎯 **Force-directed layout** with customizable physics simulation
 - 🎨 **Interactive controls** for pan, zoom, drag, and filter
+- 📱 **Full mobile support** with touch gestures and mobile-optimized UI
+- 👆 **Touch interactions** - pinch-to-zoom, tap-to-pan, double-tap filtering
 - 🎛️ **Real-time configuration** with sliders for all physics parameters  
 - 🌓 **Theme support** (dark/light modes)
-- 📱 **Responsive design** that works on all screen sizes
+- 📊 **Responsive design** that adapts to all screen sizes
 - 🔍 **Node filtering** to focus on specific parts of the network
-- 📊 **Multiple node shapes** (circle, rectangle, square, triangle)
+- 🎮 **Multiple node shapes** (circle, rectangle, square, triangle)
 - 🔗 **Flexible link styling** (solid, dashed, dotted lines)
 - 🎪 **Event system** for custom interactions
 - 📦 **Zero dependencies** - pure JavaScript and SVG
@@ -73,6 +75,72 @@ const graph = new GraphNetwork('graph-container', {
         showLegend: true
     }
 });
+```
+
+## Mobile Usage
+
+The library provides full mobile and touch support with optimized interactions for phones and tablets.
+
+### Mobile HTML Setup
+
+For optimal mobile experience, include proper viewport meta tags:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="stylesheet" href="path/to/svg-graph-network.css">
+</head>
+<body>
+    <div id="graph-container" style="width: 100vw; height: 100vh;"></div>
+    <script src="path/to/svg-graph-network.js"></script>
+</body>
+</html>
+```
+
+### Touch Gestures
+
+| Gesture | Action |
+|---------|--------|
+| **Single finger drag on background** | Pan around the graph |
+| **Single finger drag on node** | Drag node to new position |
+| **Double-tap node** | Filter to show only that node and connections |
+| **Double-tap background** | Reset filter to show all nodes |
+| **Pinch with two fingers** | Zoom in/out |
+| **Tap zoom controls** | Zoom in (+), zoom out (−), reset view (⊙) |
+
+### Mobile Controls
+
+On mobile devices (screens ≤768px), floating action buttons appear:
+
+- **+ button**: Zoom in
+- **− button**: Zoom out  
+- **⊙ button**: Reset view and layout
+- **🌙/🌞 button**: Toggle dark/light theme
+- **^ button**: Open settings panel
+
+### Responsive Behavior
+
+The library automatically adapts to different screen sizes:
+
+- **Desktop (>768px)**: Full controls, hover effects, detailed tooltips
+- **Tablet (≤768px)**: Touch controls, larger buttons, simplified UI
+- **Phone (≤480px)**: Compact layout, full-width settings panel
+
+### Mobile-Specific Methods
+
+```javascript
+// Programmatic zoom controls (used by mobile buttons)
+graph.zoomIn();   // Zoom in by 10x sensitivity factor
+graph.zoomOut();  // Zoom out by 10x sensitivity factor
+
+// Check if device supports touch
+const isTouchDevice = 'ontouchstart' in window;
 ```
 
 ## API Reference
@@ -178,6 +246,10 @@ graph.resetViewAndLayout();
 
 // Fit graph to container
 graph.fitToView();
+
+// Programmatic zoom controls
+graph.zoomIn();    // Zoom in (mobile button functionality)
+graph.zoomOut();   // Zoom out (mobile button functionality)
 
 // Filter by node (show only neighbors)
 graph.filterByNode("node-id", depth);
@@ -314,12 +386,50 @@ graph.on('filtered', (data) => {
 });
 ```
 
+### Mobile-Optimized Setup
+```javascript
+// Create a mobile-friendly graph
+const mobileGraph = new GraphNetwork('mobile-container', {
+    data: graphData,
+    config: {
+        theme: 'light',           // Light theme often better on mobile
+        showControls: true,       // Enable mobile zoom controls
+        showLegend: true,         // Collapsible legend
+        showTitle: false,         // Save space on small screens
+        showBreadcrumbs: true,    // Navigation breadcrumbs
+        
+        // Optimize physics for touch interaction
+        damping: 0.9,             // Less bouncy for stability
+        repulsionStrength: 5000,  // Moderate spacing
+        zoomSensitivity: 1.05     // Slightly more zoom per gesture
+    }
+});
+
+// Listen for mobile-specific events
+mobileGraph.on('zoom', (data) => {
+    // Adjust UI based on zoom level
+    if (data.scale < 0.5) {
+        // Hide details at low zoom
+        document.querySelector('.detail-panel').style.display = 'none';
+    }
+});
+```
+
 ## Browser Support
 
+### Desktop
 - Chrome 60+
 - Firefox 55+
 - Safari 12+
 - Edge 79+
+
+### Mobile
+- iOS Safari 12+
+- Chrome Mobile 60+
+- Samsung Internet 8+
+- Firefox Mobile 68+
+
+**Touch Features**: Full gesture support including pinch-to-zoom, double-tap, and drag interactions on all supported mobile browsers.
 
 ## Development
 
