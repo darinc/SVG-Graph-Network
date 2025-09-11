@@ -457,23 +457,23 @@ export class UIManager {
         const numValue = parseFloat(userValue);
         
         switch (key) {
-            case 'damping':
-                if (numValue === 0) {
-                    return 1.0;
-                } else {
-                    const t = numValue / 20;
-                    return Math.exp(Math.log(1.0) * (1 - t) + Math.log(0.35) * t);
-                }
-            case 'repulsionStrength':
-                return numValue * 500;
-            case 'attractionStrength':
-                return numValue / 10000;
-            case 'groupingStrength':
-                return numValue / 10000;
-            case 'filterDepth':
-                return parseInt(numValue); // No conversion needed, use raw value
-            default:
-                return numValue;
+        case 'damping':
+            if (numValue === 0) {
+                return 1.0;
+            } else {
+                const t = numValue / 20;
+                return Math.exp(Math.log(1.0) * (1 - t) + Math.log(0.35) * t);
+            }
+        case 'repulsionStrength':
+            return numValue * 500;
+        case 'attractionStrength':
+            return numValue / 10000;
+        case 'groupingStrength':
+            return numValue / 10000;
+        case 'filterDepth':
+            return parseInt(numValue); // No conversion needed, use raw value
+        default:
+            return numValue;
         }
     }
 
@@ -490,7 +490,7 @@ export class UIManager {
     destroy() {
         // Remove all created elements
         [this.titleElement, this.breadcrumbsElement, this.legendElement, 
-         this.controls, this.settingsPanel].forEach(element => {
+            this.controls, this.settingsPanel].forEach(element => {
             if (element && element.parentNode) {
                 element.parentNode.removeChild(element);
             }

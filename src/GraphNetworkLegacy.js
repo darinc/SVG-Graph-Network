@@ -446,38 +446,38 @@ export class GraphNetwork {
         const valueElement = document.getElementById(`${control}-value-${this.containerId}`);
         
         switch (control) {
-            case 'damping':
-                if (numValue === 0) {
-                    this.config.damping = 1.0;
-                } else {
-                    const t = numValue / 20;
-                    this.config.damping = Math.exp(Math.log(1.0) * (1 - t) + Math.log(0.35) * t);
-                }
-                valueElement.textContent = numValue.toFixed(1);
-                break;
-            case 'repulsion':
-                this.config.repulsionStrength = numValue * 500;
-                valueElement.textContent = numValue.toFixed(1);
-                break;
-            case 'attraction':
-                this.config.attractionStrength = numValue / 10000;
-                valueElement.textContent = numValue.toFixed(1);
-                break;
-            case 'zoom-sensitivity':
-                this.config.zoomSensitivity = numValue;
-                valueElement.textContent = numValue.toFixed(2);
-                break;
-            case 'filter-depth':
-                this.config.filterDepth = parseInt(numValue);
-                valueElement.textContent = this.config.filterDepth;
-                if (this.currentFilterNodeId) {
-                    this.filterByNode(this.currentFilterNodeId, this.config.filterDepth);
-                }
-                break;
-            case 'grouping':
-                this.config.groupingStrength = numValue / 10000;
-                valueElement.textContent = numValue.toFixed(1);
-                break;
+        case 'damping':
+            if (numValue === 0) {
+                this.config.damping = 1.0;
+            } else {
+                const t = numValue / 20;
+                this.config.damping = Math.exp(Math.log(1.0) * (1 - t) + Math.log(0.35) * t);
+            }
+            valueElement.textContent = numValue.toFixed(1);
+            break;
+        case 'repulsion':
+            this.config.repulsionStrength = numValue * 500;
+            valueElement.textContent = numValue.toFixed(1);
+            break;
+        case 'attraction':
+            this.config.attractionStrength = numValue / 10000;
+            valueElement.textContent = numValue.toFixed(1);
+            break;
+        case 'zoom-sensitivity':
+            this.config.zoomSensitivity = numValue;
+            valueElement.textContent = numValue.toFixed(2);
+            break;
+        case 'filter-depth':
+            this.config.filterDepth = parseInt(numValue);
+            valueElement.textContent = this.config.filterDepth;
+            if (this.currentFilterNodeId) {
+                this.filterByNode(this.currentFilterNodeId, this.config.filterDepth);
+            }
+            break;
+        case 'grouping':
+            this.config.groupingStrength = numValue / 10000;
+            valueElement.textContent = numValue.toFixed(1);
+            break;
         }
     }
 
@@ -614,57 +614,57 @@ export class GraphNetwork {
             let hiddenIndicator = null;
             
             switch(node.data.shape) {
-                case 'rectangle':
-                    const textWidth = this.measureTextWidth(node.data.name);
-                    const padding = 20;
-                    const minWidth = node.size * 2;
-                    const rectWidth = Math.max(minWidth, textWidth + padding);
-                    const rectHeight = node.size * 1.4;
+            case 'rectangle':
+                const textWidth = this.measureTextWidth(node.data.name);
+                const padding = 20;
+                const minWidth = node.size * 2;
+                const rectWidth = Math.max(minWidth, textWidth + padding);
+                const rectHeight = node.size * 1.4;
                     
-                    node.dynamicWidth = rectWidth;
-                    node.dynamicHeight = rectHeight;
+                node.dynamicWidth = rectWidth;
+                node.dynamicHeight = rectHeight;
                     
-                    const indicatorPadding = 4;
-                    hiddenIndicator = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                    hiddenIndicator.setAttribute('x', -(rectWidth + indicatorPadding) / 2);
-                    hiddenIndicator.setAttribute('y', -(rectHeight + indicatorPadding) / 2);
-                    hiddenIndicator.setAttribute('width', rectWidth + indicatorPadding);
-                    hiddenIndicator.setAttribute('height', rectHeight + indicatorPadding);
-                    hiddenIndicator.setAttribute('rx', 5);
-                    hiddenIndicator.classList.add('hidden-connection-indicator');
-                    hiddenIndicator.style.display = 'none';
+                const indicatorPadding = 4;
+                hiddenIndicator = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                hiddenIndicator.setAttribute('x', -(rectWidth + indicatorPadding) / 2);
+                hiddenIndicator.setAttribute('y', -(rectHeight + indicatorPadding) / 2);
+                hiddenIndicator.setAttribute('width', rectWidth + indicatorPadding);
+                hiddenIndicator.setAttribute('height', rectHeight + indicatorPadding);
+                hiddenIndicator.setAttribute('rx', 5);
+                hiddenIndicator.classList.add('hidden-connection-indicator');
+                hiddenIndicator.style.display = 'none';
                     
-                    shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                    shapeElement.setAttribute('x', -rectWidth / 2);
-                    shapeElement.setAttribute('y', -rectHeight / 2);
-                    shapeElement.setAttribute('width', rectWidth);
-                    shapeElement.setAttribute('height', rectHeight);
-                    shapeElement.setAttribute('rx', 5);
-                    break;
-                case 'square':
-                    const squareSize = node.size * 1.4;
-                    shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                    shapeElement.setAttribute('x', -squareSize / 2);
-                    shapeElement.setAttribute('y', -squareSize / 2);
-                    shapeElement.setAttribute('width', squareSize);
-                    shapeElement.setAttribute('height', squareSize);
-                    shapeElement.setAttribute('rx', 5);
-                    break;
-                case 'triangle':
-                    const triangleSize = node.size * 1.4;
-                    const triPoints = [
-                        `${0},${-triangleSize * 0.577}`, 
-                        `${-triangleSize * 0.5},${triangleSize * 0.288}`, 
-                        `${triangleSize * 0.5},${triangleSize * 0.288}`
-                    ].join(' ');
-                    shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-                    shapeElement.setAttribute('points', triPoints);
-                    break;
-                case 'circle':
-                default:
-                    shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                    shapeElement.setAttribute('r', node.size);
-                    break;
+                shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                shapeElement.setAttribute('x', -rectWidth / 2);
+                shapeElement.setAttribute('y', -rectHeight / 2);
+                shapeElement.setAttribute('width', rectWidth);
+                shapeElement.setAttribute('height', rectHeight);
+                shapeElement.setAttribute('rx', 5);
+                break;
+            case 'square':
+                const squareSize = node.size * 1.4;
+                shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                shapeElement.setAttribute('x', -squareSize / 2);
+                shapeElement.setAttribute('y', -squareSize / 2);
+                shapeElement.setAttribute('width', squareSize);
+                shapeElement.setAttribute('height', squareSize);
+                shapeElement.setAttribute('rx', 5);
+                break;
+            case 'triangle':
+                const triangleSize = node.size * 1.4;
+                const triPoints = [
+                    `${0},${-triangleSize * 0.577}`, 
+                    `${-triangleSize * 0.5},${triangleSize * 0.288}`, 
+                    `${triangleSize * 0.5},${triangleSize * 0.288}`
+                ].join(' ');
+                shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                shapeElement.setAttribute('points', triPoints);
+                break;
+            case 'circle':
+            default:
+                shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                shapeElement.setAttribute('r', node.size);
+                break;
             }
             
             shapeElement.classList.add('node-shape', `node-${node.data.type}`);

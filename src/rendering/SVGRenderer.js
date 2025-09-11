@@ -222,63 +222,63 @@ export class SVGRenderer {
         let hiddenIndicator = null;
         
         switch(node.data.shape) {
-            case 'rectangle':
-                const textWidth = this.measureTextWidth(node.data.name);
-                const padding = 20;
-                const minWidth = node.size * 2;
-                const rectWidth = Math.max(minWidth, textWidth + padding);
-                const rectHeight = node.size * 1.4;
+        case 'rectangle':
+            const textWidth = this.measureTextWidth(node.data.name);
+            const padding = 20;
+            const minWidth = node.size * 2;
+            const rectWidth = Math.max(minWidth, textWidth + padding);
+            const rectHeight = node.size * 1.4;
                 
-                // Store dynamic dimensions on node
-                node.dynamicWidth = rectWidth;
-                node.dynamicHeight = rectHeight;
+            // Store dynamic dimensions on node
+            node.dynamicWidth = rectWidth;
+            node.dynamicHeight = rectHeight;
                 
-                // Create hidden connection indicator
-                const indicatorPadding = 4;
-                hiddenIndicator = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                hiddenIndicator.setAttribute('x', -(rectWidth + indicatorPadding) / 2);
-                hiddenIndicator.setAttribute('y', -(rectHeight + indicatorPadding) / 2);
-                hiddenIndicator.setAttribute('width', rectWidth + indicatorPadding);
-                hiddenIndicator.setAttribute('height', rectHeight + indicatorPadding);
-                hiddenIndicator.setAttribute('rx', 5);
-                hiddenIndicator.classList.add('hidden-connection-indicator');
-                hiddenIndicator.style.display = 'none';
+            // Create hidden connection indicator
+            const indicatorPadding = 4;
+            hiddenIndicator = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            hiddenIndicator.setAttribute('x', -(rectWidth + indicatorPadding) / 2);
+            hiddenIndicator.setAttribute('y', -(rectHeight + indicatorPadding) / 2);
+            hiddenIndicator.setAttribute('width', rectWidth + indicatorPadding);
+            hiddenIndicator.setAttribute('height', rectHeight + indicatorPadding);
+            hiddenIndicator.setAttribute('rx', 5);
+            hiddenIndicator.classList.add('hidden-connection-indicator');
+            hiddenIndicator.style.display = 'none';
                 
-                shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                shapeElement.setAttribute('x', -rectWidth / 2);
-                shapeElement.setAttribute('y', -rectHeight / 2);
-                shapeElement.setAttribute('width', rectWidth);
-                shapeElement.setAttribute('height', rectHeight);
-                shapeElement.setAttribute('rx', 5);
-                break;
+            shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            shapeElement.setAttribute('x', -rectWidth / 2);
+            shapeElement.setAttribute('y', -rectHeight / 2);
+            shapeElement.setAttribute('width', rectWidth);
+            shapeElement.setAttribute('height', rectHeight);
+            shapeElement.setAttribute('rx', 5);
+            break;
                 
-            case 'square':
-                const squareSize = node.size * 1.4;
-                shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                shapeElement.setAttribute('x', -squareSize / 2);
-                shapeElement.setAttribute('y', -squareSize / 2);
-                shapeElement.setAttribute('width', squareSize);
-                shapeElement.setAttribute('height', squareSize);
-                shapeElement.setAttribute('rx', 5);
-                break;
+        case 'square':
+            const squareSize = node.size * 1.4;
+            shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            shapeElement.setAttribute('x', -squareSize / 2);
+            shapeElement.setAttribute('y', -squareSize / 2);
+            shapeElement.setAttribute('width', squareSize);
+            shapeElement.setAttribute('height', squareSize);
+            shapeElement.setAttribute('rx', 5);
+            break;
                 
-            case 'triangle':
-                const triangleSize = node.size * 1.4;
-                const h = triangleSize * Math.sqrt(3) / 2;
-                const points = [
-                    [0, -h / 2],
-                    [-triangleSize / 2, h / 2],
-                    [triangleSize / 2, h / 2]
-                ].map(point => point.join(',')).join(' ');
+        case 'triangle':
+            const triangleSize = node.size * 1.4;
+            const h = triangleSize * Math.sqrt(3) / 2;
+            const points = [
+                [0, -h / 2],
+                [-triangleSize / 2, h / 2],
+                [triangleSize / 2, h / 2]
+            ].map(point => point.join(',')).join(' ');
                 
-                shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-                shapeElement.setAttribute('points', points);
-                break;
+            shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+            shapeElement.setAttribute('points', points);
+            break;
                 
-            default: // circle
-                shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                shapeElement.setAttribute('r', node.size);
-                break;
+        default: // circle
+            shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            shapeElement.setAttribute('r', node.size);
+            break;
         }
         
         // Apply node styling
