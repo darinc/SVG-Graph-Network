@@ -45,7 +45,7 @@
         .node-major_power { fill: #E53E3E; } /* Red */
         .node-regional_power { fill: #4299E1; } /* Blue */
         .node-small_nation { fill: #38A169; } /* Green */
-        .node-territory { fill: #F6E05E; } /* Yellow */
+        .node-territory { fill: #ED8936; } /* Orange */
         
         /* New class for the subtle outline */
         .node-shape.has-hidden-link {
@@ -336,12 +336,12 @@
         <div id="settings">
             <h3>Simulation Controls</h3>
             <div class="control-group">
-                <label for="damping-slider">Damping (<span id="damping-value">0.9</span>)</label>
-                <input type="range" id="damping-slider" min="0.1" max="1" value="0.9" step="0.05">
+                <label for="damping-slider">Damping (<span id="damping-value">10</span>)</label>
+                <input type="range" id="damping-slider" min="0" max="20" value="10" step="0.5">
             </div>
             <div class="control-group">
-                <label for="repulsion-slider">Repulsion (<span id="repulsion-value">3200</span>)</label>
-                <input type="range" id="repulsion-slider" min="100" max="5000" value="3200" step="100">
+                <label for="repulsion-slider">Repulsion (<span id="repulsion-value">13</span>)</label>
+                <input type="range" id="repulsion-slider" min="0" max="20" value="13" step="0.5">
             </div>
             <div class="control-group">
                 <label for="attraction-slider">Attraction (<span id="attraction-value">10</span>)</label>
@@ -354,6 +354,10 @@
             <div class="control-group">
                 <label for="filter-depth-slider">Filter Depth (<span id="filter-depth-value">1</span>)</label>
                 <input type="range" id="filter-depth-slider" min="1" max="3" value="1" step="1">
+            </div>
+            <div class="control-group">
+                <label for="grouping-slider">Grouping (<span id="grouping-value">10</span>)</label>
+                <input type="range" id="grouping-slider" min="0" max="20" value="10" step="0.5">
             </div>
             <button id="reset-button">Reset View & Layout</button>
         </div>
@@ -378,28 +382,34 @@
                         <span class="legend-text">Small Nations</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color" style="background-color: #F6E05E;"></div>
+                        <div class="legend-color" style="background-color: #ED8936;"></div>
                         <span class="legend-text">Territories</span>
                     </div>
                 </div>
                 <div class="legend-section">
                     <div class="legend-item">
                         <svg class="legend-shape" viewBox="0 0 16 16">
-                            <rect x="2" y="2" width="12" height="12" rx="2" fill="#ccc" />
+                            <rect x="1" y="4" width="14" height="8" rx="2" fill="#ccc" />
                         </svg>
                         <span class="legend-text">Major Powers</span>
                     </div>
                     <div class="legend-item">
                         <svg class="legend-shape" viewBox="0 0 16 16">
-                            <circle cx="8" cy="8" r="6" fill="#ccc" />
+                            <rect x="2" y="2" width="12" height="12" rx="2" fill="#ccc" />
                         </svg>
                         <span class="legend-text">Regional Powers</span>
                     </div>
                     <div class="legend-item">
                         <svg class="legend-shape" viewBox="0 0 16 16">
+                            <circle cx="8" cy="8" r="6" fill="#ccc" />
+                        </svg>
+                        <span class="legend-text">Small Nations</span>
+                    </div>
+                    <div class="legend-item">
+                        <svg class="legend-shape" viewBox="0 0 16 16">
                             <polygon points="8,2 14,12 2,12" fill="#ccc" />
                         </svg>
-                        <span class="legend-text">Small Nations & Territories</span>
+                        <span class="legend-text">Territories</span>
                     </div>
                 </div>
             </div>
@@ -411,22 +421,22 @@
             const graphData = {
                 nodes: [
                     // Major Powers
-                    { id: "germany", name: "German Empire", type: "major_power", shape: "square", size: 50 },
-                    { id: "britain", name: "British Empire", type: "major_power", shape: "square", size: 45 },
-                    { id: "france", name: "French Republic", type: "major_power", shape: "square", size: 40 },
-                    { id: "russia", name: "Russian Empire", type: "major_power", shape: "square", size: 45 },
-                    { id: "austria-hungary", name: "Austria-Hungary", type: "major_power", shape: "square", size: 35 },
+                    { id: "germany", name: "German Empire", type: "major_power", shape: "rectangle", size: 50 },
+                    { id: "britain", name: "British Empire", type: "major_power", shape: "rectangle", size: 45 },
+                    { id: "france", name: "French Republic", type: "major_power", shape: "rectangle", size: 40 },
+                    { id: "russia", name: "Russian Empire", type: "major_power", shape: "rectangle", size: 45 },
+                    { id: "austria-hungary", name: "Austria-Hungary", type: "major_power", shape: "rectangle", size: 35 },
                     
                     // Regional Powers
-                    { id: "ottoman", name: "Ottoman Empire", type: "regional_power", shape: "circle", size: 30 },
-                    { id: "italy", name: "Kingdom of Italy", type: "regional_power", shape: "circle", size: 25 },
-                    { id: "serbia", name: "Kingdom of Serbia", type: "regional_power", shape: "circle", size: 20 },
+                    { id: "ottoman", name: "Ottoman Empire", type: "regional_power", shape: "square", size: 30 },
+                    { id: "italy", name: "Kingdom of Italy", type: "regional_power", shape: "square", size: 25 },
+                    { id: "serbia", name: "Kingdom of Serbia", type: "regional_power", shape: "square", size: 20 },
                     
                     // Smaller Nations
-                    { id: "belgium", name: "Belgium", type: "small_nation", shape: "triangle", size: 15 },
-                    { id: "bulgaria", name: "Bulgaria", type: "small_nation", shape: "triangle", size: 18 },
-                    { id: "romania", name: "Romania", type: "small_nation", shape: "triangle", size: 20 },
-                    { id: "montenegro", name: "Montenegro", type: "small_nation", shape: "triangle", size: 12 },
+                    { id: "belgium", name: "Belgium", type: "small_nation", shape: "circle", size: 15 },
+                    { id: "bulgaria", name: "Bulgaria", type: "small_nation", shape: "circle", size: 18 },
+                    { id: "romania", name: "Romania", type: "small_nation", shape: "circle", size: 20 },
+                    { id: "montenegro", name: "Montenegro", type: "small_nation", shape: "circle", size: 12 },
                     
                     // Key Regions/Issues
                     { id: "alsace-lorraine", name: "Alsace-Lorraine", type: "territory", shape: "triangle", size: 25 },
@@ -536,11 +546,12 @@
                     this.currentFilterNodeId = null;
                     
                     this.config = {
-                        damping: 0.9,
-                        repulsionStrength: 3200,
+                        damping: 0.95,
+                        repulsionStrength: 6500,
                         attractionStrength: 0.001,
                         zoomSensitivity: 1.01,
-                        filterDepth: 1
+                        filterDepth: 1,
+                        groupingStrength: 0.001
                     };
                     
                     this.setupControls();
@@ -619,6 +630,16 @@
                         
                         let shapeElement;
                         switch(node.data.shape) {
+                            case 'rectangle':
+                                const rectWidth = node.size * 2.8; // 2x wider than tall
+                                const rectHeight = node.size * 1.4;
+                                shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                                shapeElement.setAttribute('x', -rectWidth / 2);
+                                shapeElement.setAttribute('y', -rectHeight / 2);
+                                shapeElement.setAttribute('width', rectWidth);
+                                shapeElement.setAttribute('height', rectHeight);
+                                shapeElement.setAttribute('rx', 5);
+                                break;
                             case 'square':
                                 const squareSize = node.size * 1.4; // Adjust size for visual balance
                                 shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
@@ -676,16 +697,28 @@
                     const attractionSlider = document.getElementById('attraction-slider');
                     const zoomSlider = document.getElementById('zoom-sensitivity-slider');
                     const filterDepthSlider = document.getElementById('filter-depth-slider');
+                    const groupingSlider = document.getElementById('grouping-slider');
                     const resetButton = document.getElementById('reset-button');
 
                     dampingSlider.addEventListener('input', (e) => {
-                        this.config.damping = parseFloat(e.target.value);
-                        document.getElementById('damping-value').textContent = this.config.damping.toFixed(2);
+                        // Convert 0-20 slider to logarithmic scale:
+                        // 0 = 1.0 (no damping), 10 = 0.95 (default), 20 = 0.35 (high damping)
+                        const sliderValue = parseFloat(e.target.value);
+                        if (sliderValue === 0) {
+                            this.config.damping = 1.0;
+                        } else {
+                            // Logarithmic interpolation between 1.0 and 0.35
+                            const t = sliderValue / 20; // normalize to 0-1
+                            this.config.damping = Math.exp(Math.log(1.0) * (1 - t) + Math.log(0.35) * t);
+                        }
+                        document.getElementById('damping-value').textContent = sliderValue.toFixed(1);
                     });
 
                     repulsionSlider.addEventListener('input', (e) => {
-                        this.config.repulsionStrength = parseFloat(e.target.value);
-                        document.getElementById('repulsion-value').textContent = this.config.repulsionStrength;
+                        // Convert 0-20 slider to 0-10000 range
+                        // slider 0 = 0, slider 20 = 10000, current default 3200 ≈ slider 13
+                        this.config.repulsionStrength = parseFloat(e.target.value) * 500;
+                        document.getElementById('repulsion-value').textContent = parseFloat(e.target.value).toFixed(1);
                     });
                     
                     attractionSlider.addEventListener('input', (e) => {
@@ -709,6 +742,13 @@
                         if (this.currentFilterNodeId) {
                             this.filterGraph(this.currentFilterNodeId);
                         }
+                    });
+
+                    groupingSlider.addEventListener('input', (e) => {
+                        // Convert 0-20 slider so that:
+                        // slider 0 = 0.000 (no grouping), slider 10 = 0.001 (current default), slider 20 = 0.002 (double)
+                        this.config.groupingStrength = parseFloat(e.target.value) / 10000;
+                        document.getElementById('grouping-value').textContent = parseFloat(e.target.value).toFixed(1);
                     });
 
                     resetButton.addEventListener('click', () => {
@@ -956,9 +996,9 @@
                             nodeA.force = nodeA.force.add(repulsionForce);
                             nodeB.force = nodeB.force.subtract(repulsionForce);
 
-                            // Attraction force by type
-                            if (nodeA.data.type === nodeB.data.type) {
-                                const attractionForce = diff.normalize().multiply(-this.config.attractionStrength * distance);
+                            // Attraction force by type (grouping)
+                            if (nodeA.data.type === nodeB.data.type && this.config.groupingStrength > 0) {
+                                const attractionForce = diff.normalize().multiply(-this.config.groupingStrength * distance);
                                 nodeA.force = nodeA.force.add(attractionForce);
                                 nodeB.force = nodeB.force.subtract(attractionForce);
                             }
@@ -1015,6 +1055,22 @@
                                 const ratio = (distance - targetSize) / distance;
                                 newX2 = sourcePos.x + diff.x * ratio;
                                 newY2 = sourcePos.y + diff.y * ratio;
+                            }
+                        } else if (targetShape === 'rectangle') {
+                            const halfWidth = targetSize * 2.8 / 2;
+                            const halfHeight = targetSize * 1.4 / 2;
+                            if (distance > Math.min(halfWidth, halfHeight)) {
+                                const angle = Math.atan2(diff.y, diff.x);
+                                const absAngle = Math.abs(angle);
+                                let dx = halfWidth;
+                                let dy = halfHeight;
+                                if (absAngle > Math.atan2(halfHeight, halfWidth) && absAngle < Math.PI - Math.atan2(halfHeight, halfWidth)) {
+                                    dx = halfHeight / Math.tan(absAngle);
+                                } else {
+                                    dy = halfWidth * Math.tan(absAngle);
+                                }
+                                newX2 = targetPos.x - dx * Math.sign(diff.x);
+                                newY2 = targetPos.y - dy * Math.sign(diff.y);
                             }
                         } else if (targetShape === 'square') {
                             const halfSize = targetSize * 1.4 / 2;
