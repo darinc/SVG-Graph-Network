@@ -19,12 +19,28 @@ export class Vector {
         return new Vector(this.x * s, this.y * s);
     }
 
+    divide(s) {
+        if (s === 0) {
+            throw new Error('Division by zero');
+        }
+        return new Vector(this.x / s, this.y / s);
+    }
+
     magnitude() {
         return Math.sqrt(this.x * this.x + this.y * this.y);
     }
 
     normalize() {
         const mag = this.magnitude();
-        return mag > 0 ? new Vector(this.x / mag, this.y / mag) : new Vector(0, 0);
+        if (mag === 0) {
+            throw new Error('Cannot normalize zero vector');
+        }
+        return new Vector(this.x / mag, this.y / mag);
+    }
+
+    static distance(v1, v2) {
+        const dx = v1.x - v2.x;
+        const dy = v1.y - v2.y;
+        return Math.sqrt(dx * dx + dy * dy);
     }
 }

@@ -12,7 +12,7 @@ export class Node {
         );
         this.velocity = new Vector();
         this.force = new Vector();
-        this.size = data.size || 20;
+        this.size = data.size !== undefined ? data.size : 20;
         this.isFixed = false;
         
         // Dynamic dimensions for rectangles (calculated later)
