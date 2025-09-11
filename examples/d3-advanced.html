@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>D3.js Advanced Example - European Diplomatic Network 1914</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #1a1a1a;
+            color: #f0f0f0;
+            overflow: hidden;
+        }
+        
+        .container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        
+        .title {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #f0f0f0;
+            font-size: 24px;
+            font-weight: bold;
+            z-index: 20;
+            text-align: center;
+        }
+        
+        .legend {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(42, 42, 42, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            color: #f0f0f0;
+            font-size: 12px;
+            z-index: 40;
+            min-width: 120px;
+        }
+        
+        .legend h4 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            gap: 8px;
+        }
+        
+        .legend-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+        
+        .legend-text {
+            font-size: 11px;
+        }
+        
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 51;
+        }
+        
+        .control-button {
+            background-color: #38A169;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, background-color 0.2s ease;
+        }
+        
+        .control-button:hover {
+            background-color: #2F855A;
+            transform: scale(1.1);
+        }
+        
+        svg {
+            width: 100%;
+            height: 100%;
+            background: #2a2a2a;
+            /* Grid background pattern */
+            background-image: 
+                linear-gradient(rgba(59, 130, 246, 0.15) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.15) 1px, transparent 1px),
+                linear-gradient(rgba(59, 130, 246, 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.08) 1px, transparent 1px);
+            background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
+        }
+        
+        .links line {
+            stroke-opacity: 0.8;
+        }
+        
+        .nodes rect {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .nodes rect:hover {
+            stroke: #fff;
+            stroke-width: 5px;
+        }
+        
+        .nodes text {
+            font-size: 12px;
+            fill: #f0f0f0;
+            text-anchor: middle;
+            font-weight: bold;
+            user-select: none;
+            pointer-events: none;
+        }
+        
+        .link-solid {
+            stroke-dasharray: none;
+        }
+        
+        .link-dashed {
+            stroke-dasharray: 8,4;
+        }
+        
+        .link-dotted {
+            stroke-dasharray: 2,2;
+        }
+        
+        .link-labels text {
+            font-size: 10px;
+            fill: #f0f0f0;
+            text-anchor: middle;
+            font-weight: bold;
+            user-select: none;
+            pointer-events: none;
+            background: rgba(42, 42, 42, 0.8);
+        }
+        
+        .link-labels rect {
+            fill: rgba(42, 42, 42, 0.8);
+            stroke: rgba(255, 255, 255, 0.1);
+            stroke-width: 0.5px;
+            rx: 3;
+            ry: 3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">European Diplomatic Network 1914 (D3.js)</div>
+        
+        <div class="legend">
+            <h4>Legend</h4>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #E53E3E;"></div>
+                <span class="legend-text">Major Powers</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #4299E1;"></div>
+                <span class="legend-text">Regional Powers</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #38A169;"></div>
+                <span class="legend-text">Small Nations</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #ED8936;"></div>
+                <span class="legend-text">Territories</span>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="control-button" onclick="resetSimulation()">⟲</button>
+            <button class="control-button" onclick="toggleTheme()">🌞</button>
+        </div>
+        
+        <svg id="graph"></svg>
+    </div>
+
+    <script>
+        // Historical diplomatic network data from 1914 (same as advanced.js)
+        const diplomaticNetworkData = {
+            nodes: [
+                // Major Powers
+                { id: "germany", name: "German Empire", type: "major_power", size: 50 },
+                { id: "britain", name: "British Empire", type: "major_power", size: 45 },
+                { id: "france", name: "French Republic", type: "major_power", size: 40 },
+                { id: "russia", name: "Russian Empire", type: "major_power", size: 45 },
+                { id: "austria-hungary", name: "Austria-Hungary", type: "major_power", size: 35 },
+                
+                // Regional Powers
+                { id: "ottoman", name: "Ottoman Empire", type: "regional_power", size: 30 },
+                { id: "italy", name: "Kingdom of Italy", type: "regional_power", size: 25 },
+                { id: "serbia", name: "Kingdom of Serbia", type: "regional_power", size: 20 },
+                
+                // Smaller Nations
+                { id: "belgium", name: "Belgium", type: "small_nation", size: 15 },
+                { id: "bulgaria", name: "Bulgaria", type: "small_nation", size: 18 },
+                { id: "romania", name: "Romania", type: "small_nation", size: 20 },
+                { id: "montenegro", name: "Montenegro", type: "small_nation", size: 12 },
+                
+                // Key Regions/Issues
+                { id: "alsace-lorraine", name: "Alsace-Lorraine", type: "territory", size: 25 },
+                { id: "balkans", name: "Balkan Peninsula", type: "territory", size: 30 },
+                { id: "morocco", name: "Morocco", type: "territory", size: 20 }
+            ],
+            links: [
+                // Triple Alliance
+                { source: "germany", target: "austria-hungary", label: "Triple Alliance", weight: 5, line_type: 'solid' },
+                { source: "germany", target: "italy", label: "Triple Alliance", weight: 4, line_type: 'solid' },
+                { source: "austria-hungary", target: "italy", label: "Triple Alliance", weight: 3, line_type: 'solid' },
+                
+                // Triple Entente
+                { source: "france", target: "russia", label: "Franco-Russian Alliance", weight: 5, line_type: 'solid' },
+                { source: "britain", target: "france", label: "Entente Cordiale", weight: 4, line_type: 'solid' },
+                { source: "britain", target: "russia", label: "Anglo-Russian Entente", weight: 3, line_type: 'solid' },
+                
+                // Tensions and Rivalries
+                { source: "germany", target: "france", label: "mutual hostility", weight: 4, line_type: 'dashed' },
+                { source: "austria-hungary", target: "serbia", label: "annexation crisis", weight: 5, line_type: 'dashed' },
+                { source: "russia", target: "austria-hungary", label: "Balkan rivalry", weight: 4, line_type: 'dashed' },
+                { source: "germany", target: "britain", label: "naval arms race", weight: 3, line_type: 'dashed' },
+                
+                // Territorial Disputes
+                { source: "france", target: "alsace-lorraine", label: "claims", weight: 5, line_type: 'dotted' },
+                { source: "germany", target: "alsace-lorraine", label: "controls", weight: 5, line_type: 'solid' },
+                { source: "russia", target: "balkans", label: "influence", weight: 4, line_type: 'dotted' },
+                { source: "austria-hungary", target: "balkans", label: "controls", weight: 5, line_type: 'solid' },
+                { source: "serbia", target: "balkans", label: "expansion", weight: 4, line_type: 'dotted' },
+                
+                // Colonial Rivalries
+                { source: "germany", target: "morocco", label: "challenges", weight: 3, line_type: 'dashed' },
+                { source: "france", target: "morocco", label: "protectorate", weight: 4, line_type: 'solid' },
+                { source: "britain", target: "france", label: "supports in Morocco", weight: 2, line_type: 'dotted' },
+                
+                // Balkan Connections
+                { source: "russia", target: "serbia", label: "Pan-Slavic support", weight: 4, line_type: 'solid' },
+                { source: "serbia", target: "montenegro", label: "Slavic alliance", weight: 3, line_type: 'solid' },
+                { source: "bulgaria", target: "austria-hungary", label: "alignment", weight: 2, line_type: 'dotted' },
+                { source: "romania", target: "austria-hungary", label: "secret treaty", weight: 3, line_type: 'dotted' },
+                
+                // Guarantee and Protection
+                { source: "britain", target: "belgium", label: "neutrality guarantee", weight: 4, line_type: 'solid' },
+                { source: "germany", target: "ottoman", label: "military mission", weight: 3, line_type: 'dotted' }
+            ]
+        };
+
+        // Set up dimensions and colors
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        
+        const typeColors = {
+            'major_power': '#E53E3E',
+            'regional_power': '#4299E1', 
+            'small_nation': '#38A169',
+            'territory': '#ED8936'
+        };
+
+        // Create SVG
+        const svg = d3.select("#graph")
+            .attr("width", width)
+            .attr("height", height);
+
+        // Create zoom behavior
+        const zoom = d3.zoom()
+            .scaleExtent([0.2, 2])
+            .on("zoom", (event) => {
+                container.attr("transform", event.transform);
+            });
+
+        svg.call(zoom);
+
+        // Create main container group
+        const container = svg.append("g");
+
+        // Create force simulation
+        const simulation = d3.forceSimulation(diplomaticNetworkData.nodes)
+            .force("link", d3.forceLink(diplomaticNetworkData.links)
+                .id(d => d.id)
+                .distance(d => 100 + (5 - d.weight) * 20)
+                .strength(0.8))
+            .force("charge", d3.forceManyBody()
+                .strength(-800))
+            .force("center", d3.forceCenter(width / 2, height / 2))
+            .force("collision", d3.forceCollide()
+                .radius(d => Math.max(d.size, d.size * 0.8) + 15));
+
+        // Create link elements
+        const link = container.append("g")
+            .attr("class", "links")
+            .selectAll("line")
+            .data(diplomaticNetworkData.links)
+            .join("line")
+            .attr("stroke", "#5a5a5a")
+            .attr("stroke-width", d => d.weight)
+            .attr("class", d => `link-${d.line_type}`);
+
+        // Create link label backgrounds
+        const linkLabelBg = container.append("g")
+            .attr("class", "link-labels")
+            .selectAll("rect")
+            .data(diplomaticNetworkData.links)
+            .join("rect");
+
+        // Create link labels
+        const linkLabel = container.append("g")
+            .attr("class", "link-labels")
+            .selectAll("text")
+            .data(diplomaticNetworkData.links)
+            .join("text")
+            .text(d => d.label)
+            .style("font-size", "10px")
+            .style("fill", "#f0f0f0")
+            .style("text-anchor", "middle");
+
+        // Create node elements (rectangles)
+        const node = container.append("g")
+            .attr("class", "nodes")
+            .selectAll("rect")
+            .data(diplomaticNetworkData.nodes)
+            .join("rect")
+            .attr("width", d => d.size * 2)
+            .attr("height", d => d.size * 1.6)
+            .attr("rx", 4)
+            .attr("ry", 4)
+            .attr("x", d => -d.size)
+            .attr("y", d => -d.size * 0.8)
+            .attr("fill", d => typeColors[d.type])
+            .attr("stroke", d => typeColors[d.type])
+            .attr("stroke-width", d => {
+                switch(d.type) {
+                    case 'major_power': return 4;
+                    case 'regional_power': return 3;
+                    case 'small_nation': return 2;
+                    case 'territory': return 2;
+                    default: return 2;
+                }
+            })
+            .style("stroke-dasharray", d => d.type === 'territory' ? '4,2' : 'none')
+            .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended))
+            .on("dblclick", nodeDoubleClick);
+
+        // Create node labels
+        const nodeLabel = container.append("g")
+            .attr("class", "nodes")
+            .selectAll("text")
+            .data(diplomaticNetworkData.nodes)
+            .join("text")
+            .text(d => d.name)
+            .attr("text-anchor", "middle")
+            .attr("dy", ".35em")
+            .style("font-size", "12px")
+            .style("fill", "#f0f0f0")
+            .style("font-weight", "bold");
+
+        // Update positions on each tick
+        simulation.on("tick", () => {
+            link
+                .attr("x1", d => d.source.x)
+                .attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x)
+                .attr("y2", d => d.target.y);
+
+            // Update link labels
+            linkLabel
+                .attr("x", d => (d.source.x + d.target.x) / 2)
+                .attr("y", d => (d.source.y + d.target.y) / 2);
+
+            // Update link label backgrounds
+            linkLabel.each(function(d) {
+                const bbox = this.getBBox();
+                const bg = d3.select(linkLabelBg.nodes()[linkLabel.nodes().indexOf(this)]);
+                bg.attr("x", bbox.x - 2)
+                  .attr("y", bbox.y - 2)
+                  .attr("width", bbox.width + 4)
+                  .attr("height", bbox.height + 4);
+            });
+
+            node
+                .attr("transform", d => `translate(${d.x}, ${d.y})`);
+
+            nodeLabel
+                .attr("x", d => d.x)
+                .attr("y", d => d.y);
+        });
+
+        // Drag functions
+        function dragstarted(event, d) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+
+        function dragged(event, d) {
+            d.fx = event.x;
+            d.fy = event.y;
+        }
+
+        function dragended(event, d) {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        }
+
+        // Node double-click for filtering (simplified)
+        let filteredNodeId = null;
+        
+        function nodeDoubleClick(event, d) {
+            event.stopPropagation();
+            
+            if (filteredNodeId === d.id) {
+                // Reset filter
+                resetFilter();
+            } else {
+                // Filter by node
+                filterByNode(d.id);
+            }
+        }
+
+        function filterByNode(nodeId) {
+            filteredNodeId = nodeId;
+            
+            // Find connected nodes
+            const connectedNodes = new Set([nodeId]);
+            diplomaticNetworkData.links.forEach(link => {
+                if (link.source.id === nodeId) connectedNodes.add(link.target.id);
+                if (link.target.id === nodeId) connectedNodes.add(link.source.id);
+            });
+
+            // Hide/show nodes
+            node.style("opacity", d => connectedNodes.has(d.id) ? 1 : 0.1);
+            nodeLabel.style("opacity", d => connectedNodes.has(d.id) ? 1 : 0.1);
+            
+            // Hide/show links
+            link.style("opacity", d => 
+                connectedNodes.has(d.source.id) && connectedNodes.has(d.target.id) ? 1 : 0.05);
+            linkLabel.style("opacity", d => 
+                connectedNodes.has(d.source.id) && connectedNodes.has(d.target.id) ? 1 : 0.05);
+            linkLabelBg.style("opacity", d => 
+                connectedNodes.has(d.source.id) && connectedNodes.has(d.target.id) ? 0.8 : 0.05);
+        }
+
+        function resetFilter() {
+            filteredNodeId = null;
+            
+            // Show all elements
+            node.style("opacity", 1);
+            nodeLabel.style("opacity", 1);
+            link.style("opacity", 1);
+            linkLabel.style("opacity", 1);
+            linkLabelBg.style("opacity", 0.8);
+        }
+
+        // Control functions
+        function resetSimulation() {
+            resetFilter();
+            simulation.alpha(1).restart();
+        }
+
+        let isDarkTheme = true;
+        function toggleTheme() {
+            isDarkTheme = !isDarkTheme;
+            
+            const body = document.body;
+            const svg = d3.select("#graph");
+            const title = document.querySelector('.title');
+            const legend = document.querySelector('.legend');
+            
+            if (isDarkTheme) {
+                body.style.background = '#1a1a1a';
+                body.style.color = '#f0f0f0';
+                svg.style('background', '#2a2a2a');
+                svg.style('background-image', `
+                    linear-gradient(rgba(59, 130, 246, 0.15) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(59, 130, 246, 0.15) 1px, transparent 1px),
+                    linear-gradient(rgba(59, 130, 246, 0.08) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(59, 130, 246, 0.08) 1px, transparent 1px)
+                `);
+                svg.style('background-size', '20px 20px, 20px 20px, 100px 100px, 100px 100px');
+                title.style.color = '#f0f0f0';
+                legend.style.background = 'rgba(42, 42, 42, 0.9)';
+                legend.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+                legend.style.color = '#f0f0f0';
+                nodeLabel.style('fill', '#f0f0f0');
+                linkLabel.style('fill', '#f0f0f0');
+                document.querySelector('.control-button').textContent = '🌞';
+            } else {
+                body.style.background = '#fafafa';
+                body.style.color = '#1a1a1a';
+                svg.style('background', '#ffffff');
+                svg.style('background-image', `
+                    linear-gradient(rgba(59, 130, 246, 0.3) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(59, 130, 246, 0.3) 1px, transparent 1px),
+                    linear-gradient(rgba(59, 130, 246, 0.15) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(59, 130, 246, 0.15) 1px, transparent 1px)
+                `);
+                svg.style('background-size', '20px 20px, 20px 20px, 100px 100px, 100px 100px');
+                title.style.color = '#1a1a1a';
+                legend.style.background = 'rgba(255, 255, 255, 0.9)';
+                legend.style.border = '1px solid rgba(0, 0, 0, 0.1)';
+                legend.style.color = '#1a1a1a';
+                nodeLabel.style('fill', '#1a1a1a');
+                linkLabel.style('fill', '#1a1a1a');
+                document.querySelector('.control-button').textContent = '🌙';
+            }
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            const newWidth = window.innerWidth;
+            const newHeight = window.innerHeight;
+            
+            svg.attr("width", newWidth).attr("height", newHeight);
+            simulation.force("center", d3.forceCenter(newWidth / 2, newHeight / 2));
+            simulation.alpha(1).restart();
+        });
+
+        // Double-click background to reset filter
+        svg.on("dblclick", () => {
+            if (filteredNodeId) {
+                resetFilter();
+            }
+        });
+
+        console.log('D3.js European Diplomatic Network 1914 loaded');
+        console.log('- Double-click nodes to explore their relationships');
+        console.log('- Drag nodes to rearrange the layout');
+        console.log('- Use mouse wheel to zoom, drag to pan');
+    </script>
+</body>
+</html>
