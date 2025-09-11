@@ -20,7 +20,7 @@
 
         #graph-container {
             width: 90%;
-            max-width: 800px;
+            max-width: 1600px;
             aspect-ratio: 16 / 9;
             background-color: #2a2a2a;
             border-radius: 12px;
@@ -42,14 +42,10 @@
             user-select: none;
         }
 
-        .node-self { fill: #E53E3E; } /* Red */
-        .node-principals { fill: #4299E1; } /* Blue */
-        .node-values { fill: #38A169; } /* Green */
-        .node-patterns { fill: #F6E05E; } /* Yellow */
-        .node-needs { fill: #ED8936; } /* Orange */
-        .node-emotions { fill: #9F7AEA; } /* Purple */
-        .node-strengths { fill: #319795; } /* Teal */
-        .node-experiences { fill: #ED64A6; } /* Pink */
+        .node-major_power { fill: #E53E3E; } /* Red */
+        .node-regional_power { fill: #4299E1; } /* Blue */
+        .node-small_nation { fill: #38A169; } /* Green */
+        .node-territory { fill: #F6E05E; } /* Yellow */
         
         /* New class for the subtle outline */
         .node-shape.has-hidden-link {
@@ -220,6 +216,105 @@
         .breadcrumb-link:hover {
             text-decoration: underline;
         }
+
+        #legend {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(42, 42, 42, 0.9);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            color: #f0f0f0;
+            font-size: 12px;
+            width: 180px;
+            z-index: 40;
+            transition: all 0.3s ease;
+        }
+
+        #legend.minimized {
+            width: 80px;
+            padding: 8px 10px;
+            height: 20px;
+        }
+
+        #legend-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        #legend-header h4 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        #legend-toggle {
+            background: none;
+            border: none;
+            color: #f0f0f0;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 2px;
+            border-radius: 3px;
+            transition: background-color 0.2s ease;
+        }
+
+        #legend-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        #legend-content {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        #legend.minimized #legend-content {
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
+        }
+
+        #legend.minimized #legend-header h4 {
+            font-size: 12px;
+        }
+
+        .legend-section {
+            margin-bottom: 15px;
+        }
+
+        .legend-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            gap: 8px;
+        }
+
+        .legend-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .legend-shape {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .legend-text {
+            font-size: 11px;
+        }
     </style>
 </head>
 <body>
@@ -249,48 +344,133 @@
                 <input type="range" id="repulsion-slider" min="100" max="5000" value="3200" step="100">
             </div>
             <div class="control-group">
-                <label for="attraction-slider">Attraction (<span id="attraction-value">0.005</span>)</label>
-                <input type="range" id="attraction-slider" min="0.001" max="0.1" value="0.005" step="0.001">
+                <label for="attraction-slider">Attraction (<span id="attraction-value">10</span>)</label>
+                <input type="range" id="attraction-slider" min="0" max="20" value="10" step="0.1">
             </div>
             <div class="control-group">
                 <label for="zoom-sensitivity-slider">Zoom Sensitivity (<span id="zoom-sensitivity-value">1.01</span>)</label>
                 <input type="range" id="zoom-sensitivity-slider" min="0.01" max="2" value="1.01" step="0.01">
             </div>
+            <div class="control-group">
+                <label for="filter-depth-slider">Filter Depth (<span id="filter-depth-value">1</span>)</label>
+                <input type="range" id="filter-depth-slider" min="1" max="3" value="1" step="1">
+            </div>
             <button id="reset-button">Reset View & Layout</button>
         </div>
         <div id="view-info"></div>
+        <div id="legend">
+            <div id="legend-header">
+                <h4>Legend</h4>
+                <button id="legend-toggle">−</button>
+            </div>
+            <div id="legend-content">
+                <div class="legend-section">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #E53E3E;"></div>
+                        <span class="legend-text">Major Powers</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #4299E1;"></div>
+                        <span class="legend-text">Regional Powers</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #38A169;"></div>
+                        <span class="legend-text">Small Nations</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #F6E05E;"></div>
+                        <span class="legend-text">Territories</span>
+                    </div>
+                </div>
+                <div class="legend-section">
+                    <div class="legend-item">
+                        <svg class="legend-shape" viewBox="0 0 16 16">
+                            <rect x="2" y="2" width="12" height="12" rx="2" fill="#ccc" />
+                        </svg>
+                        <span class="legend-text">Major Powers</span>
+                    </div>
+                    <div class="legend-item">
+                        <svg class="legend-shape" viewBox="0 0 16 16">
+                            <circle cx="8" cy="8" r="6" fill="#ccc" />
+                        </svg>
+                        <span class="legend-text">Regional Powers</span>
+                    </div>
+                    <div class="legend-item">
+                        <svg class="legend-shape" viewBox="0 0 16 16">
+                            <polygon points="8,2 14,12 2,12" fill="#ccc" />
+                        </svg>
+                        <span class="legend-text">Small Nations & Territories</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const graphData = {
                 nodes: [
-                    { id: "self", name: "Self", type: "self", shape: "circle", size: 40 },
-                    { id: "honesty", name: "Honesty", type: "principals", shape: "square", size: 25 },
-                    { id: "integrity", name: "Integrity", type: "principals", shape: "square", size: 20 },
-                    { id: "empathy", name: "Empathy", type: "values", shape: "circle", size: 25 },
-                    { id: "loyalty", name: "Loyalty", type: "values", shape: "circle", size: 20 },
-                    { id: "commitment", name: "Commitment", type: "values", shape: "circle", size: 20 },
-                    { id: "fear-of-unknown", name: "Fear of Unknown", type: "emotions", shape: "triangle", size: 20 },
-                    { id: "creativity-pattern", name: "Creative Problem-Solving", type: "patterns", shape: "triangle", size: 25 },
-                    { id: "self-trust", name: "Self-Trust", type: "strengths", shape: "square", size: 20 },
-                    { id: "lost-job", name: "Experience: Lost First Job", type: "experiences", shape: "triangle", size: 20 },
-                    { id: "security-need", name: "Need for Security", type: "needs", shape: "circle", size: 20 },
-                    { id: "belonging-need", name: "Need for Belonging", type: "needs", shape: "circle", size: 20 }
+                    // Major Powers
+                    { id: "germany", name: "German Empire", type: "major_power", shape: "square", size: 50 },
+                    { id: "britain", name: "British Empire", type: "major_power", shape: "square", size: 45 },
+                    { id: "france", name: "French Republic", type: "major_power", shape: "square", size: 40 },
+                    { id: "russia", name: "Russian Empire", type: "major_power", shape: "square", size: 45 },
+                    { id: "austria-hungary", name: "Austria-Hungary", type: "major_power", shape: "square", size: 35 },
+                    
+                    // Regional Powers
+                    { id: "ottoman", name: "Ottoman Empire", type: "regional_power", shape: "circle", size: 30 },
+                    { id: "italy", name: "Kingdom of Italy", type: "regional_power", shape: "circle", size: 25 },
+                    { id: "serbia", name: "Kingdom of Serbia", type: "regional_power", shape: "circle", size: 20 },
+                    
+                    // Smaller Nations
+                    { id: "belgium", name: "Belgium", type: "small_nation", shape: "triangle", size: 15 },
+                    { id: "bulgaria", name: "Bulgaria", type: "small_nation", shape: "triangle", size: 18 },
+                    { id: "romania", name: "Romania", type: "small_nation", shape: "triangle", size: 20 },
+                    { id: "montenegro", name: "Montenegro", type: "small_nation", shape: "triangle", size: 12 },
+                    
+                    // Key Regions/Issues
+                    { id: "alsace-lorraine", name: "Alsace-Lorraine", type: "territory", shape: "triangle", size: 25 },
+                    { id: "balkans", name: "Balkan Peninsula", type: "territory", shape: "triangle", size: 30 },
+                    { id: "morocco", name: "Morocco", type: "territory", shape: "triangle", size: 20 }
                 ],
                 links: [
-                    { source: "self", target: "self-trust", label: "possesses", weight: 3, line_type: 'solid' },
-                    { source: "self", target: "empathy", label: "aligns with", weight: 1, line_type: 'solid' },
-                    { source: "self", target: "loyalty", label: "exhibits", weight: 4, line_type: 'solid' },
-                    { source: "self-trust", target: "fear-of-unknown", label: "overcomes", weight: 2, line_type: 'dashed' },
-                    { source: "lost-job", target: "security-need", label: "leads to", weight: 1, line_type: 'dotted' },
-                    { source: "lost-job", target: "empathy", label: "triggers", weight: 2, line_type: 'solid' },
-                    { source: "empathy", target: "belonging-need", label: "seeks", weight: 3, line_type: 'solid' },
-                    { source: "security-need", target: "integrity", label: "aligns with", weight: 3, line_type: 'solid' },
-                    { source: "creativity-pattern", target: "self-trust", label: "is built on", weight: 2, line_type: 'dashed' },
-                    { source: "self", target: "integrity", label: "aligns with", weight: 5, line_type: 'solid' },
-                    { source: "self", target: "honesty", label: "aligns with", weight: 5, line_type: 'solid' },
-                    { source: "self", target: "commitment", label: "exhibits", weight: 5, line_type: 'solid' }
+                    // Triple Alliance
+                    { source: "germany", target: "austria-hungary", label: "Triple Alliance", weight: 5, line_type: 'solid' },
+                    { source: "germany", target: "italy", label: "Triple Alliance", weight: 4, line_type: 'solid' },
+                    { source: "austria-hungary", target: "italy", label: "Triple Alliance", weight: 3, line_type: 'solid' },
+                    
+                    // Triple Entente
+                    { source: "france", target: "russia", label: "Franco-Russian Alliance", weight: 5, line_type: 'solid' },
+                    { source: "britain", target: "france", label: "Entente Cordiale", weight: 4, line_type: 'solid' },
+                    { source: "britain", target: "russia", label: "Anglo-Russian Entente", weight: 3, line_type: 'solid' },
+                    
+                    // Tensions and Rivalries
+                    { source: "germany", target: "france", label: "mutual hostility", weight: 4, line_type: 'dashed' },
+                    { source: "austria-hungary", target: "serbia", label: "annexation crisis", weight: 5, line_type: 'dashed' },
+                    { source: "russia", target: "austria-hungary", label: "Balkan rivalry", weight: 4, line_type: 'dashed' },
+                    { source: "germany", target: "britain", label: "naval arms race", weight: 3, line_type: 'dashed' },
+                    
+                    // Territorial Disputes
+                    { source: "france", target: "alsace-lorraine", label: "claims", weight: 5, line_type: 'dotted' },
+                    { source: "germany", target: "alsace-lorraine", label: "controls", weight: 5, line_type: 'solid' },
+                    { source: "russia", target: "balkans", label: "influence", weight: 4, line_type: 'dotted' },
+                    { source: "austria-hungary", target: "balkans", label: "controls", weight: 5, line_type: 'solid' },
+                    { source: "serbia", target: "balkans", label: "expansion", weight: 4, line_type: 'dotted' },
+                    
+                    // Colonial Rivalries
+                    { source: "germany", target: "morocco", label: "challenges", weight: 3, line_type: 'dashed' },
+                    { source: "france", target: "morocco", label: "protectorate", weight: 4, line_type: 'solid' },
+                    { source: "britain", target: "france", label: "supports in Morocco", weight: 2, line_type: 'dotted' },
+                    
+                    // Balkan Connections
+                    { source: "russia", target: "serbia", label: "Pan-Slavic support", weight: 4, line_type: 'solid' },
+                    { source: "serbia", target: "montenegro", label: "Slavic alliance", weight: 3, line_type: 'solid' },
+                    { source: "bulgaria", target: "austria-hungary", label: "alignment", weight: 2, line_type: 'dotted' },
+                    { source: "romania", target: "austria-hungary", label: "secret treaty", weight: 3, line_type: 'dotted' },
+                    
+                    // Guarantee and Protection
+                    { source: "britain", target: "belgium", label: "neutrality guarantee", weight: 4, line_type: 'solid' },
+                    { source: "germany", target: "ottoman", label: "military mission", weight: 3, line_type: 'dotted' }
                 ]
             };
 
@@ -353,12 +533,14 @@
                     this.isPanning = false;
                     this.lastMouse = { x: 0, y: 0 };
                     this.filteredNodes = null;
+                    this.currentFilterNodeId = null;
                     
                     this.config = {
                         damping: 0.9,
                         repulsionStrength: 3200,
-                        attractionStrength: 0.005,
-                        zoomSensitivity: 1.01
+                        attractionStrength: 0.001,
+                        zoomSensitivity: 1.01,
+                        filterDepth: 1
                     };
                     
                     this.setupControls();
@@ -369,10 +551,6 @@
                     // Create nodes from data
                     data.nodes.forEach(d => {
                         const node = new Node(d);
-                        if (d.type === 'self') {
-                            node.isFixed = true;
-                            node.position = new Vector(centerX, centerY);
-                        }
                         this.nodes.set(d.id, node);
                         this.adjList.set(d.id, []);
                     });
@@ -497,6 +675,7 @@
                     const repulsionSlider = document.getElementById('repulsion-slider');
                     const attractionSlider = document.getElementById('attraction-slider');
                     const zoomSlider = document.getElementById('zoom-sensitivity-slider');
+                    const filterDepthSlider = document.getElementById('filter-depth-slider');
                     const resetButton = document.getElementById('reset-button');
 
                     dampingSlider.addEventListener('input', (e) => {
@@ -510,13 +689,26 @@
                     });
                     
                     attractionSlider.addEventListener('input', (e) => {
-                        this.config.attractionStrength = parseFloat(e.target.value);
-                        document.getElementById('attraction-value').textContent = this.config.attractionStrength.toFixed(3);
+                        // Convert 0-20 slider so that:
+                        // slider 0 = 0.000, slider 10 = 0.001, slider 20 = 0.002
+                        // slider_value / 10000 gives us the right scale
+                        this.config.attractionStrength = parseFloat(e.target.value) / 10000;
+                        document.getElementById('attraction-value').textContent = parseFloat(e.target.value).toFixed(1);
                     });
 
                     zoomSlider.addEventListener('input', (e) => {
                         this.config.zoomSensitivity = parseFloat(e.target.value);
                         document.getElementById('zoom-sensitivity-value').textContent = this.config.zoomSensitivity.toFixed(2);
+                    });
+
+                    filterDepthSlider.addEventListener('input', (e) => {
+                        this.config.filterDepth = parseInt(e.target.value);
+                        document.getElementById('filter-depth-value').textContent = this.config.filterDepth;
+                        
+                        // If there's a current filter, reapply it with the new depth
+                        if (this.currentFilterNodeId) {
+                            this.filterGraph(this.currentFilterNodeId);
+                        }
                     });
 
                     resetButton.addEventListener('click', () => {
@@ -540,6 +732,7 @@
 
                     // Clear any filtering
                     this.filteredNodes = null;
+                    this.currentFilterNodeId = null;
                     
                     // Update breadcrumbs to show only "All"
                     this.renderBreadcrumbs(null);
@@ -571,14 +764,7 @@
 
                 handleNodeMouseDown(e, node) {
                     e.preventDefault();
-                    // Special case: dragging the "Self" node should pan the entire graph.
-                    if (node.data.id === 'self') {
-                        this.isPanning = true;
-                        this.lastMouse = { x: e.clientX, y: e.clientY };
-                        return;
-                    }
-
-                    // For all other fixed nodes, do nothing.
+                    // For fixed nodes, do nothing.
                     if (node.isFixed) return;
 
                     // For regular nodes, start a drag operation.
@@ -588,11 +774,7 @@
 
                 handleNodeDoubleClick(e, node) {
                     e.preventDefault();
-                    if (node.data.id === 'self') {
-                        this.resetViewAndLayout();
-                    } else {
-                        this.filterGraph(node.data.id);
-                    }
+                    this.filterGraph(node.data.id);
                 }
 
                 handleSvgMouseDown(e) {
@@ -652,6 +834,8 @@
                     const startNode = this.nodes.get(startNodeId);
                     if (!startNode) return;
                     
+                    this.currentFilterNodeId = startNodeId;
+                    
                     const visibleNodes = new Set([startNode.data.id]);
                     const pathMap = new Map();
                     pathMap.set(startNode.data.id, null);
@@ -661,7 +845,7 @@
                     
                     while (head < queue.length) {
                         const { id, depth } = queue[head++];
-                        if (depth >= 2) continue;
+                        if (depth >= this.config.filterDepth) continue;
                         
                         this.adjList.get(id).forEach(neighbor => {
                             if (!visibleNodes.has(neighbor.node)) {
@@ -710,38 +894,15 @@
 
                     // Build and show breadcrumbs
                     if (targetNodeId) {
-                        const path = this.findPathToSelf(targetNodeId);
+                        const path = this.findPathToTarget(targetNodeId);
                         this.renderBreadcrumbs(path);
                     }
                 }
 
-                findPathToSelf(endNodeId) {
-                    const path = [];
-                    let currentNodeId = endNodeId;
-                    const visited = new Set();
-                    const queue = [{ id: 'self', path: ['self'] }];
-                    let head = 0;
-                    
-                    if (endNodeId === 'self') {
-                        return ['self'];
-                    }
-                    
-                    visited.add('self');
-
-                    while (head < queue.length) {
-                        const { id, path: currentPath } = queue[head++];
-                        if (id === endNodeId) {
-                            return currentPath;
-                        }
-
-                        this.adjList.get(id).forEach(neighbor => {
-                            if (!visited.has(neighbor.node)) {
-                                visited.add(neighbor.node);
-                                queue.push({ id: neighbor.node, path: [...currentPath, neighbor.node] });
-                            }
-                        });
-                    }
-                    return null; // Path not found
+                findPathToTarget(targetNodeId) {
+                    // For the new system, just return the target node itself
+                    // since there's no central "self" node to path from
+                    return [targetNodeId];
                 }
 
                 renderBreadcrumbs(path) {
@@ -770,11 +931,7 @@
                         link.classList.add('breadcrumb-link');
                         link.addEventListener('click', (e) => {
                             e.preventDefault();
-                            if (nodeId === 'self') {
-                                this.resetViewAndLayout();
-                            } else {
-                                this.filterGraph(nodeId);
-                            }
+                            this.filterGraph(nodeId);
                         });
                         viewInfo.appendChild(link);
                     });
@@ -800,7 +957,7 @@
                             nodeB.force = nodeB.force.subtract(repulsionForce);
 
                             // Attraction force by type
-                            if (nodeA.data.type === nodeB.data.type && nodeA.data.type !== 'self') {
+                            if (nodeA.data.type === nodeB.data.type) {
                                 const attractionForce = diff.normalize().multiply(-this.config.attractionStrength * distance);
                                 nodeA.force = nodeA.force.add(attractionForce);
                                 nodeB.force = nodeB.force.subtract(attractionForce);
@@ -915,6 +1072,15 @@
 
             const simulation = new GraphSimulation(graphData);
             simulation.animate();
+
+            // Legend toggle functionality
+            const legend = document.getElementById('legend');
+            const legendToggle = document.getElementById('legend-toggle');
+            
+            legendToggle.addEventListener('click', () => {
+                const isMinimized = legend.classList.toggle('minimized');
+                legendToggle.textContent = isMinimized ? '+' : '−';
+            });
         });
     </script>
 </body>
