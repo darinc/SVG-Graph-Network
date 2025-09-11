@@ -68,6 +68,15 @@ export class GraphNetwork {
         this.isPanning = false;
         this.lastMouse = { x: 0, y: 0 };
         this.transformState = { x: 0, y: 0, scale: 1 };
+        
+        // Touch interaction state
+        this.isPinching = false;
+        this.lastPinchDistance = 0;
+        this.lastPinchCenter = { x: 0, y: 0 };
+        this.touchStartTime = 0;
+        this.lastTouchEndTime = 0;
+        this.touchTarget = null;
+        this.dragStartPosition = null;
 
         // Initialize the graph
         this.setupContainer();
@@ -328,6 +337,32 @@ export class GraphNetwork {
         this.controls = document.createElement('div');
         this.setElementClass(this.controls, 'graph-network-controls');
         
+        // Mobile zoom controls (hidden on desktop via CSS)
+        this.mobileControls = document.createElement('div');
+        this.setElementClass(this.mobileControls, 'graph-network-mobile-controls');
+        
+        // Zoom in button
+        this.zoomInButton = document.createElement('button');
+        this.setElementClass(this.zoomInButton, 'graph-network-zoom-button graph-network-zoom-in');
+        this.zoomInButton.textContent = '+';
+        this.zoomInButton.addEventListener('click', () => this.zoomIn());
+        
+        // Zoom out button
+        this.zoomOutButton = document.createElement('button');
+        this.setElementClass(this.zoomOutButton, 'graph-network-zoom-button graph-network-zoom-out');
+        this.zoomOutButton.textContent = '−';
+        this.zoomOutButton.addEventListener('click', () => this.zoomOut());
+        
+        // Reset view button
+        this.resetButton = document.createElement('button');
+        this.setElementClass(this.resetButton, 'graph-network-reset-view-button');
+        this.resetButton.textContent = '⊙';
+        this.resetButton.addEventListener('click', () => this.resetViewAndLayout());
+        
+        this.mobileControls.appendChild(this.zoomInButton);
+        this.mobileControls.appendChild(this.zoomOutButton);
+        this.mobileControls.appendChild(this.resetButton);
+        
         // Theme toggle
         this.themeToggle = document.createElement('button');
         this.setElementClass(this.themeToggle, 'graph-network-theme-toggle');
@@ -340,6 +375,7 @@ export class GraphNetwork {
         this.settingsToggle.textContent = '^';
         this.settingsToggle.addEventListener('click', () => this.toggleSettings());
         
+        this.controls.appendChild(this.mobileControls);
         this.controls.appendChild(this.themeToggle);
         this.controls.appendChild(this.settingsToggle);
         this.container.appendChild(this.controls);
@@ -691,6 +727,27 @@ export class GraphNetwork {
         this.svg.addEventListener('dblclick', (e) => this.handleSvgDoubleClick(e));
         this.svg.addEventListener('wheel', (e) => this.handleWheel(e));
 
+        // Touch events for mobile support
+        this.svg.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
+        this.svg.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
+        this.svg.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: false });
+        this.svg.addEventListener('touchcancel', (e) => this.handleTouchEnd(e), { passive: false });
+
+        // Touch events for nodes
+        this.nodeGroup.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const element = document.elementFromPoint(touch.clientX, touch.clientY);
+            const nodeGroup = element?.closest('g[data-id]');
+            if (nodeGroup) {
+                const nodeId = nodeGroup.getAttribute('data-id');
+                const node = this.nodes.get(nodeId);
+                if (node) {
+                    this.handleNodeTouchStart(e, node);
+                }
+            }
+        }, { passive: false });
+
         // Window resize
         window.addEventListener('resize', () => this.handleResize());
     }
@@ -804,6 +861,224 @@ export class GraphNetwork {
         this.transformState.y = mouseY - ((mouseY - this.transformState.y) * (this.transformState.scale / oldScale));
         
         this.emit('zoom', { scale: this.transformState.scale, x: this.transformState.x, y: this.transformState.y });
+    }
+
+    /**
+     * Handle touch start
+     */
+    handleTouchStart(e) {
+        e.preventDefault();
+        const touches = Array.from(e.touches);
+        
+        // Always set touch time and track what was touched
+        this.touchStartTime = Date.now();
+        this.touchTarget = e.target;
+        
+        if (touches.length === 1) {
+            // Single touch - handle like mouse down
+            const touch = touches[0];
+            
+            if (e.target.closest('.node-shape') || e.target.closest('.edge-label-text')) {
+                // Touch on node - let the node handler manage it
+                console.log('Touch started on node element'); // Debug log
+                // Don't set panning to true for node touches
+                return;
+            }
+            
+            // Close settings panel if it's open
+            if (this.settingsPanel && this.settingsPanel.classList.contains('is-open')) {
+                this.settingsPanel.classList.remove('is-open');
+                if (this.settingsToggle) {
+                    this.settingsToggle.textContent = '^';
+                }
+            }
+            
+            // Only set panning for background touches
+            this.isPanning = true;
+            this.lastMouse = { x: touch.clientX, y: touch.clientY };
+        } else if (touches.length === 2) {
+            // Two touches - prepare for pinch-to-zoom
+            this.isPanning = false;
+            this.isPinching = true;
+            
+            const touch1 = touches[0];
+            const touch2 = touches[1];
+            
+            // Calculate initial distance between touches
+            this.lastPinchDistance = Math.sqrt(
+                Math.pow(touch2.clientX - touch1.clientX, 2) + 
+                Math.pow(touch2.clientY - touch1.clientY, 2)
+            );
+            
+            // Calculate center point between touches
+            this.lastPinchCenter = {
+                x: (touch1.clientX + touch2.clientX) / 2,
+                y: (touch1.clientY + touch2.clientY) / 2
+            };
+        }
+    }
+
+    /**
+     * Handle node touch start (start dragging)
+     */
+    handleNodeTouchStart(e, node) {
+        e.preventDefault();
+        if (node.isFixed || e.touches.length > 1) return;
+        
+        console.log('Node touch start:', node.data.name); // Debug log
+        this.isDragging = true;
+        this.dragNode = node;
+        // Store initial position to detect actual movement
+        this.dragStartPosition = { x: node.position.x, y: node.position.y };
+        // touchStartTime already set in handleTouchStart
+        this.emit('nodeMouseDown', { node, event: e });
+    }
+
+    /**
+     * Handle touch move
+     */
+    handleTouchMove(e) {
+        e.preventDefault();
+        const touches = Array.from(e.touches);
+        
+        if (touches.length === 1) {
+            const touch = touches[0];
+            
+            if (this.isDragging && this.dragNode) {
+                // Node dragging
+                const rect = this.svg.getBoundingClientRect();
+                this.dragNode.position.x = (touch.clientX - rect.left - this.transformState.x) / this.transformState.scale;
+                this.dragNode.position.y = (touch.clientY - rect.top - this.transformState.y) / this.transformState.scale;
+                this.showTooltip(this.dragNode);
+                this.tooltip.style.left = `${touch.clientX + 10}px`;
+                this.tooltip.style.top = `${touch.clientY + 10}px`;
+            } else if (this.isPanning) {
+                // Panning
+                const dx = touch.clientX - this.lastMouse.x;
+                const dy = touch.clientY - this.lastMouse.y;
+                this.transformState.x += dx;
+                this.transformState.y += dy;
+                this.lastMouse = { x: touch.clientX, y: touch.clientY };
+            }
+        } else if (touches.length === 2 && this.isPinching) {
+            // Pinch-to-zoom
+            const touch1 = touches[0];
+            const touch2 = touches[1];
+            
+            const currentDistance = Math.sqrt(
+                Math.pow(touch2.clientX - touch1.clientX, 2) + 
+                Math.pow(touch2.clientY - touch1.clientY, 2)
+            );
+            
+            const currentCenter = {
+                x: (touch1.clientX + touch2.clientX) / 2,
+                y: (touch1.clientY + touch2.clientY) / 2
+            };
+            
+            // Calculate zoom change
+            const scaleChange = currentDistance / this.lastPinchDistance;
+            const oldScale = this.transformState.scale;
+            const newScale = oldScale * scaleChange;
+            
+            this.transformState.scale = Math.max(0.2, Math.min(2.0, newScale));
+            
+            // Adjust position to zoom toward the center of the pinch
+            const rect = this.svg.getBoundingClientRect();
+            const zoomCenterX = currentCenter.x - rect.left;
+            const zoomCenterY = currentCenter.y - rect.top;
+            
+            this.transformState.x = zoomCenterX - ((zoomCenterX - this.transformState.x) * (this.transformState.scale / oldScale));
+            this.transformState.y = zoomCenterY - ((zoomCenterY - this.transformState.y) * (this.transformState.scale / oldScale));
+            
+            // Update for next frame
+            this.lastPinchDistance = currentDistance;
+            this.lastPinchCenter = currentCenter;
+            
+            this.emit('zoom', { scale: this.transformState.scale, x: this.transformState.x, y: this.transformState.y });
+        }
+    }
+
+    /**
+     * Handle touch end
+     */
+    handleTouchEnd(e) {
+        e.preventDefault();
+        const touchDuration = Date.now() - (this.touchStartTime || 0);
+        const now = Date.now();
+        
+        // Check if node actually moved during drag (threshold of 5 pixels)
+        const nodeActuallyMoved = this.isDragging && this.dragNode && this.dragStartPosition && 
+            (Math.abs(this.dragNode.position.x - this.dragStartPosition.x) > 5 || 
+             Math.abs(this.dragNode.position.y - this.dragStartPosition.y) > 5);
+        
+        console.log('Touch end - Duration:', touchDuration, 'ms, Dragging:', this.isDragging, 'Node moved:', nodeActuallyMoved, 'Panning:', this.isPanning); // Debug log
+        
+        // More lenient double-tap detection for mobile - don't count as dragging if node didn't actually move
+        const isQuickTap = touchDuration < 500 && touchDuration > 50 && !nodeActuallyMoved && !this.isPanning && !this.isPinching;
+        const isDoubleTap = this.lastTouchEndTime && (now - this.lastTouchEndTime) < 700;
+        
+        console.log('Is quick tap:', isQuickTap, 'Is double tap:', isDoubleTap); // Debug log
+        
+        if (isQuickTap) {
+            if (isDoubleTap) {
+                console.log('Double-tap detected!'); // Debug log
+                
+                // Use the original touch target for better reliability
+                const targetElement = this.touchTarget || e.target || document.elementFromPoint(
+                    e.changedTouches[0]?.clientX || 0, 
+                    e.changedTouches[0]?.clientY || 0
+                );
+                
+                const nodeGroup = targetElement?.closest('g[data-id]');
+                console.log('Target element:', targetElement, 'Node group:', nodeGroup); // Debug log
+                
+                if (nodeGroup) {
+                    // Double-tap on node - filter/reset like double-click
+                    const nodeId = nodeGroup.getAttribute('data-id');
+                    const node = this.nodes.get(nodeId);
+                    if (node) {
+                        console.log('Double-tap on node:', node.data.name); // Debug log
+                        if (this.currentFilterNodeId === node.data.id) {
+                            this.resetFilter();
+                        } else {
+                            this.filterByNode(node.data.id);
+                        }
+                        this.emit('nodeDoubleClick', { node, event: e });
+                    }
+                } else if (!targetElement?.closest('.graph-network-controls')) {
+                    // Double-tap on background - reset filter (but not on controls)
+                    console.log('Double-tap on background'); // Debug log
+                    if (this.currentFilterNodeId) {
+                        this.resetFilter();
+                    }
+                }
+                
+                // Clear the double-tap timer to prevent triple-tap issues
+                this.lastTouchEndTime = 0;
+            } else {
+                // First tap - store timestamp for double-tap detection
+                console.log('First tap registered'); // Debug log
+                this.lastTouchEndTime = now;
+            }
+        } else {
+            console.log('Not a quick tap - skipping double-tap detection'); // Debug log
+        }
+        
+        // Clean up touch states
+        if (e.touches.length === 0) {
+            this.isDragging = false;
+            this.dragNode = null;
+            this.dragStartPosition = null;
+            this.isPanning = false;
+            this.isPinching = false;
+            this.hideTooltip();
+        } else if (e.touches.length === 1) {
+            // One finger still down - switch from pinch to pan
+            this.isPinching = false;
+            const touch = e.touches[0];
+            this.isPanning = true;
+            this.lastMouse = { x: touch.clientX, y: touch.clientY };
+        }
     }
 
     /**
@@ -967,6 +1242,38 @@ export class GraphNetwork {
         this.resetFilter();
         
         this.emit('reset');
+    }
+
+    /**
+     * Zoom in programmatically (for mobile controls)
+     */
+    zoomIn() {
+        const centerX = this.containerWidth / 2;
+        const centerY = this.containerHeight / 2;
+        const oldScale = this.transformState.scale;
+        const newScale = Math.min(2.0, oldScale * this.config.zoomSensitivity * 10);
+        
+        this.transformState.scale = newScale;
+        this.transformState.x = centerX - ((centerX - this.transformState.x) * (this.transformState.scale / oldScale));
+        this.transformState.y = centerY - ((centerY - this.transformState.y) * (this.transformState.scale / oldScale));
+        
+        this.emit('zoom', { scale: this.transformState.scale, x: this.transformState.x, y: this.transformState.y });
+    }
+
+    /**
+     * Zoom out programmatically (for mobile controls)
+     */
+    zoomOut() {
+        const centerX = this.containerWidth / 2;
+        const centerY = this.containerHeight / 2;
+        const oldScale = this.transformState.scale;
+        const newScale = Math.max(0.2, oldScale / (this.config.zoomSensitivity * 10));
+        
+        this.transformState.scale = newScale;
+        this.transformState.x = centerX - ((centerX - this.transformState.x) * (this.transformState.scale / oldScale));
+        this.transformState.y = centerY - ((centerY - this.transformState.y) * (this.transformState.scale / oldScale));
+        
+        this.emit('zoom', { scale: this.transformState.scale, x: this.transformState.x, y: this.transformState.y });
     }
 
     /**
