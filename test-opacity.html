@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { background: #f0f0f0; padding: 20px; }
+        
+        /* Test the CSS variables */
+        :root {
+            --node-major: #800000;        /* Solid dark red - fully opaque */
+            --node-regional: #000080;     /* Solid dark blue - fully opaque */
+            --node-small: #008000;        /* Solid dark green - fully opaque */
+            --node-territory: #808000;    /* Solid dark olive - fully opaque */
+        }
+        
+        /* Apply the exact same styles as in our CSS */
+        .node-major_power { 
+            fill: var(--node-major);
+            fill-opacity: 1;
+            opacity: 1;
+            stroke: #E53E3E;
+            stroke-width: 4px;
+        }
+        .node-regional_power { 
+            fill: var(--node-regional);
+            fill-opacity: 1;
+            opacity: 1;
+            stroke: #4299E1;
+            stroke-width: 3px;
+        }
+        .node-small_nation { 
+            fill: var(--node-small);
+            fill-opacity: 1;
+            opacity: 1;
+            stroke: #38A169;
+            stroke-width: 2px;
+        }
+        .node-territory { 
+            fill: var(--node-territory);
+            fill-opacity: 1;
+            opacity: 1;
+            stroke: #ED8936;
+            stroke-width: 2px;
+        }
+        
+        /* Grid pattern background for testing */
+        .grid-background {
+            background-image: 
+                linear-gradient(rgba(0,0,0,.1) 1px, transparent 1px), 
+                linear-gradient(90deg, rgba(0,0,0,.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            padding: 20px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h2>Node Opacity Test</h2>
+    
+    <div class="grid-background">
+        <svg width="600" height="200">
+            <!-- Test rectangles with same classes as our nodes -->
+            <rect class="node node-shape node-major_power" x="50" y="50" width="100" height="60" rx="5"/>
+            <text x="100" y="80" text-anchor="middle" fill="white">Major Power</text>
+            
+            <rect class="node node-shape node-regional_power" x="180" y="50" width="100" height="60" rx="5"/>
+            <text x="230" y="80" text-anchor="middle" fill="white">Regional Power</text>
+            
+            <rect class="node node-shape node-small_nation" x="310" y="50" width="100" height="60" rx="5"/>
+            <text x="360" y="80" text-anchor="middle" fill="white">Small Nation</text>
+            
+            <rect class="node node-shape node-territory" x="440" y="50" width="100" height="60" rx="5"/>
+            <text x="490" y="80" text-anchor="middle" fill="white">Territory</text>
+        </svg>
+    </div>
+    
+    <p>If the rectangles above show grid lines through them, the opacity is not working.</p>
+    <p>If the rectangles are solid colors that block the grid, the opacity is working correctly.</p>
+    
+</body>
+</html>

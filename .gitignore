@@ -9,6 +9,7 @@ dist/
 build/
 *.tgz
 *.tar.gz
+*.tsbuildinfo
 
 # Runtime data
 pids

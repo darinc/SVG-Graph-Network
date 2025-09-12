@@ -3156,6 +3156,43 @@ export class GraphNetwork<T extends NodeData = NodeData> {
     getThemeManager(): import('./theming/ThemeManager').ThemeManager | null {
         return this.themeManager;
     }
+    
+    /**
+     * Configure grid settings
+     */
+    configureGrid(options: {
+        enabled?: boolean;
+        color?: string;
+        size?: number;
+        opacity?: number;
+    }): void {
+        if (!this.themeManager) {
+            throw new Error('ThemeManager not initialized');
+        }
+        
+        this.themeManager.configureGrid(options);
+        
+        // Re-apply canvas theming to show grid changes immediately
+        if (this.renderer) {
+            this.renderer.applyCanvasTheming();
+        }
+    }
+    
+    /**
+     * Get current grid configuration
+     */
+    getGridConfig(): {
+        enabled: boolean;
+        color?: string;
+        size?: number;
+        opacity?: number;
+    } {
+        if (!this.themeManager) {
+            throw new Error('ThemeManager not initialized');
+        }
+        
+        return this.themeManager.getGridConfig();
+    }
 
     /**
      * Create a string representation of the graph network

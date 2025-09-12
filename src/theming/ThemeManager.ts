@@ -106,9 +106,9 @@ export class ThemeManager {
             canvas: {
                 background: '#1a1a1a',
                 showGrid: true,
-                gridColor: 'rgba(255, 255, 255, 0.1)',
-                gridSize: 20,
-                gridOpacity: 0.5
+                gridColor: 'rgba(255, 165, 0, 0.1)',
+                gridSize: 30,
+                gridOpacity: 0.1
             },
             colors: {
                 primary: '#3b82f6',
@@ -307,9 +307,9 @@ export class ThemeManager {
             canvas: {
                 background: '#0f0f0f',
                 showGrid: true,
-                gridColor: 'rgba(255, 255, 255, 0.1)',
-                gridSize: 20,
-                gridOpacity: 0.3
+                gridColor: 'rgba(255, 165, 0, 0.1)',
+                gridSize: 30,
+                gridOpacity: 0.1
             },
             colors: {
                 primary: '#60a5fa',
@@ -424,9 +424,9 @@ export class ThemeManager {
             canvas: {
                 background: '#ffffff',
                 showGrid: true,
-                gridColor: 'rgba(0, 0, 0, 0.1)',
-                gridSize: 20,
-                gridOpacity: 0.5
+                gridColor: 'rgba(0, 100, 255, 0.1)',
+                gridSize: 30,
+                gridOpacity: 0.1
             },
             colors: {
                 primary: '#2563eb',
@@ -725,5 +725,53 @@ export class ThemeManager {
      */
     getAvailableThemes(): string[] {
         return Array.from(this.registeredThemes.keys());
+    }
+    
+    /**
+     * Configure grid settings for current theme
+     */
+    configureGrid(options: {
+        enabled?: boolean;
+        color?: string;
+        size?: number;
+        opacity?: number;
+    }): void {
+        if (!this.currentTheme.canvas) {
+            this.currentTheme.canvas = {};
+        }
+        
+        if (options.enabled !== undefined) {
+            this.currentTheme.canvas.showGrid = options.enabled;
+        }
+        if (options.color !== undefined) {
+            this.currentTheme.canvas.gridColor = options.color;
+        }
+        if (options.size !== undefined) {
+            this.currentTheme.canvas.gridSize = options.size;
+        }
+        if (options.opacity !== undefined) {
+            this.currentTheme.canvas.gridOpacity = options.opacity;
+        }
+        
+        // Note: Grid changes will be applied when applyCanvasTheming() is called
+        // No need to trigger theme change callback here as it's just a grid config change
+    }
+    
+    /**
+     * Get current grid configuration
+     */
+    getGridConfig(): {
+        enabled: boolean;
+        color?: string;
+        size?: number;
+        opacity?: number;
+    } {
+        const canvas = this.currentTheme.canvas || {};
+        return {
+            enabled: canvas.showGrid ?? false,
+            color: canvas.gridColor,
+            size: canvas.gridSize,
+            opacity: canvas.gridOpacity
+        };
     }
 }

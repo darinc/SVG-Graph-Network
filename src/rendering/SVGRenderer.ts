@@ -467,15 +467,32 @@ export class SVGRenderer {
     /**
      * Apply canvas theming
      */
-    private applyCanvasTheming(): void {
+    public applyCanvasTheming(): void {
         const canvasConfig = this.themeManager.getCanvasConfig();
         
-        if (canvasConfig.background && this.svg) {
-            this.svg.style.backgroundColor = canvasConfig.background;
+        if (this.svg) {
+            // Apply background color
+            if (canvasConfig.background) {
+                this.svg.style.backgroundColor = canvasConfig.background;
+            }
+            
+            // Apply grid pattern
+            if (canvasConfig.showGrid && canvasConfig.gridColor && canvasConfig.gridSize) {
+                const gridSize = canvasConfig.gridSize;
+                const gridColor = canvasConfig.gridColor;
+                
+                const backgroundImage = `linear-gradient(${gridColor} 1px, transparent 1px), linear-gradient(90deg, ${gridColor} 1px, transparent 1px)`;
+                
+                this.svg.style.backgroundImage = backgroundImage;
+                this.svg.style.backgroundSize = `${gridSize}px ${gridSize}px`;
+                
+                console.log(`Applied grid pattern: ${gridColor} at ${gridSize}px for theme: ${this.themeManager.getCurrentTheme().name}`);
+            } else {
+                // Remove grid if disabled
+                this.svg.style.backgroundImage = '';
+                this.svg.style.backgroundSize = '';
+            }
         }
-        
-        // Apply other canvas styling as needed
-        // Grid styling would go here if implemented
     }
 
     /**

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Interactions</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        #graph {
+            width: 800px;
+            height: 600px;
+            border: 1px solid #ccc;
+            margin: 20px 0;
+        }
+        .instructions {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .instructions h3 {
+            margin-top: 0;
+        }
+        .console-log {
+            background: #000;
+            color: #00ff00;
+            padding: 10px;
+            font-family: monospace;
+            height: 200px;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Interaction Test</h1>
+    
+    <div class="instructions">
+        <h3>Test Instructions:</h3>
+        <ul>
+            <li><strong>Pan:</strong> Click and drag on background</li>
+            <li><strong>Node Drag:</strong> Click and drag on a node</li>
+            <li><strong>Filter by Node:</strong> Double-click on a node</li>
+            <li><strong>Reset Filter:</strong> Double-click on background</li>
+            <li><strong>Zoom:</strong> Use mouse wheel</li>
+        </ul>
+        <p>Check the console below and browser dev tools for debug output.</p>
+    </div>
+
+    <div id="graph"></div>
+    
+    <h3>Console Output:</h3>
+    <div id="console" class="console-log"></div>
+
+    <!-- Import the built library -->
+    <script src="http://localhost:8080/svg-graph-network.js"></script>
+    
+    <script>
+        // Capture console.log output
+        const consoleDiv = document.getElementById('console');
+        const originalLog = console.log;
+        const originalWarn = console.warn;
+        
+        function addToConsole(type, ...args) {
+            const message = args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ');
+            
+            consoleDiv.innerHTML += `<div style="color: ${type === 'warn' ? '#ffaa00' : '#00ff00'}">[${type}] ${message}</div>`;
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
+        
+        console.log = (...args) => {
+            originalLog.apply(console, args);
+            addToConsole('log', ...args);
+        };
+        
+        console.warn = (...args) => {
+            originalWarn.apply(console, args);
+            addToConsole('warn', ...args);
+        };
+
+        // Test data
+        const testData = {
+            nodes: [
+                { id: 'A', name: 'Node A', type: 'primary' },
+                { id: 'B', name: 'Node B', type: 'secondary' },
+                { id: 'C', name: 'Node C', type: 'primary' },
+                { id: 'D', name: 'Node D', type: 'tertiary' }
+            ],
+            links: [
+                { id: 'AB', source: 'A', target: 'B', label: 'A→B' },
+                { id: 'BC', source: 'B', target: 'C', label: 'B→C' },
+                { id: 'CD', source: 'C', target: 'D', label: 'C→D' },
+                { id: 'DA', source: 'D', target: 'A', label: 'D→A' }
+            ]
+        };
+
+        console.log('Creating GraphNetwork instance...');
+        
+        // Initialize graph
+        const graph = new GraphNetwork('graph', {
+            data: testData,
+            config: {
+                showControls: true,
+                showLegend: true,
+                enablePhysics: true,
+                zoomSensitivity: 1.1
+            }
+        });
+
+        console.log('GraphNetwork created, waiting for initialization...');
+        
+        // Add event listeners to track interactions
+        graph.on('nodeDoubleClick', (event) => {
+            console.log('Graph event: nodeDoubleClick', event);
+        });
+        
+        graph.on('backgroundDoubleClick', (event) => {
+            console.log('Graph event: backgroundDoubleClick', event);
+        });
+        
+        graph.on('pan', (event) => {
+            console.log('Graph event: pan', event);
+        });
+        
+        graph.on('zoom', (event) => {
+            console.log('Graph event: zoom', event);
+        });
+
+        console.log('Event listeners attached. Try interacting with the graph!');
+    </script>
+</body>
+</html>
