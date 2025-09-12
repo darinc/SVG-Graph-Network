@@ -734,3 +734,300 @@
         display: none;
     }
 }
+
+/* ==================== Phase 5: Selection & Highlight States ==================== */
+
+/* Selection states */
+.graph-node {
+    transition: all 0.2s ease;
+}
+
+.graph-edge {
+    transition: all 0.2s ease;
+}
+
+.graph-node--normal {
+    /* Default node appearance */
+}
+
+.graph-node--selected {
+    stroke: #3b82f6 !important;
+    stroke-width: 4px !important;
+    filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6));
+}
+
+.graph-node--hover {
+    stroke: #fff !important;
+    stroke-width: 3px !important;
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.4));
+}
+
+[data-theme="light"] .graph-node--hover {
+    stroke: #000 !important;
+    stroke-width: 3px !important;
+    filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.4));
+}
+
+.graph-node--active {
+    stroke: #1d4ed8 !important;
+    stroke-width: 5px !important;
+    filter: drop-shadow(0 0 10px rgba(29, 78, 216, 0.8));
+}
+
+.graph-node--disabled {
+    opacity: 0.3;
+    filter: grayscale(100%);
+}
+
+.graph-node--highlighted {
+    stroke: #f59e0b !important;
+    stroke-width: 4px !important;
+    filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.7));
+}
+
+.graph-edge--normal {
+    /* Default edge appearance */
+}
+
+.graph-edge--selected {
+    stroke: #3b82f6 !important;
+    stroke-width: 3px !important;
+    filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.6));
+}
+
+.graph-edge--hover {
+    stroke: #fff !important;
+    stroke-width: 2px !important;
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.4));
+}
+
+[data-theme="light"] .graph-edge--hover {
+    stroke: #000 !important;
+    stroke-width: 2px !important;
+    filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.4));
+}
+
+.graph-edge--active {
+    stroke: #1d4ed8 !important;
+    stroke-width: 4px !important;
+    filter: drop-shadow(0 0 8px rgba(29, 78, 216, 0.8));
+}
+
+.graph-edge--disabled {
+    opacity: 0.3;
+    filter: grayscale(100%);
+}
+
+.graph-edge--highlighted {
+    stroke: #f59e0b !important;
+    stroke-width: 3px !important;
+    filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.7));
+}
+
+/* Highlight animation effects */
+.graph-highlight-animated {
+    animation: highlight-pulse 2s ease-in-out infinite;
+}
+
+@keyframes highlight-pulse {
+    0%, 100% {
+        filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.7));
+    }
+    50% {
+        filter: drop-shadow(0 0 16px rgba(245, 158, 11, 1));
+    }
+}
+
+.graph-highlight-glow {
+    filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.9)) brightness(1.2);
+}
+
+.graph-highlight-pulse {
+    animation: highlight-strong-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes highlight-strong-pulse {
+    0%, 100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.8));
+    }
+    50% {
+        transform: scale(1.05);
+        filter: drop-shadow(0 0 24px rgba(245, 158, 11, 1)) brightness(1.3);
+    }
+}
+
+/* Path highlighting */
+.graph-path-flow {
+    stroke-dasharray: 8, 4;
+    animation: path-flow 2s linear infinite;
+}
+
+@keyframes path-flow {
+    0% {
+        stroke-dashoffset: 0;
+    }
+    100% {
+        stroke-dashoffset: 12;
+    }
+}
+
+/* Neighbor highlighting depth colors */
+.graph-neighbor-depth-1 {
+    stroke: #3b82f6 !important;
+    filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.7));
+}
+
+.graph-neighbor-depth-2 {
+    stroke: #8b5cf6 !important;
+    filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.6));
+}
+
+.graph-neighbor-depth-3 {
+    stroke: #ec4899 !important;
+    filter: drop-shadow(0 0 6px rgba(236, 72, 153, 0.5));
+}
+
+.graph-neighbor-depth-4 {
+    stroke: #f97316 !important;
+    filter: drop-shadow(0 0 4px rgba(249, 115, 22, 0.4));
+}
+
+.graph-neighbor-depth-5 {
+    stroke: #84cc16 !important;
+    filter: drop-shadow(0 0 4px rgba(132, 204, 22, 0.3));
+}
+
+/* Focus/camera animation states */
+.graph-focus-target {
+    stroke: #ef4444 !important;
+    stroke-width: 5px !important;
+    filter: drop-shadow(0 0 15px rgba(239, 68, 68, 0.8));
+    animation: focus-highlight 1s ease-in-out;
+}
+
+@keyframes focus-highlight {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Multi-selection box indicator */
+.graph-selection-box {
+    fill: rgba(59, 130, 246, 0.1);
+    stroke: #3b82f6;
+    stroke-width: 2;
+    stroke-dasharray: 4, 2;
+    pointer-events: none;
+}
+
+/* Selection count indicator */
+.graph-selection-count {
+    position: absolute;
+    bottom: 80px;
+    left: 20px;
+    background-color: var(--panel-bg);
+    color: var(--text-primary);
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    border: 1px solid var(--border-color);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    z-index: 30;
+}
+
+.graph-selection-count.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Highlight legend for path/neighbor highlighting */
+.graph-highlight-legend {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background-color: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 11px;
+    color: var(--text-primary);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    z-index: 25;
+    max-width: 200px;
+}
+
+.graph-highlight-legend.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.graph-highlight-legend h5 {
+    margin: 0 0 8px 0;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.graph-highlight-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.graph-highlight-legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+/* Responsive adjustments for selection/highlight features */
+@media (max-width: 768px) {
+    .graph-selection-count,
+    .graph-highlight-legend {
+        bottom: 90px;
+        left: 10px;
+        font-size: 10px;
+        padding: 6px 10px;
+    }
+    
+    .graph-highlight-legend {
+        max-width: 160px;
+    }
+    
+    /* Reduce highlight effects on mobile for performance */
+    .graph-highlight-animated,
+    .graph-highlight-pulse {
+        animation: none;
+    }
+    
+    .graph-highlight-glow {
+        filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.6));
+    }
+}
+
+@media (max-width: 480px) {
+    .graph-selection-count,
+    .graph-highlight-legend {
+        bottom: 80px;
+        left: 5px;
+        font-size: 9px;
+        padding: 5px 8px;
+    }
+    
+    .graph-highlight-legend {
+        max-width: 140px;
+    }
+}

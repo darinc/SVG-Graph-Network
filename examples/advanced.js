@@ -1,5 +1,5 @@
 // Import the library for development
-import GraphNetwork from '../src/index.js';
+import GraphNetwork from '../src/index.ts';
 
 // Make it available globally
 window.GraphNetwork = GraphNetwork;

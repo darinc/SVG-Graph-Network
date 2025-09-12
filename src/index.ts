@@ -1,6 +1,6 @@
-import { GraphNetwork } from './GraphNetwork.js';
-import { Vector } from './Vector.js';
-import { Node } from './Node.js';
+import { GraphNetwork } from './GraphNetwork';
+import { Vector } from './Vector';
+import { Node } from './Node';
 import './styles.css';
 
 // Export the main class as default

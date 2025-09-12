@@ -6,7 +6,7 @@ const isProduction = process.env.NODE_ENV === 'production' || process.argv.inclu
 
 const config = {
   entry: {
-    'svg-graph-network': './src/index.js',
+    'svg-graph-network': './src/index.ts',
   },
   output: {
     path: path.resolve(__dirname, 'dist'),

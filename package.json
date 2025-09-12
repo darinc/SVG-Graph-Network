@@ -2,8 +2,8 @@
   "name": "svg-graph-network",
   "version": "1.0.0",
   "description": "Interactive SVG graph visualization library with force-directed layout and physics simulation",
-  "main": "dist/svg-graph-network.umd.js",
-  "module": "dist/svg-graph-network.es.js",
+  "main": "dist/svg-graph-network.min.js",
+  "module": "dist/svg-graph-network.min.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist",

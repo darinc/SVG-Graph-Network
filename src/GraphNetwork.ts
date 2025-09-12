@@ -36,6 +36,21 @@ import {
     InvalidEdgeReferencesError,
     GraphErrorUtils
 } from './errors/GraphErrors';
+import { SelectionManager } from './selection/SelectionManager';
+import { StyleManager } from './styling/StyleManager';
+import { HighlightManager } from './highlighting/HighlightManager';
+import { CameraController } from './camera/CameraController';
+import {
+    SelectionOptions,
+    NodeStyles,
+    EdgeStyles,
+    StyleObject,
+    ElementSelector,
+    HighlightStyle,
+    PathHighlightOptions,
+    NeighborHighlightOptions,
+    FocusOptions
+} from './types/styling';
 
 /**
  * Graph initialization options
@@ -131,6 +146,12 @@ export class GraphNetwork<T extends NodeData = NodeData> {
     private renderer: SVGRenderer | null = null;
     private ui: UIManager | null = null;
     private events: EventManager<T> | null = null;
+    
+    // Phase 5: Styling & Interactivity managers
+    private selectionManager: SelectionManager | null = null;
+    private styleManager: StyleManager | null = null;
+    private highlightManager: HighlightManager | null = null;
+    private cameraController: CameraController | null = null;
 
     // Event handling
     private eventCallbacks: EventManagerCallbacks<T> = {};
@@ -282,6 +303,23 @@ export class GraphNetwork<T extends NodeData = NodeData> {
 
         // Create tooltip element
         this.createTooltip();
+
+        // Initialize Phase 5: Styling & Interactivity managers
+        this.selectionManager = new SelectionManager(
+            (event) => this.emit('selectionChanged', event)
+        );
+        
+        this.styleManager = new StyleManager(
+            (event) => this.emit('styleChanged', event)
+        );
+        
+        this.highlightManager = new HighlightManager(
+            (event) => this.emit('highlightChanged', event)
+        );
+        
+        this.cameraController = new CameraController(
+            (event) => this.emit('focusChanged', event)
+        );
 
         // Set initial theme after all modules are initialized
         this.setTheme(this.config.theme);
@@ -988,7 +1026,9 @@ export class GraphNetwork<T extends NodeData = NodeData> {
 
             // Remove connected edges from edge tracking Map
             connectedLinks.forEach(connectedLink => {
-                this.edges.delete(connectedLink.id);
+                if (connectedLink.id) {
+                    this.edges.delete(connectedLink.id);
+                }
             });
 
             // Remove from nodes
@@ -2413,6 +2453,384 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         URL.revokeObjectURL(url);
     }
 
+    // ==================== Phase 5: Selection API ====================
+
+    /**
+     * Select a single node
+     * @param nodeId - ID of node to select
+     * @param options - Selection options
+     * @returns True if selection changed
+     */
+    selectNode(nodeId: string, options?: SelectionOptions): boolean {
+        return this.selectionManager?.selectNode(nodeId, options) || false;
+    }
+
+    /**
+     * Select multiple nodes
+     * @param nodeIds - Array of node IDs to select
+     * @param options - Selection options
+     * @returns Array of newly selected node IDs
+     */
+    selectNodes(nodeIds: string[], options?: SelectionOptions): string[] {
+        return this.selectionManager?.selectNodes(nodeIds, options) || [];
+    }
+
+    /**
+     * Select a single edge
+     * @param edgeId - ID of edge to select
+     * @param options - Selection options
+     * @returns True if selection changed
+     */
+    selectEdge(edgeId: string, options?: SelectionOptions): boolean {
+        return this.selectionManager?.selectEdge(edgeId, options) || false;
+    }
+
+    /**
+     * Select multiple edges
+     * @param edgeIds - Array of edge IDs to select
+     * @param options - Selection options
+     * @returns Array of newly selected edge IDs
+     */
+    selectEdges(edgeIds: string[], options?: SelectionOptions): string[] {
+        return this.selectionManager?.selectEdges(edgeIds, options) || [];
+    }
+
+    /**
+     * Deselect a node
+     * @param nodeId - ID of node to deselect
+     * @returns True if deselection changed
+     */
+    deselectNode(nodeId: string): boolean {
+        return this.selectionManager?.deselectNode(nodeId) || false;
+    }
+
+    /**
+     * Deselect an edge
+     * @param edgeId - ID of edge to deselect
+     * @returns True if deselection changed
+     */
+    deselectEdge(edgeId: string): boolean {
+        return this.selectionManager?.deselectEdge(edgeId) || false;
+    }
+
+    /**
+     * Clear all selections
+     */
+    deselectAll(): void {
+        this.selectionManager?.deselectAll();
+    }
+
+    /**
+     * Toggle node selection
+     * @param nodeId - ID of node to toggle
+     * @returns True if selection state changed
+     */
+    toggleNodeSelection(nodeId: string): boolean {
+        return this.selectionManager?.toggleNodeSelection(nodeId) || false;
+    }
+
+    /**
+     * Toggle edge selection
+     * @param edgeId - ID of edge to toggle
+     * @returns True if selection state changed
+     */
+    toggleEdgeSelection(edgeId: string): boolean {
+        return this.selectionManager?.toggleEdgeSelection(edgeId) || false;
+    }
+
+    /**
+     * Check if node is selected
+     * @param nodeId - ID of node to check
+     * @returns True if node is selected
+     */
+    isNodeSelected(nodeId: string): boolean {
+        return this.selectionManager?.isNodeSelected(nodeId) || false;
+    }
+
+    /**
+     * Check if edge is selected
+     * @param edgeId - ID of edge to check
+     * @returns True if edge is selected
+     */
+    isEdgeSelected(edgeId: string): boolean {
+        return this.selectionManager?.isEdgeSelected(edgeId) || false;
+    }
+
+    /**
+     * Get all selected node IDs
+     * @returns Array of selected node IDs
+     */
+    getSelectedNodes(): string[] {
+        return this.selectionManager?.getSelectedNodes() || [];
+    }
+
+    /**
+     * Get all selected edge IDs
+     * @returns Array of selected edge IDs
+     */
+    getSelectedEdges(): string[] {
+        return this.selectionManager?.getSelectedEdges() || [];
+    }
+
+    /**
+     * Set selection mode
+     * @param mode - Selection mode
+     */
+    setSelectionMode(mode: 'single' | 'multi' | 'box'): void {
+        this.selectionManager?.setSelectionMode(mode);
+    }
+
+    /**
+     * Get current selection mode
+     * @returns Current selection mode
+     */
+    getSelectionMode(): 'single' | 'multi' | 'box' {
+        return this.selectionManager?.getSelectionMode() || 'multi';
+    }
+
+    // ==================== Phase 5: Styling API ====================
+
+    /**
+     * Set style for a specific node
+     * @param nodeId - ID of node to style
+     * @param styles - Node styles to apply
+     */
+    setNodeStyle(nodeId: string, styles: NodeStyles): void {
+        this.styleManager?.setNodeStyle(nodeId, styles);
+    }
+
+    /**
+     * Set style for a specific edge
+     * @param edgeId - ID of edge to style
+     * @param styles - Edge styles to apply
+     */
+    setEdgeStyle(edgeId: string, styles: EdgeStyles): void {
+        this.styleManager?.setEdgeStyle(edgeId, styles);
+    }
+
+    /**
+     * Update styles for multiple elements
+     * @param elements - Element selector
+     * @param styles - Styles to apply
+     */
+    updateStyles(elements: ElementSelector, styles: StyleObject): void {
+        this.styleManager?.updateStyles(elements, styles);
+    }
+
+    /**
+     * Reset styles to defaults
+     * @param elements - Elements to reset (optional, resets all if not provided)
+     */
+    resetStyle(elements?: ElementSelector): void {
+        this.styleManager?.resetStyle(elements);
+    }
+
+    /**
+     * Get current style for a node
+     * @param nodeId - ID of node
+     * @returns Node styles or null if not found
+     */
+    getNodeStyle(nodeId: string): NodeStyles | null {
+        return this.styleManager?.getNodeStyle(nodeId) || null;
+    }
+
+    /**
+     * Get current style for an edge
+     * @param edgeId - ID of edge
+     * @returns Edge styles or null if not found
+     */
+    getEdgeStyle(edgeId: string): EdgeStyles | null {
+        return this.styleManager?.getEdgeStyle(edgeId) || null;
+    }
+
+    // ==================== Phase 5: Highlight API ====================
+
+    /**
+     * Highlight a single node
+     * @param nodeId - ID of node to highlight
+     * @param style - Highlight style options
+     */
+    highlightNode(nodeId: string, style?: HighlightStyle): void {
+        this.highlightManager?.highlightNode(nodeId, style);
+    }
+
+    /**
+     * Highlight multiple nodes
+     * @param nodeIds - Array of node IDs to highlight
+     * @param style - Highlight style options
+     */
+    highlightNodes(nodeIds: string[], style?: HighlightStyle): void {
+        this.highlightManager?.highlightNodes(nodeIds, style);
+    }
+
+    /**
+     * Highlight a single edge
+     * @param edgeId - ID of edge to highlight
+     * @param style - Highlight style options
+     */
+    highlightEdge(edgeId: string, style?: HighlightStyle): void {
+        this.highlightManager?.highlightEdge(edgeId, style);
+    }
+
+    /**
+     * Highlight multiple edges
+     * @param edgeIds - Array of edge IDs to highlight
+     * @param style - Highlight style options
+     */
+    highlightEdges(edgeIds: string[], style?: HighlightStyle): void {
+        this.highlightManager?.highlightEdges(edgeIds, style);
+    }
+
+    /**
+     * Highlight shortest path between two nodes
+     * @param sourceId - Source node ID
+     * @param targetId - Target node ID
+     * @param options - Path highlight options
+     * @returns Array of highlighted element IDs or null if no path found
+     */
+    highlightPath(sourceId: string, targetId: string, options?: PathHighlightOptions): string[] | null {
+        return this.highlightManager?.highlightPath(sourceId, targetId, options) || null;
+    }
+
+    /**
+     * Highlight neighbors of a node
+     * @param nodeId - ID of node whose neighbors to highlight
+     * @param options - Neighbor highlight options
+     * @returns Array of highlighted element IDs
+     */
+    highlightNeighbors(nodeId: string, options?: NeighborHighlightOptions): string[] {
+        return this.highlightManager?.highlightNeighbors(nodeId, options) || [];
+    }
+
+    /**
+     * Highlight all connections for a node
+     * @param nodeId - ID of node whose connections to highlight
+     * @param style - Highlight style options
+     * @returns Array of highlighted element IDs
+     */
+    highlightConnections(nodeId: string, style?: HighlightStyle): string[] {
+        return this.highlightManager?.highlightConnections(nodeId, style) || [];
+    }
+
+    /**
+     * Clear all highlights
+     */
+    clearHighlights(): void {
+        this.highlightManager?.clearHighlights();
+    }
+
+    /**
+     * Clear highlight for a specific node
+     * @param nodeId - ID of node to clear highlight
+     */
+    clearNodeHighlight(nodeId: string): void {
+        this.highlightManager?.clearNodeHighlight(nodeId);
+    }
+
+    /**
+     * Clear highlight for a specific edge
+     * @param edgeId - ID of edge to clear highlight
+     */
+    clearEdgeHighlight(edgeId: string): void {
+        this.highlightManager?.clearEdgeHighlight(edgeId);
+    }
+
+    /**
+     * Check if node is highlighted
+     * @param nodeId - ID of node to check
+     * @returns True if node is highlighted
+     */
+    isNodeHighlighted(nodeId: string): boolean {
+        return this.highlightManager?.isNodeHighlighted(nodeId) || false;
+    }
+
+    /**
+     * Check if edge is highlighted
+     * @param edgeId - ID of edge to check
+     * @returns True if edge is highlighted
+     */
+    isEdgeHighlighted(edgeId: string): boolean {
+        return this.highlightManager?.isEdgeHighlighted(edgeId) || false;
+    }
+
+    /**
+     * Get all highlighted node IDs
+     * @returns Array of highlighted node IDs
+     */
+    getHighlightedNodes(): string[] {
+        return this.highlightManager?.getHighlightedNodes() || [];
+    }
+
+    /**
+     * Get all highlighted edge IDs
+     * @returns Array of highlighted edge IDs
+     */
+    getHighlightedEdges(): string[] {
+        return this.highlightManager?.getHighlightedEdges() || [];
+    }
+
+    // ==================== Phase 5: Focus/Camera API ====================
+
+    /**
+     * Focus on a single node with smooth animation
+     * @param nodeId - ID of node to focus on
+     * @param options - Focus animation options
+     * @returns Promise that resolves when animation completes
+     */
+    async focusOnNode(nodeId: string, options?: FocusOptions): Promise<void> {
+        if (this.cameraController) {
+            await this.cameraController.focusOnNode(nodeId, options);
+        }
+    }
+
+    /**
+     * Focus on multiple nodes by fitting them in view
+     * @param nodeIds - Array of node IDs to focus on
+     * @param options - Focus animation options
+     * @returns Promise that resolves when animation completes
+     */
+    async focusOnNodes(nodeIds: string[], options?: FocusOptions): Promise<void> {
+        if (this.cameraController) {
+            await this.cameraController.focusOnNodes(nodeIds, options);
+        }
+    }
+
+    /**
+     * Fit entire graph to view with padding
+     * @param padding - Padding around graph in pixels
+     * @returns Promise that resolves when animation completes
+     */
+    async fitToView(padding?: number): Promise<void> {
+        if (this.cameraController) {
+            await this.cameraController.fitToView(padding);
+        }
+    }
+
+    /**
+     * Center the view on the graph center
+     * @returns Promise that resolves when animation completes
+     */
+    async centerView(): Promise<void> {
+        if (this.cameraController) {
+            await this.cameraController.centerView();
+        }
+    }
+
+    /**
+     * Check if camera animation is currently running
+     * @returns True if animation is active
+     */
+    isCameraAnimating(): boolean {
+        return this.cameraController?.isAnimating() || false;
+    }
+
+    /**
+     * Stop current camera animation
+     */
+    stopCameraAnimation(): void {
+        this.cameraController?.stopAnimation();
+    }
+
     /**
      * Add event listener
      * @param event - Event name
@@ -2517,6 +2935,17 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         this.renderer?.destroy();
         this.ui?.destroy();
         this.events?.destroy();
+        
+        // Clean up Phase 5 managers
+        this.selectionManager?.clearSelection();
+        this.styleManager?.clearStyles();
+        this.highlightManager?.clearHighlights();
+        this.cameraController?.stopAnimation();
+        
+        this.selectionManager = null;
+        this.styleManager = null;
+        this.highlightManager = null;
+        this.cameraController = null;
 
         // Remove tooltip
         if (this.tooltip && this.tooltip.parentNode) {
