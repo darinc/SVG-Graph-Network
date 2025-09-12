@@ -1,5 +1,5 @@
-import { Vector } from './Vector.js';
-import { NodeData } from './types/index.js';
+import { Vector } from './Vector';
+import { NodeData } from './types/index';
 
 /**
  * Node class representing a graph node with position, velocity, and force vectors
@@ -8,22 +8,22 @@ import { NodeData } from './types/index.js';
 export class Node<T extends NodeData = NodeData> {
     /** Position vector of the node */
     public position: Vector;
-    
+
     /** Velocity vector for physics simulation */
     public velocity: Vector;
-    
+
     /** Force vector accumulator for physics simulation */
     public force: Vector;
-    
+
     /** Visual size of the node in pixels */
     public size: number;
-    
+
     /** Whether the node is fixed in position */
     public isFixed: boolean;
-    
+
     /** Dynamic width for rectangular nodes (calculated by renderer) */
     public dynamicWidth: number | null = null;
-    
+
     /** Dynamic height for rectangular nodes (calculated by renderer) */
     public dynamicHeight: number | null = null;
 
@@ -39,18 +39,15 @@ export class Node<T extends NodeData = NodeData> {
         containerHeight: number = 600
     ) {
         // Initialize position randomly within container bounds
-        this.position = new Vector(
-            Math.random() * containerWidth, 
-            Math.random() * containerHeight
-        );
-        
+        this.position = new Vector(Math.random() * containerWidth, Math.random() * containerHeight);
+
         // Initialize physics vectors to zero
         this.velocity = new Vector();
         this.force = new Vector();
-        
+
         // Set size from data or use default
         this.size = data.size !== undefined ? data.size : 20;
-        
+
         // Node starts unfixed
         this.isFixed = false;
     }
@@ -64,7 +61,7 @@ export class Node<T extends NodeData = NodeData> {
     resetPosition(containerWidth: number, containerHeight: number): void {
         // Always reset velocity
         this.velocity = new Vector();
-        
+
         // Only reset position if node is not fixed
         if (!this.isFixed) {
             this.position = new Vector(
@@ -128,9 +125,11 @@ export class Node<T extends NodeData = NodeData> {
      * @returns True if both nodes have the same type
      */
     hasSameType(other: Node): boolean {
-        return this.data.type !== undefined && 
-               other.data.type !== undefined && 
-               this.data.type === other.data.type;
+        return (
+            this.data.type !== undefined &&
+            other.data.type !== undefined &&
+            this.data.type === other.data.type
+        );
     }
 
     /**
@@ -174,13 +173,13 @@ export class Node<T extends NodeData = NodeData> {
      */
     updatePosition(deltaTime: number = 1, damping: number = 0.95): void {
         if (this.isFixed) return;
-        
+
         // Integrate force into velocity (F = ma, assuming mass = 1)
         this.velocity = this.velocity.add(this.force.multiply(deltaTime));
-        
+
         // Apply damping to velocity
         this.velocity = this.velocity.multiply(damping);
-        
+
         // Integrate velocity into position
         this.position = this.position.add(this.velocity.multiply(deltaTime));
     }
@@ -198,13 +197,13 @@ export class Node<T extends NodeData = NodeData> {
                     return Math.max(this.dynamicWidth, this.dynamicHeight) / 2;
                 }
                 return this.size * 1.4; // Rectangle default multiplier
-            
+
             case 'square':
                 return this.size * 1.4;
-            
+
             case 'triangle':
                 return this.size * 1.4;
-            
+
             case 'circle':
             default:
                 return this.size;
@@ -218,18 +217,14 @@ export class Node<T extends NodeData = NodeData> {
      * @returns New node instance with cloned data
      */
     clone(containerWidth?: number, containerHeight?: number): Node<T> {
-        const cloned = new Node(
-            { ...this.data } as T,
-            containerWidth,
-            containerHeight
-        );
-        
+        const cloned = new Node({ ...this.data } as T, containerWidth, containerHeight);
+
         // Preserve fixed state and position if specified
         if (containerWidth === undefined || containerHeight === undefined) {
             cloned.position = this.position.clone();
             cloned.isFixed = this.isFixed;
         }
-        
+
         return cloned;
     }
 
@@ -280,7 +275,7 @@ export class Node<T extends NodeData = NodeData> {
         containerHeight?: number
     ): Node<T> {
         const node = new Node(obj.data, containerWidth, containerHeight);
-        
+
         // Restore state if provided
         if (obj.position) {
             node.position = new Vector(obj.position.x, obj.position.y);
@@ -294,7 +289,7 @@ export class Node<T extends NodeData = NodeData> {
         if (obj.size !== undefined) {
             node.size = obj.size;
         }
-        
+
         return node;
     }
 }

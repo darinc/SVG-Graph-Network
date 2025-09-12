@@ -299,6 +299,82 @@ export interface DeletionOptions {
     animate?: boolean;
 }
 
+/**
+ * Bulk update options for nodes
+ */
+export interface BulkUpdateOptions {
+    /** Skip redraw until all updates complete */
+    skipRedraw?: boolean;
+    /** Skip validation for performance (use with caution) */
+    skipValidation?: boolean;
+    /** Animate the updates */
+    animate?: boolean;
+    /** Animation duration in milliseconds */
+    duration?: number;
+}
+
+/**
+ * Data replacement options with transitions
+ */
+export interface DataReplacementOptions {
+    /** Animate the transition */
+    animate?: boolean;
+    /** Animation duration in milliseconds */
+    duration?: number;
+    /** Preserve existing node positions */
+    preservePositions?: boolean;
+    /** Layout to apply after data replacement */
+    layout?: 'force-directed' | 'preserve' | 'reset';
+    /** Skip validation for performance */
+    skipValidation?: boolean;
+}
+
+/**
+ * Data merging options
+ */
+export interface DataMergeOptions {
+    /** How to handle conflicts for existing nodes */
+    nodeConflictResolution?: 'update' | 'preserve' | 'error';
+    /** How to handle conflicts for existing edges */
+    edgeConflictResolution?: 'update' | 'preserve' | 'error';
+    /** Skip redraw until merge complete */
+    skipRedraw?: boolean;
+    /** Animate the merge operation */
+    animate?: boolean;
+    /** Animation duration in milliseconds */
+    duration?: number;
+}
+
+/**
+ * Transaction state for atomic operations
+ */
+export interface TransactionState {
+    /** Transaction ID */
+    id: string;
+    /** Transaction start timestamp */
+    startTime: number;
+    /** Operations performed in this transaction */
+    operations: TransactionOperation[];
+    /** Snapshot of data before transaction */
+    beforeSnapshot: GraphData;
+}
+
+/**
+ * Transaction operation record
+ */
+export interface TransactionOperation {
+    /** Operation type */
+    type: 'addNode' | 'deleteNode' | 'updateNode' | 'addEdge' | 'deleteEdge' | 'updateEdge';
+    /** Target ID */
+    targetId: string;
+    /** Operation timestamp */
+    timestamp: number;
+    /** Before state (for rollback) */
+    beforeState?: unknown;
+    /** After state */
+    afterState?: unknown;
+}
+
 // ==================== Module-Specific Types ====================
 
 /**

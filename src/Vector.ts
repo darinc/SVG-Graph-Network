@@ -116,10 +116,7 @@ export class Vector {
      * @returns New vector from polar coordinates
      */
     static fromPolar(magnitude: number, angle: number): Vector {
-        return new Vector(
-            magnitude * Math.cos(angle),
-            magnitude * Math.sin(angle)
-        );
+        return new Vector(magnitude * Math.cos(angle), magnitude * Math.sin(angle));
     }
 
     /**
@@ -163,8 +160,7 @@ export class Vector {
      * @returns True if vectors are equal within tolerance
      */
     equals(v: Vector, tolerance: number = 1e-10): boolean {
-        return Math.abs(this.x - v.x) < tolerance && 
-               Math.abs(this.y - v.y) < tolerance;
+        return Math.abs(this.x - v.x) < tolerance && Math.abs(this.y - v.y) < tolerance;
     }
 
     /**

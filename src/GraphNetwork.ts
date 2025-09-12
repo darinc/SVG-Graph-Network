@@ -1,8 +1,8 @@
-import { Node } from './Node.js';
-import { PhysicsEngine } from './physics/PhysicsEngine.js';
-import { UIManager, UICallbacks, BreadcrumbItem } from './ui/UIManager.js';
-import { SVGRenderer, RenderLink } from './rendering/SVGRenderer.js';
-import { EventManager, EventManagerCallbacks } from './interaction/EventManager.js';
+import { Node } from './Node';
+import { PhysicsEngine } from './physics/PhysicsEngine';
+import { UIManager, UICallbacks, BreadcrumbItem } from './ui/UIManager';
+import { SVGRenderer, RenderLink } from './rendering/SVGRenderer';
+import { EventManager, EventManagerCallbacks } from './interaction/EventManager';
 import {
     NodeData,
     LinkData,
@@ -14,13 +14,18 @@ import {
     NodeCreationOptions,
     EdgeCreationOptions,
     DeletionOptions,
+    BulkUpdateOptions,
+    DataReplacementOptions,
+    DataMergeOptions,
+    TransactionState,
+    TransactionOperation,
     NodeUpdate,
     LinkUpdate,
     DEFAULT_CONFIG,
     isGraphData,
     isNodeData,
     isLinkData
-} from './types/index.js';
+} from './types/index';
 import {
     NodeValidationError,
     NodeExistsError,
@@ -30,7 +35,7 @@ import {
     EdgeNotFoundError,
     InvalidEdgeReferencesError,
     GraphErrorUtils
-} from './errors/GraphErrors.js';
+} from './errors/GraphErrors';
 
 /**
  * Graph initialization options
@@ -109,6 +114,10 @@ export class GraphNetwork<T extends NodeData = NodeData> {
     private readonly edges = new Map<string, LinkData>(); // Track edges by ID for Phase 3 API
     private filteredNodes: Set<string> | null = null;
     private currentFilterNodeId: string | null = null;
+    
+    // Transaction management (Phase 4)
+    private currentTransaction: TransactionState | null = null;
+    private transactionIdCounter: number = 0;
 
     // Animation state
     private animationFrame: number | null = null;
@@ -282,68 +291,6 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         }
     }
 
-    /**
-     * Set graph data and create visual elements
-     * @param data - Graph data containing nodes and links
-     */
-    setData(data: GraphData): void {
-        if (!isGraphData(data)) {
-            throw new Error('Invalid graph data format. Must contain nodes and links arrays.');
-        }
-
-        if (this.debug) {
-            console.log(
-                'GraphNetwork: Setting data with',
-                data.nodes.length,
-                'nodes and',
-                data.links.length,
-                'links'
-            );
-        }
-
-        this.clearGraph();
-        this.parseData(data);
-
-        if (this.renderer) {
-            this.renderer.createElements(this.nodes, this.links);
-        }
-
-        // Initialize event handling after elements are created
-        if (this.events && this.renderer) {
-            this.events.updateCallbacks(this.eventCallbacks);
-            this.events.initialize(this.renderer.getSVGElement()!, this.nodes);
-        }
-
-        // Update UI with new data
-        if (this.ui) {
-            this.ui.createLegend(Array.from(this.nodes.values()));
-        }
-
-        // Reset node positions to ensure they're spread out properly
-        this.resetAllNodePositions();
-
-        // Ensure physics engine is initialized
-        if (!this.physics) {
-            this.physics = new PhysicsEngine({
-                damping: this.config.damping,
-                repulsionStrength: this.config.repulsionStrength,
-                attractionStrength: this.config.attractionStrength,
-                groupingStrength: this.config.groupingStrength
-            });
-        }
-
-        // Ensure animation is running for new data
-        if (!this.isAnimating) {
-            this.startAnimation();
-        }
-
-        this.updateGraphView();
-        this.emit('dataLoaded', {
-            nodes: this.nodes.size,
-            links: this.links.length,
-            loadTime: Date.now() - this.startTime
-        });
-    }
 
     /**
      * Parse and validate input data
@@ -1332,6 +1279,17 @@ export class GraphNetwork<T extends NodeData = NodeData> {
     }
 
     /**
+     * Get complete graph data
+     * @returns Complete graph data with nodes and links
+     */
+    getData(): GraphData {
+        return {
+            nodes: this.getNodes(),
+            links: this.getLinks()
+        };
+    }
+
+    /**
      * Get node by ID
      * @param nodeId - Node ID
      * @returns Node data or null if not found
@@ -1493,6 +1451,719 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             }
             throw error;
         }
+    }
+
+    // ==================== Phase 4: Bulk & Data-Driven Operations ====================
+
+    /**
+     * Update multiple nodes in bulk with intelligent batching
+     * @param nodesData - Array of node updates with IDs
+     * @param options - Bulk update options
+     * @returns Array of successfully updated node IDs
+     */
+    updateNodes(nodesData: Array<{ id: string } & Partial<Omit<T, 'id'>>>, options: BulkUpdateOptions = {}): string[] {
+        try {
+            const updatedNodeIds: string[] = [];
+            const errors: Array<{ nodeId: string; error: Error }> = [];
+
+            // Validate all updates first if not skipped
+            if (!options.skipValidation) {
+                for (const nodeUpdate of nodesData) {
+                    if (!nodeUpdate.id || typeof nodeUpdate.id !== 'string') {
+                        throw new NodeValidationError('Node update must include a valid ID', nodeUpdate);
+                    }
+
+                    if (!this.nodes.has(nodeUpdate.id)) {
+                        errors.push({
+                            nodeId: nodeUpdate.id,
+                            error: new NodeNotFoundError(nodeUpdate.id)
+                        });
+                        continue;
+                    }
+
+                    // Validate update fields
+                    if (nodeUpdate.name !== undefined && (typeof nodeUpdate.name !== 'string' || nodeUpdate.name.trim() === '')) {
+                        errors.push({
+                            nodeId: nodeUpdate.id,
+                            error: new NodeValidationError('Node name must be a non-empty string', nodeUpdate)
+                        });
+                    }
+
+                    if (nodeUpdate.size !== undefined && (typeof nodeUpdate.size !== 'number' || nodeUpdate.size <= 0)) {
+                        errors.push({
+                            nodeId: nodeUpdate.id,
+                            error: new NodeValidationError('Node size must be a positive number', nodeUpdate)
+                        });
+                    }
+                }
+
+                if (errors.length > 0) {
+                    throw new Error(`Bulk node update validation failed for ${errors.length} nodes: ${errors.map(e => `${e.nodeId}: ${e.error.message}`).join(', ')}`);
+                }
+            }
+
+            // Track transaction operation if in transaction
+            if (this.currentTransaction) {
+                this.currentTransaction.operations.push({
+                    type: 'updateNode',
+                    targetId: `bulk-${nodesData.length}-nodes`,
+                    timestamp: Date.now(),
+                    beforeState: nodesData.map(n => ({ ...this.nodes.get(n.id)?.data })),
+                    afterState: nodesData
+                });
+            }
+
+            // Apply all updates
+            for (const nodeUpdate of nodesData) {
+                const node = this.nodes.get(nodeUpdate.id);
+                if (!node) continue;
+
+                const oldData = { ...node.data };
+                const { id, ...updates } = nodeUpdate;
+                
+                // Apply updates to node data
+                Object.assign(node.data, updates);
+                updatedNodeIds.push(nodeUpdate.id);
+
+                if (this.debug) {
+                    console.log(`GraphNetwork: Bulk updated node "${nodeUpdate.id}"`);
+                }
+
+                // Emit event for each node
+                this.emit('nodeUpdated', {
+                    nodeId: nodeUpdate.id,
+                    nodeData: { ...node.data },
+                    oldData,
+                    type: 'nodeUpdated',
+                    timestamp: Date.now()
+                });
+            }
+
+            // Single redraw at the end for performance
+            if (!options.skipRedraw && updatedNodeIds.length > 0) {
+                this.renderer?.createElements(this.nodes, this.links);
+                this.ui?.createLegend(Array.from(this.nodes.values()));
+            }
+
+            // Emit bulk event
+            if (updatedNodeIds.length > 0) {
+                this.emit('nodesBulkUpdated', {
+                    nodeIds: updatedNodeIds,
+                    count: updatedNodeIds.length,
+                    type: 'nodesBulkUpdated',
+                    timestamp: Date.now()
+                });
+            }
+
+            if (this.debug) {
+                console.log(`GraphNetwork: Bulk updated ${updatedNodeIds.length} nodes`);
+            }
+
+            return updatedNodeIds;
+
+        } catch (error) {
+            if (this.debug) {
+                console.error('GraphNetwork: Failed to bulk update nodes:', GraphErrorUtils.getErrorDetails(error));
+            }
+            throw error;
+        }
+    }
+
+    /**
+     * Update multiple edges in bulk with intelligent batching
+     * @param edgesData - Array of edge updates with IDs
+     * @param options - Bulk update options
+     * @returns Array of successfully updated edge IDs
+     */
+    updateEdges(edgesData: Array<{ id: string } & Partial<Omit<EdgeData, 'id' | 'source' | 'target'>>>, options: BulkUpdateOptions = {}): string[] {
+        try {
+            const updatedEdgeIds: string[] = [];
+            const errors: Array<{ edgeId: string; error: Error }> = [];
+
+            // Validate all updates first if not skipped
+            if (!options.skipValidation) {
+                for (const edgeUpdate of edgesData) {
+                    if (!edgeUpdate.id || typeof edgeUpdate.id !== 'string') {
+                        throw new EdgeValidationError('Edge update must include a valid ID', edgeUpdate);
+                    }
+
+                    if (!this.edges.has(edgeUpdate.id)) {
+                        errors.push({
+                            edgeId: edgeUpdate.id,
+                            error: new EdgeNotFoundError(edgeUpdate.id)
+                        });
+                        continue;
+                    }
+
+                    // Validate update fields
+                    if (edgeUpdate.weight !== undefined && (typeof edgeUpdate.weight !== 'number' || edgeUpdate.weight < 0)) {
+                        errors.push({
+                            edgeId: edgeUpdate.id,
+                            error: new EdgeValidationError('Edge weight must be a non-negative number', edgeUpdate)
+                        });
+                    }
+
+                    if (edgeUpdate.line_type !== undefined && !['solid', 'dashed', 'dotted'].includes(edgeUpdate.line_type)) {
+                        errors.push({
+                            edgeId: edgeUpdate.id,
+                            error: new EdgeValidationError('Edge line_type must be "solid", "dashed", or "dotted"', edgeUpdate)
+                        });
+                    }
+                }
+
+                if (errors.length > 0) {
+                    throw new Error(`Bulk edge update validation failed for ${errors.length} edges: ${errors.map(e => `${e.edgeId}: ${e.error.message}`).join(', ')}`);
+                }
+            }
+
+            // Track transaction operation if in transaction
+            if (this.currentTransaction) {
+                this.currentTransaction.operations.push({
+                    type: 'updateEdge',
+                    targetId: `bulk-${edgesData.length}-edges`,
+                    timestamp: Date.now(),
+                    beforeState: edgesData.map(e => ({ ...this.edges.get(e.id) })),
+                    afterState: edgesData
+                });
+            }
+
+            // Apply all updates
+            for (const edgeUpdate of edgesData) {
+                const edgeData = this.edges.get(edgeUpdate.id);
+                if (!edgeData) continue;
+
+                const oldData = { ...edgeData };
+                const { id, ...updates } = edgeUpdate;
+                
+                // Apply updates to edge data
+                Object.assign(edgeData, updates);
+                this.edges.set(edgeUpdate.id, edgeData);
+
+                // Update corresponding render link
+                const renderLink = this.links.find(link => 
+                    link.source.getId() === edgeData.source && 
+                    link.target.getId() === edgeData.target
+                );
+
+                if (renderLink) {
+                    if (updates.label !== undefined) renderLink.label = updates.label || '';
+                    if (updates.weight !== undefined) renderLink.weight = updates.weight;
+                    if (updates.line_type !== undefined) renderLink.line_type = updates.line_type;
+                }
+
+                updatedEdgeIds.push(edgeUpdate.id);
+
+                if (this.debug) {
+                    console.log(`GraphNetwork: Bulk updated edge "${edgeUpdate.id}"`);
+                }
+
+                // Emit event for each edge
+                this.emit('linkUpdated', {
+                    linkData: { ...edgeData },
+                    oldData,
+                    edgeId: edgeUpdate.id,
+                    type: 'linkUpdated',
+                    timestamp: Date.now()
+                });
+            }
+
+            // Single redraw at the end for performance
+            if (!options.skipRedraw && updatedEdgeIds.length > 0) {
+                this.renderer?.createElements(this.nodes, this.links);
+            }
+
+            // Emit bulk event
+            if (updatedEdgeIds.length > 0) {
+                this.emit('edgesBulkUpdated', {
+                    edgeIds: updatedEdgeIds,
+                    count: updatedEdgeIds.length,
+                    type: 'edgesBulkUpdated',
+                    timestamp: Date.now()
+                });
+            }
+
+            if (this.debug) {
+                console.log(`GraphNetwork: Bulk updated ${updatedEdgeIds.length} edges`);
+            }
+
+            return updatedEdgeIds;
+
+        } catch (error) {
+            if (this.debug) {
+                console.error('GraphNetwork: Failed to bulk update edges:', GraphErrorUtils.getErrorDetails(error));
+            }
+            throw error;
+        }
+    }
+
+    /**
+     * Enhanced setData with smooth transitions and position preservation
+     * @param data - Graph data containing nodes and edges
+     * @param options - Data replacement options with animation and layout control
+     */
+    setData(data: GraphData, options: DataReplacementOptions = {}): void {
+        try {
+            if (!options.skipValidation && !isGraphData(data)) {
+                throw new Error('Invalid graph data format. Must contain nodes and links arrays.');
+            }
+
+            const oldNodeCount = this.nodes.size;
+            const oldLinkCount = this.links.length;
+
+            // Store position data if preserving positions
+            const positionMap = new Map<string, Position>();
+            if (options.preservePositions) {
+                for (const [nodeId, node] of this.nodes.entries()) {
+                    positionMap.set(nodeId, { x: node.position.x, y: node.position.y });
+                }
+            }
+
+            if (this.debug) {
+                console.log(
+                    `GraphNetwork: Setting data with ${data.nodes.length} nodes and ${data.links.length} links`,
+                    options.preservePositions ? '(preserving positions)' : ''
+                );
+            }
+
+            // Track transaction operation if in transaction
+            if (this.currentTransaction) {
+                this.currentTransaction.operations.push({
+                    type: 'setData' as any,
+                    targetId: 'graph',
+                    timestamp: Date.now(),
+                    beforeState: this.getData(),
+                    afterState: data
+                });
+            }
+
+            // Clear current data
+            this.clearGraph();
+
+            // Parse new data
+            this.parseData(data);
+
+            // Restore positions if requested
+            if (options.preservePositions && positionMap.size > 0) {
+                for (const [nodeId, node] of this.nodes.entries()) {
+                    const savedPosition = positionMap.get(nodeId);
+                    if (savedPosition) {
+                        node.position.x = savedPosition.x;
+                        node.position.y = savedPosition.y;
+                    }
+                }
+            }
+
+            // Create visual elements
+            if (this.renderer) {
+                this.renderer.createElements(this.nodes, this.links);
+            }
+
+            // Initialize event handling after elements are created
+            if (this.events && this.renderer) {
+                this.events.updateCallbacks(this.eventCallbacks);
+                this.events.initialize(this.renderer.getSVGElement()!, this.nodes);
+            }
+
+            // Update UI with new data
+            if (this.ui) {
+                this.ui.createLegend(Array.from(this.nodes.values()));
+            }
+
+            // Handle layout options
+            if (options.layout === 'reset' || (!options.preservePositions && options.layout !== 'preserve')) {
+                this.resetAllNodePositions();
+            }
+
+            // Ensure physics engine is initialized
+            if (!this.physics) {
+                this.physics = new PhysicsEngine({
+                    damping: this.config.damping,
+                    repulsionStrength: this.config.repulsionStrength,
+                    attractionStrength: this.config.attractionStrength,
+                    groupingStrength: this.config.groupingStrength
+                });
+            }
+
+            // Start animation if not already running
+            if (!this.isAnimating) {
+                this.startAnimation();
+            }
+
+            // Emit enhanced event
+            this.emit('dataLoaded', {
+                nodeCount: this.nodes.size,
+                linkCount: this.links.length,
+                oldNodeCount,
+                oldLinkCount,
+                preservedPositions: options.preservePositions && positionMap.size,
+                type: 'dataLoaded',
+                timestamp: Date.now()
+            });
+
+            if (this.debug) {
+                console.log(`GraphNetwork: Data set successfully with ${this.nodes.size} nodes and ${this.links.length} links`);
+            }
+
+        } catch (error) {
+            if (this.debug) {
+                console.error('GraphNetwork: Failed to set data:', GraphErrorUtils.getErrorDetails(error));
+            }
+            throw error;
+        }
+    }
+
+    /**
+     * Merge new data with existing graph data intelligently
+     * @param data - Graph data to merge
+     * @param options - Merge options with conflict resolution
+     */
+    mergeData(data: GraphData, options: DataMergeOptions = {}): void {
+        try {
+            if (!isGraphData(data)) {
+                throw new Error('Invalid graph data format. Must contain nodes and links arrays.');
+            }
+
+            const results = {
+                nodesAdded: 0,
+                nodesUpdated: 0,
+                nodesSkipped: 0,
+                edgesAdded: 0,
+                edgesUpdated: 0,
+                edgesSkipped: 0,
+                errors: [] as string[]
+            };
+
+            if (this.debug) {
+                console.log(`GraphNetwork: Merging data with ${data.nodes.length} nodes and ${data.links.length} links`);
+            }
+
+            // Track transaction operation if in transaction
+            if (this.currentTransaction) {
+                this.currentTransaction.operations.push({
+                    type: 'mergeData' as any,
+                    targetId: 'graph',
+                    timestamp: Date.now(),
+                    beforeState: this.getData(),
+                    afterState: data
+                });
+            }
+
+            // Process nodes
+            for (const nodeData of data.nodes) {
+                try {
+                    const exists = this.nodes.has(nodeData.id);
+                    
+                    if (exists) {
+                        // Handle node conflicts
+                        if (options.nodeConflictResolution === 'error') {
+                            throw new NodeExistsError(nodeData.id);
+                        } else if (options.nodeConflictResolution === 'preserve') {
+                            results.nodesSkipped++;
+                            continue;
+                        } else {
+                            // Update existing node
+                            const { id, ...updates } = nodeData;
+                            this.updateNode(nodeData.id, updates as unknown as Partial<Omit<T, 'id'>>, { skipRedraw: true });
+                            results.nodesUpdated++;
+                        }
+                    } else {
+                        // Add new node
+                        this.addNode(nodeData as T, { skipRedraw: true });
+                        results.nodesAdded++;
+                    }
+                } catch (error) {
+                    const errorMessage = error instanceof Error ? error.message : String(error);
+                    results.errors.push(`Node ${nodeData.id}: ${errorMessage}`);
+                }
+            }
+
+            // Process edges
+            for (const linkData of data.links) {
+                try {
+                    // Generate ID if not present
+                    const edgeId = linkData.id || `${linkData.source}-${linkData.target}`;
+                    const exists = this.edges.has(edgeId);
+                    
+                    if (exists) {
+                        // Handle edge conflicts
+                        if (options.edgeConflictResolution === 'error') {
+                            throw new EdgeExistsError(edgeId);
+                        } else if (options.edgeConflictResolution === 'preserve') {
+                            results.edgesSkipped++;
+                            continue;
+                        } else {
+                            // Update existing edge
+                            const { id, source, target, ...updates } = linkData;
+                            this.updateEdge(edgeId, updates, { skipRedraw: true });
+                            results.edgesUpdated++;
+                        }
+                    } else {
+                        // Add new edge
+                        const edgeData: EdgeData = {
+                            id: edgeId,
+                            source: linkData.source,
+                            target: linkData.target,
+                            label: linkData.label,
+                            weight: linkData.weight,
+                            line_type: linkData.line_type,
+                            color: linkData.color
+                        };
+                        this.addEdge(edgeData, { skipRedraw: true });
+                        results.edgesAdded++;
+                    }
+                } catch (error) {
+                    const errorMessage = error instanceof Error ? error.message : String(error);
+                    results.errors.push(`Edge ${linkData.source}-${linkData.target}: ${errorMessage}`);
+                }
+            }
+
+            // Single redraw at the end
+            if (!options.skipRedraw) {
+                this.renderer?.createElements(this.nodes, this.links);
+                this.ui?.createLegend(Array.from(this.nodes.values()));
+            }
+
+            // Emit merge event
+            this.emit('dataMerged', {
+                results,
+                type: 'dataMerged',
+                timestamp: Date.now()
+            });
+
+            if (this.debug) {
+                console.log('GraphNetwork: Data merge completed:', results);
+            }
+
+            if (results.errors.length > 0 && this.debug) {
+                console.warn('GraphNetwork: Merge completed with errors:', results.errors);
+            }
+
+        } catch (error) {
+            if (this.debug) {
+                console.error('GraphNetwork: Failed to merge data:', GraphErrorUtils.getErrorDetails(error));
+            }
+            throw error;
+        }
+    }
+
+    /**
+     * Clear all data from the graph with optional animation
+     * @param options - Clear options with animation support
+     */
+    clearData(options: { animate?: boolean; duration?: number } = {}): void {
+        try {
+            const nodeCount = this.nodes.size;
+            const linkCount = this.links.length;
+
+            if (this.debug) {
+                console.log(`GraphNetwork: Clearing ${nodeCount} nodes and ${linkCount} links`);
+            }
+
+            // Track transaction operation if in transaction
+            if (this.currentTransaction) {
+                this.currentTransaction.operations.push({
+                    type: 'clearData' as any,
+                    targetId: 'graph',
+                    timestamp: Date.now(),
+                    beforeState: this.getData(),
+                    afterState: { nodes: [], links: [] }
+                });
+            }
+
+            // TODO: Implement animation support in future version
+            if (options.animate) {
+                if (this.debug) {
+                    console.log('GraphNetwork: Animation not yet implemented for clearData');
+                }
+            }
+
+            // Clear the graph
+            this.clearGraph();
+
+            // Update visual elements
+            this.renderer?.createElements(this.nodes, this.links);
+            this.ui?.createLegend([]);
+
+            // Stop animation if no data
+            if (this.isAnimating) {
+                this.stopAnimation();
+            }
+
+            // Emit clear event
+            this.emit('dataCleared', {
+                clearedNodeCount: nodeCount,
+                clearedLinkCount: linkCount,
+                type: 'dataCleared',
+                timestamp: Date.now()
+            });
+
+            if (this.debug) {
+                console.log('GraphNetwork: Data cleared successfully');
+            }
+
+        } catch (error) {
+            if (this.debug) {
+                console.error('GraphNetwork: Failed to clear data:', GraphErrorUtils.getErrorDetails(error));
+            }
+            throw error;
+        }
+    }
+
+    /**
+     * Replace all data atomically - alias for setData for clarity
+     * @param data - New graph data
+     * @param options - Replacement options
+     */
+    replaceData(data: GraphData, options: DataReplacementOptions = {}): void {
+        return this.setData(data, options);
+    }
+
+    // ==================== Transaction Support ====================
+
+    /**
+     * Start a new transaction for atomic operations
+     * @returns Transaction ID for tracking
+     */
+    startTransaction(): string {
+        if (this.currentTransaction) {
+            throw new Error('Transaction already in progress. Commit or rollback current transaction first.');
+        }
+
+        const transactionId = `tx-${++this.transactionIdCounter}-${Date.now()}`;
+        
+        this.currentTransaction = {
+            id: transactionId,
+            startTime: Date.now(),
+            operations: [],
+            beforeSnapshot: this.getData()
+        };
+
+        if (this.debug) {
+            console.log(`GraphNetwork: Started transaction "${transactionId}"`);
+        }
+
+        return transactionId;
+    }
+
+    /**
+     * Commit the current transaction, applying all changes
+     * @returns Transaction summary
+     */
+    commitTransaction(): { id: string; operationCount: number; duration: number } {
+        if (!this.currentTransaction) {
+            throw new Error('No transaction in progress');
+        }
+
+        const transaction = this.currentTransaction;
+        const duration = Date.now() - transaction.startTime;
+        
+        // Transaction is already applied (operations were executed during transaction)
+        // Just clean up the transaction state
+        this.currentTransaction = null;
+
+        const summary = {
+            id: transaction.id,
+            operationCount: transaction.operations.length,
+            duration
+        };
+
+        if (this.debug) {
+            console.log(`GraphNetwork: Committed transaction "${transaction.id}" with ${transaction.operations.length} operations in ${duration}ms`);
+        }
+
+        // Emit transaction committed event
+        this.emit('transactionCommitted', {
+            transactionId: transaction.id,
+            operationCount: transaction.operations.length,
+            duration,
+            type: 'transactionCommitted',
+            timestamp: Date.now()
+        });
+
+        return summary;
+    }
+
+    /**
+     * Rollback the current transaction, undoing all changes
+     * @returns Transaction summary
+     */
+    rollbackTransaction(): { id: string; operationCount: number; duration: number } {
+        if (!this.currentTransaction) {
+            throw new Error('No transaction in progress');
+        }
+
+        const transaction = this.currentTransaction;
+        const duration = Date.now() - transaction.startTime;
+
+        try {
+            if (this.debug) {
+                console.log(`GraphNetwork: Rolling back transaction "${transaction.id}" with ${transaction.operations.length} operations`);
+            }
+
+            // Restore the snapshot from before the transaction
+            this.setData(transaction.beforeSnapshot, { 
+                skipValidation: true,
+                preservePositions: false 
+            });
+
+            const summary = {
+                id: transaction.id,
+                operationCount: transaction.operations.length,
+                duration
+            };
+
+            // Clear transaction state
+            this.currentTransaction = null;
+
+            if (this.debug) {
+                console.log(`GraphNetwork: Rolled back transaction "${transaction.id}" in ${duration}ms`);
+            }
+
+            // Emit transaction rolled back event
+            this.emit('transactionRolledBack', {
+                transactionId: transaction.id,
+                operationCount: transaction.operations.length,
+                duration,
+                type: 'transactionRolledBack',
+                timestamp: Date.now()
+            });
+
+            return summary;
+
+        } catch (error) {
+            // Clear transaction state even if rollback fails
+            this.currentTransaction = null;
+            
+            if (this.debug) {
+                console.error('GraphNetwork: Failed to rollback transaction:', GraphErrorUtils.getErrorDetails(error));
+            }
+            throw error;
+        }
+    }
+
+    /**
+     * Get current transaction status
+     * @returns Transaction info or null if no active transaction
+     */
+    getTransactionStatus(): { id: string; startTime: number; operationCount: number; duration: number } | null {
+        if (!this.currentTransaction) {
+            return null;
+        }
+
+        return {
+            id: this.currentTransaction.id,
+            startTime: this.currentTransaction.startTime,
+            operationCount: this.currentTransaction.operations.length,
+            duration: Date.now() - this.currentTransaction.startTime
+        };
+    }
+
+    /**
+     * Check if currently in a transaction
+     * @returns True if transaction is active
+     */
+    isInTransaction(): boolean {
+        return this.currentTransaction !== null;
     }
 
     /**
