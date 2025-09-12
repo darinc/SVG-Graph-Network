@@ -7,13 +7,16 @@ window.GraphNetwork = GraphNetwork;
 console.log('Advanced example loaded');
 
 // Initialize the graph when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    // Prevent multiple initializations (for HMR)
+document.addEventListener('DOMContentLoaded', async () => {
+    // Prevent multiple initializations (for HMR) with proper cleanup
     if (window.graph) {
         try {
+            console.log('🧹 Cleaning up previous graph instance...');
+            await window.graph.clearData({ animate: true, duration: 300 });
             window.graph.destroy();
+            console.log('✅ Previous graph instance cleaned up');
         } catch (e) {
-            console.log('Previous graph instance cleanup skipped');
+            console.log('⚠️ Previous graph cleanup skipped:', e.message);
         }
     }
 
@@ -213,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const eraCheckbox = document.getElementById('era-checkbox');
     const toggleSwitch = document.getElementById('toggle-switch');
     
-    function updateEra() {
+    async function updateEra() {
         isModernEra = eraCheckbox.checked;
         
         // Update toggle visual state
@@ -223,17 +226,22 @@ document.addEventListener('DOMContentLoaded', () => {
             toggleSwitch.classList.remove('active');
         }
         
-        // Update graph data and title
-        graph.setData(getCurrentNetworkData());
-        graph.config.title = getCurrentTitle();
+        console.log(`Switching to ${isModernEra ? '2024' : '1914'} diplomatic network...`);
         
-        // Update the title element if it exists
-        const titleElement = document.querySelector('.graph-network-title');
-        if (titleElement) {
-            titleElement.textContent = getCurrentTitle();
-        }
+        // Use Phase 4 enhanced setData API with smooth transitions
+        graph.setData(getCurrentNetworkData(), {
+            animate: true,
+            duration: 800,
+            preservePositions: false,  // Allow new layout for different data
+            layout: 'force-directed'   // Apply fresh layout
+        });
         
-        console.log(`Switched to ${isModernEra ? '2024' : '1914'} diplomatic network`);
+        // Update configuration
+        graph.updateConfig({ 
+            title: getCurrentTitle() 
+        });
+        
+        console.log(`✅ Successfully switched to ${isModernEra ? '2024' : '1914'} diplomatic network`);
     }
     
     // Add event listeners for toggle
@@ -245,32 +253,97 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event listeners for advanced interactions
     graph.on('nodeDoubleClick', (data) => {
-        console.log(`Filtering by ${data.node.data.name}`);
+        console.log(`🎯 Filtering by ${data.node.data.name}`);
     });
 
     graph.on('filtered', (data) => {
-        console.log(`Graph filtered by ${data.nodeId}, showing ${data.visibleNodes.length} nodes`);
+        console.log(`🔍 Graph filtered by ${data.nodeId}, showing ${data.visibleNodes.length} nodes`);
     });
 
     graph.on('filterReset', () => {
-        console.log('Showing all nodes');
+        console.log('🌐 Showing all nodes');
     });
 
     graph.on('themeChanged', (data) => {
-        console.log(`Theme changed to ${data.theme}`);
+        console.log(`🎨 Theme changed to ${data.theme}`);
     });
 
     graph.on('zoom', (data) => {
-        console.log(`Zoomed to ${data.scale.toFixed(2)}x`);
+        console.log(`🔍 Zoomed to ${data.scale.toFixed(2)}x`);
+    });
+    
+    // Showcase Phase 5 Selection & Highlighting APIs
+    graph.on('nodeClick', (data) => {
+        const nodeId = data.node.data.id;
+        
+        // Demo selection functionality
+        if (graph.isNodeSelected(nodeId)) {
+            graph.deselectNode(nodeId);
+            console.log(`👋 Deselected ${data.node.data.name}`);
+        } else {
+            graph.selectNode(nodeId, { additive: true });
+            console.log(`👆 Selected ${data.node.data.name}`);
+        }
+    });
+    
+    // Add keyboard shortcuts for advanced features
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            graph.deselectAll();
+            graph.clearHighlights();
+            console.log('🧹 Cleared all selections and highlights');
+        } else if (e.key === 'h') {
+            // Highlight neighbors of selected nodes
+            const selected = graph.getSelectedNodes();
+            if (selected.length > 0) {
+                selected.forEach(nodeId => {
+                    const neighbors = graph.highlightNeighbors(nodeId, {
+                        depth: 1,
+                        nodeColor: '#ffd700',
+                        edgeColor: '#ffa500',
+                        fadeOthers: true
+                    });
+                    console.log(`✨ Highlighted ${neighbors.length} neighbors of ${nodeId}`);
+                });
+            }
+        } else if (e.key === 'p') {
+            // Highlight path between first two selected nodes
+            const selected = graph.getSelectedNodes();
+            if (selected.length >= 2) {
+                const path = graph.highlightPath(selected[0], selected[1], {
+                    pathColor: '#ff6b6b',
+                    pathWidth: 4,
+                    animate: true
+                });
+                if (path) {
+                    console.log(`🛤️ Highlighted path: ${path.join(' → ')}`);
+                } else {
+                    console.log('❌ No path found between selected nodes');
+                }
+            } else {
+                console.log('ℹ️ Select at least 2 nodes to highlight path');
+            }
+        }
     });
 
     // Make graph available globally
     window.graph = graph;
 
-    // Start the simulation
-    console.log('European Diplomatic Networks loaded (1914 & 2024)');
-    console.log('- Use the toggle at the top to switch between 1914 and 2024 eras');
-    console.log('- Double-click nodes to explore their relationships');
-    console.log('- Use controls to adjust physics parameters');
-    console.log('- Pan with mouse drag, zoom with wheel');
+    // Start the simulation  
+    console.log('🌍 European Diplomatic Networks loaded (1914 & 2024)');
+    console.log('');
+    console.log('📱 BASIC INTERACTIONS:');
+    console.log('  • Toggle: Switch between 1914 and 2024 eras');
+    console.log('  • Double-click nodes: Filter by node relationships');
+    console.log('  • Single-click nodes: Select/deselect (multi-select enabled)');
+    console.log('  • Pan: Mouse drag on background');
+    console.log('  • Zoom: Mouse wheel');
+    console.log('');
+    console.log('⌨️ ADVANCED KEYBOARD SHORTCUTS:');
+    console.log('  • ESC: Clear all selections and highlights');
+    console.log('  • H: Highlight neighbors of selected nodes');
+    console.log('  • P: Highlight path between first two selected nodes');
+    console.log('');
+    console.log('🎛️ CONTROLS: Use the control panel to adjust physics parameters');
+    console.log('📊 LEGEND: Shows node types and relationship meanings');
 });
