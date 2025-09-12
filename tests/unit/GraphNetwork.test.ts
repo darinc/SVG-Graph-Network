@@ -122,7 +122,11 @@ describe('GraphNetwork', () => {
 
         describe('deleteNode()', () => {
             beforeEach(() => {
-                graph.setData(sampleGraphData);
+                graph.clearData();
+                graph.setData({
+                    nodes: JSON.parse(JSON.stringify(sampleNodes)),
+                    links: JSON.parse(JSON.stringify(sampleEdges))
+                });
             });
 
             it('should delete a node and connected edges', () => {
@@ -244,7 +248,11 @@ describe('GraphNetwork', () => {
 
         describe('deleteEdge()', () => {
             beforeEach(() => {
-                graph.setData(sampleGraphData);
+                graph.clearData();
+                graph.setData({
+                    nodes: JSON.parse(JSON.stringify(sampleNodes)),
+                    links: JSON.parse(JSON.stringify(sampleEdges))
+                });
             });
 
             it('should delete edge by ID', () => {
@@ -275,7 +283,11 @@ describe('GraphNetwork', () => {
 
     describe('Phase 3: Update Operations', () => {
         beforeEach(() => {
-            graph.setData(sampleGraphData);
+            graph.clearData();
+            graph.setData({
+                nodes: JSON.parse(JSON.stringify(sampleNodes)),
+                links: JSON.parse(JSON.stringify(sampleEdges))
+            });
         });
 
         describe('updateNode()', () => {
@@ -335,7 +347,11 @@ describe('GraphNetwork', () => {
 
     describe('Phase 3: Getter Methods', () => {
         beforeEach(() => {
-            graph.setData(sampleGraphData);
+            graph.clearData();
+            graph.setData({
+                nodes: JSON.parse(JSON.stringify(sampleNodes)),
+                links: JSON.parse(JSON.stringify(sampleEdges))
+            });
         });
 
         describe('getNode()', () => {
@@ -400,7 +416,11 @@ describe('GraphNetwork', () => {
 
     describe('Phase 4: Bulk Operations', () => {
         beforeEach(() => {
-            graph.setData(sampleGraphData);
+            graph.clearData();
+            graph.setData({
+                nodes: JSON.parse(JSON.stringify(sampleNodes)),
+                links: JSON.parse(JSON.stringify(sampleEdges))
+            });
         });
 
         describe('updateNodes()', () => {
@@ -522,7 +542,11 @@ describe('GraphNetwork', () => {
 
         describe('mergeData()', () => {
             beforeEach(() => {
-                graph.setData(sampleGraphData);
+                graph.clearData();
+                graph.setData({
+                    nodes: JSON.parse(JSON.stringify(sampleNodes)),
+                    links: JSON.parse(JSON.stringify(sampleEdges))
+                });
             });
 
             it('should merge new data with conflict resolution', () => {
@@ -596,7 +620,11 @@ describe('GraphNetwork', () => {
 
     describe('Phase 4: Transaction Support', () => {
         beforeEach(() => {
-            graph.setData(sampleGraphData);
+            graph.clearData();
+            graph.setData({
+                nodes: JSON.parse(JSON.stringify(sampleNodes)),
+                links: JSON.parse(JSON.stringify(sampleEdges))
+            });
         });
 
         describe('Transaction Lifecycle', () => {

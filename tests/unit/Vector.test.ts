@@ -1,4 +1,4 @@
-import { Vector } from '../../src/Vector.js';
+import { Vector } from '../../src/Vector';
 
 describe('Vector', () => {
     describe('constructor', () => {

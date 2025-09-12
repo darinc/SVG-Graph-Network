@@ -1,8 +1,8 @@
-import { PhysicsEngine } from '../../../src/physics/PhysicsEngine.js';
-import { Node } from '../../../src/Node.js';
-import { Vector } from '../../../src/Vector.js';
-import { createMockNode, createMockPhysicsConfig } from '../../utils/testHelpers.js';
-import { NodeData } from '../../../src/types/index.js';
+import { PhysicsEngine } from '../../../src/physics/PhysicsEngine';
+import { Node } from '../../../src/Node';
+import { Vector } from '../../../src/Vector';
+import { createMockNode, createMockPhysicsConfig } from '../../utils/testHelpers';
+import { NodeData } from '../../../src/types/index';
 
 describe('PhysicsEngine', () => {
     let engine: PhysicsEngine;

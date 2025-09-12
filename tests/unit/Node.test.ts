@@ -1,6 +1,6 @@
-import { Node } from '../../src/Node.js';
-import { Vector } from '../../src/Vector.js';
-import { createMockNode } from '../utils/testHelpers.js';
+import { Node } from '../../src/Node';
+import { Vector } from '../../src/Vector';
+import { createMockNode } from '../utils/testHelpers';
 
 describe('Node', () => {
     describe('constructor', () => {

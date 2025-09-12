@@ -22,7 +22,7 @@ module.exports = {
   },
   
   // Setup files to run after the test framework is installed
-  setupFilesAfterEnv: ['<rootDir>/tests/setup.js'],
+  setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
   
   // Test match patterns
   testMatch: [
@@ -44,8 +44,8 @@ module.exports = {
   // Coverage configuration
   collectCoverage: false,
   collectCoverageFrom: [
-    'src/**/*.js',
     'src/**/*.ts',
+    '!src/**/*.js',
     '!src/**/*.test.js',
     '!src/**/*.spec.js',
     '!src/**/*.test.ts',

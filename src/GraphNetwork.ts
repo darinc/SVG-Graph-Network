@@ -353,12 +353,20 @@ export class GraphNetwork<T extends NodeData = NodeData> {
                 );
             }
 
+            // Create render link
             this.links.push({
                 source: sourceNode,
                 target: targetNode,
                 label: linkData.label || '',
                 weight: linkData.weight || 1,
                 line_type: linkData.line_type || 'solid'
+            });
+
+            // Also populate edges Map for Phase 3 API compatibility
+            const edgeId = linkData.id || `${linkData.source}-${linkData.target}`;
+            this.edges.set(edgeId, { 
+                id: edgeId, 
+                ...linkData 
             });
         });
 
@@ -846,6 +854,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
     clearGraph(): void {
         this.nodes.clear();
         this.links = [];
+        this.edges.clear(); // Clear edge tracking for Phase 3 API
         this.filteredNodes = null;
         this.currentFilterNodeId = null;
         this.renderer?.clearElements();
@@ -863,34 +872,36 @@ export class GraphNetwork<T extends NodeData = NodeData> {
     addNode(nodeData: T, options: NodeCreationOptions = {}): Node<T> {
         try {
             // Enhanced validation
-            if (!options.skipValidation && !isNodeData(nodeData)) {
-                throw new NodeValidationError(
-                    'Invalid node data. Must have id and name properties.',
-                    nodeData
-                );
+            if (!options.skipValidation) {
+                if (!isNodeData(nodeData)) {
+                    throw new NodeValidationError(
+                        'Invalid node data. Must have id and name properties.',
+                        nodeData
+                    );
+                }
+
+                // Additional validation for required fields
+                if (!nodeData.id || typeof nodeData.id !== 'string' || nodeData.id.trim() === '') {
+                    throw new NodeValidationError('Node id must be a non-empty string', nodeData);
+                }
+
+                if (!nodeData.name || typeof nodeData.name !== 'string' || nodeData.name.trim() === '') {
+                    throw new NodeValidationError('Node name must be a non-empty string', nodeData);
+                }
+
+                // Validate optional fields
+                if (nodeData.type !== undefined && typeof nodeData.type !== 'string') {
+                    throw new NodeValidationError('Node type must be a string', nodeData);
+                }
+
+                if (nodeData.size !== undefined && (typeof nodeData.size !== 'number' || nodeData.size <= 0 || !isFinite(nodeData.size) || isNaN(nodeData.size))) {
+                    throw new NodeValidationError('Node size must be a positive finite number', nodeData);
+                }
             }
 
-            // Check for existing node
+            // Check for existing node (always check, even when skipping validation)
             if (this.nodes.has(nodeData.id)) {
                 throw new NodeExistsError(nodeData.id);
-            }
-
-            // Additional validation for required fields
-            if (!nodeData.id || typeof nodeData.id !== 'string' || nodeData.id.trim() === '') {
-                throw new NodeValidationError('Node id must be a non-empty string', nodeData);
-            }
-
-            if (!nodeData.name || typeof nodeData.name !== 'string' || nodeData.name.trim() === '') {
-                throw new NodeValidationError('Node name must be a non-empty string', nodeData);
-            }
-
-            // Validate optional fields
-            if (nodeData.type !== undefined && typeof nodeData.type !== 'string') {
-                throw new NodeValidationError('Node type must be a string', nodeData);
-            }
-
-            if (nodeData.size !== undefined && (typeof nodeData.size !== 'number' || nodeData.size <= 0)) {
-                throw new NodeValidationError('Node size must be a positive number', nodeData);
             }
 
             // Create node with optional positioning
@@ -907,6 +918,17 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             }
 
             this.nodes.set(nodeData.id, node);
+
+            // Track transaction operation if in transaction
+            if (this.currentTransaction) {
+                this.currentTransaction.operations.push({
+                    type: 'addNode',
+                    targetId: nodeData.id,
+                    timestamp: Date.now(),
+                    beforeState: null,
+                    afterState: { ...nodeData }
+                });
+            }
 
             // Redraw if not skipped
             if (!options.skipRedraw) {
@@ -953,16 +975,9 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             const connectedLinks: LinkData[] = [];
 
             // Collect connected links for event emission
-            this.links.forEach(link => {
-                if (link.source.getId() === nodeId || link.target.getId() === nodeId) {
-                    connectedLinks.push({
-                        id: `${link.source.getId()}-${link.target.getId()}`, // Generate ID if not present
-                        source: link.source.getId(),
-                        target: link.target.getId(),
-                        label: link.label,
-                        weight: link.weight,
-                        line_type: link.line_type
-                    });
+            this.edges.forEach((edgeData, edgeId) => {
+                if (edgeData.source === nodeId || edgeData.target === nodeId) {
+                    connectedLinks.push({ ...edgeData });
                 }
             });
 
@@ -970,6 +985,11 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             this.links = this.links.filter(
                 link => link.source.getId() !== nodeId && link.target.getId() !== nodeId
             );
+
+            // Remove connected edges from edge tracking Map
+            connectedLinks.forEach(connectedLink => {
+                this.edges.delete(connectedLink.id);
+            });
 
             // Remove from nodes
             this.nodes.delete(nodeId);
@@ -991,6 +1011,17 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             if (!options.skipRedraw) {
                 this.renderer?.createElements(this.nodes, this.links);
                 this.ui?.createLegend(Array.from(this.nodes.values()));
+            }
+
+            // Track transaction operation if in transaction
+            if (this.currentTransaction) {
+                this.currentTransaction.operations.push({
+                    type: 'deleteNode',
+                    targetId: nodeId,
+                    timestamp: Date.now(),
+                    beforeState: nodeData,
+                    afterState: null
+                });
             }
 
             if (this.debug) {
@@ -1098,6 +1129,17 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             this.edges.set(edgeData.id, { ...edgeData });
             this.links.push(renderLink);
 
+            // Track transaction operation if in transaction
+            if (this.currentTransaction) {
+                this.currentTransaction.operations.push({
+                    type: 'addEdge',
+                    targetId: edgeData.id,
+                    timestamp: Date.now(),
+                    beforeState: null,
+                    afterState: { ...edgeData }
+                });
+            }
+
             // Redraw if not skipped
             if (!options.skipRedraw) {
                 this.renderer?.createElements(this.nodes, this.links);
@@ -1183,6 +1225,17 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             // Redraw if not skipped
             if (!options.skipRedraw) {
                 this.renderer?.createElements(this.nodes, this.links);
+            }
+
+            // Track transaction operation if in transaction
+            if (this.currentTransaction) {
+                this.currentTransaction.operations.push({
+                    type: 'deleteEdge',
+                    targetId: edgeId,
+                    timestamp: Date.now(),
+                    beforeState: { ...edgeData },
+                    afterState: null
+                });
             }
 
             if (this.debug) {
@@ -1363,6 +1416,17 @@ export class GraphNetwork<T extends NodeData = NodeData> {
                 this.ui?.createLegend(Array.from(this.nodes.values()));
             }
 
+            // Track transaction operation if in transaction
+            if (this.currentTransaction) {
+                this.currentTransaction.operations.push({
+                    type: 'updateNode',
+                    targetId: nodeId,
+                    timestamp: Date.now(),
+                    beforeState: oldData,
+                    afterState: { ...node.data }
+                });
+            }
+
             if (this.debug) {
                 console.log(`GraphNetwork: Updated node "${nodeId}"`);
             }
@@ -1428,6 +1492,17 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             // Redraw if not skipped
             if (!options.skipRedraw) {
                 this.renderer?.createElements(this.nodes, this.links);
+            }
+
+            // Track transaction operation if in transaction
+            if (this.currentTransaction) {
+                this.currentTransaction.operations.push({
+                    type: 'updateEdge',
+                    targetId: edgeId,
+                    timestamp: Date.now(),
+                    beforeState: oldData,
+                    afterState: { ...edgeData }
+                });
             }
 
             if (this.debug) {
@@ -1872,6 +1947,10 @@ export class GraphNetwork<T extends NodeData = NodeData> {
                         results.nodesAdded++;
                     }
                 } catch (error) {
+                    // Re-throw NodeExistsError when conflict resolution is 'error'
+                    if (error instanceof NodeExistsError && options.nodeConflictResolution === 'error') {
+                        throw error;
+                    }
                     const errorMessage = error instanceof Error ? error.message : String(error);
                     results.errors.push(`Node ${nodeData.id}: ${errorMessage}`);
                 }

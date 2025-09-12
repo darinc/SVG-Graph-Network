@@ -2,7 +2,7 @@
  * Test utilities and helpers for SVG Graph Network tests
  */
 
-import { NodeData, LinkData, GraphData } from '../../src/types/index.js';
+import { NodeData, LinkData, GraphData } from '../../src/types/index';
 
 /**
  * Create mock node data for testing
