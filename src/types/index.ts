@@ -26,6 +26,8 @@ export interface NodeData {
  * Link/edge data structure connecting two nodes
  */
 export interface LinkData {
+    /** Unique identifier for the edge (optional for backward compatibility) */
+    id?: string;
     /** Source node ID */
     source: string;
     /** Target node ID */
@@ -36,6 +38,8 @@ export interface LinkData {
     weight?: number;
     /** Visual style of the line */
     line_type?: 'solid' | 'dashed' | 'dotted';
+    /** Color of the edge */
+    color?: string;
     /** Allow additional custom properties */
     [key: string]: any;
 }
@@ -199,13 +203,7 @@ export interface ThemeEvent extends BaseEvent {
 /**
  * Union type of all possible events
  */
-export type GraphEvent = 
-    | NodeEvent 
-    | LinkEvent 
-    | ViewEvent 
-    | FilterEvent 
-    | DataEvent 
-    | ThemeEvent;
+export type GraphEvent = NodeEvent | LinkEvent | ViewEvent | FilterEvent | DataEvent | ThemeEvent;
 
 // ==================== Callback Types ====================
 
@@ -249,9 +247,57 @@ export type ConfigUpdate = Partial<GraphConfig>;
 export type NodeUpdate = { id: string } & Partial<Omit<NodeData, 'id'>>;
 
 /**
- * Link update type - source and target required, rest optional
+ * Link update type - ID required for identification, other fields optional
  */
-export type LinkUpdate = { source: string; target: string } & Partial<Omit<LinkData, 'source' | 'target'>>;
+export type LinkUpdate = { id: string } & Partial<Omit<LinkData, 'id'>>;
+
+/**
+ * Edge data for creation - enhanced with validation requirements
+ */
+export interface EdgeData extends Omit<LinkData, 'id'> {
+    /** Unique identifier for the edge */
+    id: string;
+    /** Source node ID */
+    source: string;
+    /** Target node ID */
+    target: string;
+}
+
+/**
+ * Node creation options with optional positioning
+ */
+export interface NodeCreationOptions {
+    /** Initial X position (optional) */
+    x?: number;
+    /** Initial Y position (optional) */
+    y?: number;
+    /** Skip validation (for internal use) */
+    skipValidation?: boolean;
+    /** Skip redraw after creation */
+    skipRedraw?: boolean;
+}
+
+/**
+ * Edge creation options
+ */
+export interface EdgeCreationOptions {
+    /** Skip validation (for internal use) */
+    skipValidation?: boolean;
+    /** Skip redraw after creation */
+    skipRedraw?: boolean;
+}
+
+/**
+ * Deletion options
+ */
+export interface DeletionOptions {
+    /** Skip redraw after deletion */
+    skipRedraw?: boolean;
+    /** For edge deletion: also remove orphaned nodes */
+    removeOrphans?: boolean;
+    /** Animate the deletion */
+    animate?: boolean;
+}
 
 // ==================== Module-Specific Types ====================
 
@@ -292,32 +338,38 @@ export interface SimulationState {
  * Type guard to check if data is valid NodeData
  */
 export function isNodeData(data: any): data is NodeData {
-    return data && 
-           typeof data === 'object' && 
-           typeof data.id === 'string' && 
-           typeof data.name === 'string';
+    return (
+        data &&
+        typeof data === 'object' &&
+        typeof data.id === 'string' &&
+        typeof data.name === 'string'
+    );
 }
 
 /**
  * Type guard to check if data is valid LinkData
  */
 export function isLinkData(data: any): data is LinkData {
-    return data && 
-           typeof data === 'object' && 
-           typeof data.source === 'string' && 
-           typeof data.target === 'string';
+    return (
+        data &&
+        typeof data === 'object' &&
+        typeof data.source === 'string' &&
+        typeof data.target === 'string'
+    );
 }
 
 /**
  * Type guard to check if data is valid GraphData
  */
 export function isGraphData(data: any): data is GraphData {
-    return data && 
-           typeof data === 'object' &&
-           Array.isArray(data.nodes) &&
-           Array.isArray(data.links) &&
-           data.nodes.every(isNodeData) &&
-           data.links.every(isLinkData);
+    return (
+        data &&
+        typeof data === 'object' &&
+        Array.isArray(data.nodes) &&
+        Array.isArray(data.links) &&
+        data.nodes.every(isNodeData) &&
+        data.links.every(isLinkData)
+    );
 }
 
 // ==================== Constants ====================
@@ -331,11 +383,11 @@ export const DEFAULT_CONFIG: GraphConfig = {
     repulsionStrength: 6500,
     attractionStrength: 0.001,
     groupingStrength: 0.001,
-    
+
     // Interaction
     zoomSensitivity: 1.01,
     filterDepth: 1,
-    
+
     // UI
     showControls: true,
     showLegend: true,
