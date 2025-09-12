@@ -67,5 +67,68 @@ document.addEventListener('DOMContentLoaded', () => {
     // Make graph available globally for button controls
     window.graph = graph;
     
+    // Add theme testing functionality - available in browser console
+    window.testThemes = function() {
+        console.log('Available themes:', graph.getAvailableThemes());
+        
+        // Test switching to different themes
+        setTimeout(() => {
+            console.log('Switching to dark theme...');
+            graph.setTheme('dark');
+        }, 2000);
+        
+        setTimeout(() => {
+            console.log('Switching to minimal theme...');
+            graph.setTheme('minimal');
+        }, 4000);
+        
+        setTimeout(() => {
+            console.log('Switching back to light theme...');
+            graph.setTheme('light');
+        }, 6000);
+    };
+    
+    // Test custom node styling
+    window.testCustomStyling = function() {
+        // Customize the primary node style
+        graph.setNodeTypeStyle('primary', {
+            fill: '#ff6b6b',
+            stroke: '#ff5252',
+            strokeWidth: 3,
+            opacity: 1
+        });
+        
+        // Customize secondary nodes
+        graph.setNodeTypeStyle('secondary', {
+            fill: '#4ecdc4',
+            stroke: '#26a69a',
+            strokeWidth: 2,
+            opacity: 1
+        });
+        
+        console.log('Custom node styling applied!');
+    };
+    
+    // Test visual states
+    window.testStates = function() {
+        // Set some nodes to different visual states
+        graph.setElementState('A', 'hover', true);
+        setTimeout(() => graph.setElementState('B', 'selected', true), 1000);
+        setTimeout(() => graph.setElementState('C', 'active', true), 2000);
+        setTimeout(() => {
+            // Reset all states
+            graph.setElementState('A', 'hover', false);
+            graph.setElementState('B', 'selected', false);
+            graph.setElementState('C', 'active', false);
+        }, 4000);
+        
+        console.log('Testing visual states...');
+    };
+    
     console.log('Graph initialized successfully!');
+    console.log('Try these functions in the browser console:');
+    console.log('- testThemes() - Test switching between themes');
+    console.log('- testCustomStyling() - Test custom node styling');
+    console.log('- testStates() - Test visual states');
+    console.log('- graph.getCurrentTheme() - Get current theme info');
 });

@@ -1,6 +1,7 @@
 import { Node } from '../Node';
 import { Vector } from '../Vector';
 import { NodeData, LinkData, TransformState, SVGElements, Bounds } from '../types/index';
+import { ThemeManager, VisualState } from '../theming/ThemeManager';
 
 /**
  * Link representation for rendering
@@ -56,6 +57,7 @@ export class SVGRenderer {
     private readonly container: HTMLElement;
     private readonly containerId: string;
     private readonly config: RendererConfig;
+    private readonly themeManager: ThemeManager;
 
     // SVG elements
     private canvas: HTMLDivElement | null = null;
@@ -84,11 +86,13 @@ export class SVGRenderer {
      * Create a new SVGRenderer instance
      * @param container - DOM container element
      * @param containerId - Unique identifier for this container
+     * @param themeManager - Theme manager instance
      * @param config - Renderer configuration options
      */
-    constructor(container: HTMLElement, containerId: string, config: RendererConfig = {}) {
+    constructor(container: HTMLElement, containerId: string, themeManager: ThemeManager, config: RendererConfig = {}) {
         this.container = container;
         this.containerId = containerId;
+        this.themeManager = themeManager;
         this.config = {
             showLabels: true,
             animationDuration: 300,
@@ -216,6 +220,10 @@ export class SVGRenderer {
         }
 
         this.clearElements();
+
+        // Apply canvas theming
+        this.applyCanvasTheming();
+
         this.createLinkElements(links);
         this.createNodeElements(nodes);
     }
@@ -231,8 +239,12 @@ export class SVGRenderer {
             const linkEl = document.createElementNS('http://www.w3.org/2000/svg', 'line');
             linkEl.classList.add('link');
             linkEl.setAttribute('marker-end', `url(#arrowhead-${this.containerId})`);
+            linkEl.setAttribute('data-id', `${link.source.getId()}-${link.target.getId()}`);
 
-            // Apply link styling
+            // Apply theme-based edge styling
+            this.applyEdgeStyles(linkEl, link.line_type || 'default', `${link.source.getId()}-${link.target.getId()}`);
+
+            // Apply additional styling from data
             if (link.weight) {
                 linkEl.style.strokeWidth = `${link.weight}px`;
             }
@@ -252,6 +264,17 @@ export class SVGRenderer {
             const labelText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             labelText.textContent = link.label || '';
             labelText.classList.add('edge-label-text');
+            
+            // Apply theme styling to edge labels
+            const foregroundColor = this.themeManager.getColor('foreground');
+            const backgroundColor = this.themeManager.getColor('background');
+            if (foregroundColor) {
+                labelText.style.fill = foregroundColor;
+            }
+            if (backgroundColor) {
+                labelBackground.style.fill = backgroundColor;
+            }
+            
             this.labelGroup!.appendChild(labelText);
 
             this.linkElements.set(link, { linkEl, labelText, labelBackground });
@@ -273,6 +296,15 @@ export class SVGRenderer {
 
             const { shapeElement, hiddenIndicator } = this.createNodeShape(node);
             const textElement = this.createNodeText(node);
+
+            // Apply theme-based node styling
+            this.applyNodeStyles(shapeElement, node.data.type || 'default', node.getId());
+
+            // Apply text styling from theme
+            const foregroundColor = this.themeManager.getColor('foreground');
+            if (foregroundColor) {
+                textElement.style.fill = foregroundColor;
+            }
 
             // Assemble node group
             if (hiddenIndicator) {
@@ -372,12 +404,16 @@ export class SVGRenderer {
         }
 
         // Apply node styling
-        shapeElement.classList.add('node');
+        shapeElement.classList.add('node', 'node-shape');
+        shapeElement.setAttribute('data-id', node.getId());
         const nodeType = node.getType();
         if (nodeType) {
             shapeElement.classList.add(`node-${nodeType}`);
             shapeElement.setAttribute('data-type', nodeType);
         }
+        
+        // Apply theme-based styling
+        this.applyNodeStyles(shapeElement, nodeType || 'default', node.getId());
 
         return { shapeElement, hiddenIndicator };
     }
@@ -394,6 +430,82 @@ export class SVGRenderer {
         textElement.setAttribute('dominant-baseline', 'central');
 
         return textElement;
+    }
+
+    /**
+     * Apply theme-based styles to a node element
+     * @private
+     */
+    private applyNodeStyles(element: SVGElement, nodeType: string, nodeId: string): void {
+        const states = this.themeManager.getElementStates(nodeId);
+        const style = this.themeManager.getNodeStyle(nodeType, states);
+        
+        // Apply each style attribute
+        Object.entries(style).forEach(([attr, value]) => {
+            if (value !== undefined) {
+                element.setAttribute(attr, String(value));
+            }
+        });
+    }
+
+    /**
+     * Apply theme-based styles to an edge element
+     * @private
+     */
+    private applyEdgeStyles(element: SVGElement, edgeType: string, edgeId: string): void {
+        const states = this.themeManager.getElementStates(edgeId);
+        const style = this.themeManager.getEdgeStyle(edgeType, states);
+        
+        // Apply each style attribute
+        Object.entries(style).forEach(([attr, value]) => {
+            if (value !== undefined) {
+                element.setAttribute(attr, String(value));
+            }
+        });
+    }
+
+    /**
+     * Apply canvas theming
+     */
+    private applyCanvasTheming(): void {
+        const canvasConfig = this.themeManager.getCanvasConfig();
+        
+        if (canvasConfig.background && this.svg) {
+            this.svg.style.backgroundColor = canvasConfig.background;
+        }
+        
+        // Apply other canvas styling as needed
+        // Grid styling would go here if implemented
+    }
+
+    /**
+     * Update element visual state
+     */
+    updateElementState(elementId: string, state: VisualState, enabled: boolean): void {
+        this.themeManager.setElementState(elementId, state, enabled);
+        
+        // Re-apply styles for the element
+        // Find the element and re-apply its styles
+        const element = this.svg?.querySelector(`[data-id="${elementId}"]`);
+        if (element) {
+            const isNode = element.classList.contains('node-shape');
+            const isEdge = element.classList.contains('link');
+            
+            if (isNode) {
+                const nodeType = element.getAttribute('data-type') || 'default';
+                this.applyNodeStyles(element as SVGElement, nodeType, elementId);
+            } else if (isEdge) {
+                const edgeType = element.getAttribute('data-type') || 'default';
+                this.applyEdgeStyles(element as SVGElement, edgeType, elementId);
+            }
+        }
+    }
+
+    /**
+     * Get the theme manager instance
+     */
+    getThemeManager(): ThemeManager {
+        return this.themeManager;
     }
 
     /**

@@ -40,6 +40,7 @@ import { SelectionManager } from './selection/SelectionManager';
 import { StyleManager } from './styling/StyleManager';
 import { HighlightManager } from './highlighting/HighlightManager';
 import { CameraController } from './camera/CameraController';
+import { ThemeManager, ThemeConfig } from './theming/ThemeManager';
 import {
     SelectionOptions,
     NodeStyles,
@@ -152,6 +153,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
     private styleManager: StyleManager | null = null;
     private highlightManager: HighlightManager | null = null;
     private cameraController: CameraController | null = null;
+    private themeManager: ThemeManager | null = null;
 
     // Event handling
     private eventCallbacks: EventManagerCallbacks<T> = {};
@@ -235,6 +237,13 @@ export class GraphNetwork<T extends NodeData = NodeData> {
      * @private
      */
     private initializeModules(): void {
+        // Initialize theme manager first (needed by other components)
+        this.themeManager = new ThemeManager();
+
+        if (this.debug) {
+            console.log('GraphNetwork: Theme manager initialized');
+        }
+
         // Initialize physics engine
         this.physics = new PhysicsEngine({
             damping: this.config.damping,
@@ -247,8 +256,8 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             console.log('GraphNetwork: Physics engine initialized');
         }
 
-        // Initialize SVG renderer
-        this.renderer = new SVGRenderer(this.container, this.containerId, {
+        // Initialize SVG renderer with theme manager
+        this.renderer = new SVGRenderer(this.container, this.containerId, this.themeManager!, {
             showLabels: true,
             debug: this.debug
         });
@@ -268,7 +277,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             onBreadcrumbClick: (action: string) => this.handleBreadcrumbAction(action)
         };
 
-        this.ui = new UIManager(this.container, this.config, uiCallbacks);
+        this.ui = new UIManager(this.container, this.config, uiCallbacks, this.themeManager);
         this.ui.initialize();
 
         if (this.debug) {
@@ -759,25 +768,15 @@ export class GraphNetwork<T extends NodeData = NodeData> {
      * Toggle between light and dark themes
      */
     toggleTheme(): void {
-        const newTheme: 'light' | 'dark' = this.config.theme === 'light' ? 'dark' : 'light';
-        this.setTheme(newTheme);
-    }
-
-    /**
-     * Set theme
-     * @param theme - Theme to set
-     */
-    setTheme(theme: 'light' | 'dark'): void {
-        this.config.theme = theme;
-        this.container.setAttribute('data-theme', theme);
-        this.ui?.updateThemeToggle(theme);
-
-        if (this.debug) {
-            console.log(`GraphNetwork: Theme changed to ${theme}`);
+        if (!this.themeManager) {
+            throw new Error('ThemeManager not initialized');
         }
-
-        this.emit('themeChanged', { theme });
+        
+        const currentTheme = this.themeManager.getCurrentTheme();
+        const newThemeName = currentTheme.name === 'light' ? 'dark' : 'light';
+        this.setTheme(newThemeName);
     }
+
 
     /**
      * Handle breadcrumb navigation
@@ -2964,11 +2963,207 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         });
     }
 
+    // ==================== Theme Management API ====================
+
+    /**
+     * Set the current theme
+     * @param theme - Theme name or ThemeConfig object
+     */
+    setTheme(theme: string | import('./theming/ThemeManager').ThemeConfig): void {
+        if (!this.themeManager) {
+            throw new Error('ThemeManager not initialized');
+        }
+        
+        try {
+            this.themeManager.setTheme(theme);
+            
+            // Re-render to apply new theme
+            if (this.renderer && this.nodes && this.links) {
+                this.renderer.createElements(this.nodes, this.links);
+                // Re-initialize events after recreating elements
+                if (this.events) {
+                    this.events.initialize(this.renderer.getSVGElement()!, this.nodes, this.eventCallbacks);
+                }
+            }
+            
+            // Update UI theme colors
+            if (this.ui) {
+                this.ui.updateThemeColors();
+            }
+            
+            // Emit theme change event
+            this.emit('themeChanged', {
+                theme: typeof theme === 'string' ? theme : theme.name,
+                type: 'themeChanged',
+                timestamp: Date.now()
+            });
+            
+            if (this.debug) {
+                console.log('GraphNetwork: Theme changed to:', typeof theme === 'string' ? theme : theme.name);
+            }
+        } catch (error) {
+            if (this.debug) {
+                console.error('GraphNetwork: Failed to set theme:', error);
+            }
+            throw error;
+        }
+    }
+
+    /**
+     * Get the current theme configuration
+     * @returns Current theme configuration
+     */
+    getCurrentTheme(): import('./theming/ThemeManager').ThemeConfig {
+        if (!this.themeManager) {
+            throw new Error('ThemeManager not initialized');
+        }
+        return this.themeManager.getCurrentTheme();
+    }
+
+    /**
+     * Get list of available theme names
+     * @returns Array of available theme names
+     */
+    getAvailableThemes(): string[] {
+        if (!this.themeManager) {
+            throw new Error('ThemeManager not initialized');
+        }
+        return this.themeManager.getAvailableThemes();
+    }
+
+    /**
+     * Register a new custom theme
+     * @param name - Theme name
+     * @param theme - Theme configuration
+     */
+    registerTheme(name: string, theme: import('./theming/ThemeManager').ThemeConfig): void {
+        if (!this.themeManager) {
+            throw new Error('ThemeManager not initialized');
+        }
+        
+        this.themeManager.registerTheme(name, theme);
+        
+        if (this.debug) {
+            console.log(`GraphNetwork: Registered custom theme '${name}'`);
+        }
+    }
+
+    /**
+     * Update the current theme with partial configuration
+     * @param updates - Partial theme updates to apply
+     */
+    updateTheme(updates: Partial<import('./theming/ThemeManager').ThemeConfig>): void {
+        if (!this.themeManager) {
+            throw new Error('ThemeManager not initialized');
+        }
+        
+        this.themeManager.updateTheme(updates);
+        
+        // Re-render to apply changes
+        if (this.renderer && this.nodes && this.links) {
+            this.renderer.createElements(this.nodes, this.links);
+            // Re-initialize events after recreating elements
+            if (this.events) {
+                this.events.initialize(this.renderer.getSVGElement()!, this.nodes, this.eventCallbacks);
+            }
+        }
+        
+        // Update UI theme colors
+        if (this.ui) {
+            this.ui.updateThemeColors();
+        }
+        
+        if (this.debug) {
+            console.log('GraphNetwork: Theme updated');
+        }
+    }
+
+    /**
+     * Set custom style for a specific node type
+     * @param nodeType - Node type to style
+     * @param style - Style configuration
+     */
+    setNodeTypeStyle(nodeType: string, style: import('./theming/ThemeManager').NodeStyleConfig): void {
+        if (!this.themeManager) {
+            throw new Error('ThemeManager not initialized');
+        }
+        
+        this.themeManager.setNodeStyle(nodeType, style);
+        
+        // Re-render affected nodes
+        if (this.renderer && this.nodes && this.links) {
+            this.renderer.createElements(this.nodes, this.links);
+            // Re-initialize events after recreating elements
+            if (this.events) {
+                this.events.initialize(this.renderer.getSVGElement()!, this.nodes, this.eventCallbacks);
+            }
+        }
+        
+        if (this.debug) {
+            console.log(`GraphNetwork: Updated style for node type '${nodeType}'`);
+        }
+    }
+
+    /**
+     * Set custom style for a specific edge type
+     * @param edgeType - Edge type to style
+     * @param style - Style configuration
+     */
+    setEdgeTypeStyle(edgeType: string, style: import('./theming/ThemeManager').EdgeStyleConfig): void {
+        if (!this.themeManager) {
+            throw new Error('ThemeManager not initialized');
+        }
+        
+        this.themeManager.setEdgeStyle(edgeType, style);
+        
+        // Re-render affected edges
+        if (this.renderer && this.nodes && this.links) {
+            this.renderer.createElements(this.nodes, this.links);
+            // Re-initialize events after recreating elements
+            if (this.events) {
+                this.events.initialize(this.renderer.getSVGElement()!, this.nodes, this.eventCallbacks);
+            }
+        }
+        
+        if (this.debug) {
+            console.log(`GraphNetwork: Updated style for edge type '${edgeType}'`);
+        }
+    }
+
+    /**
+     * Set visual state for an element
+     * @param elementId - ID of the element (node or edge)
+     * @param state - Visual state to apply
+     * @param enabled - Whether to enable or disable the state
+     */
+    setElementState(elementId: string, state: import('./theming/ThemeManager').VisualState, enabled: boolean = true): void {
+        if (!this.themeManager || !this.renderer) {
+            throw new Error('ThemeManager or Renderer not initialized');
+        }
+        
+        this.themeManager.setElementState(elementId, state, enabled);
+        this.renderer.updateElementState(elementId, state, enabled);
+        
+        if (this.debug) {
+            console.log(`GraphNetwork: Set element '${elementId}' state '${state}' to ${enabled}`);
+        }
+    }
+
+    /**
+     * Get the theme manager instance for advanced usage
+     * @returns ThemeManager instance
+     */
+    getThemeManager(): import('./theming/ThemeManager').ThemeManager | null {
+        return this.themeManager;
+    }
+
     /**
      * Create a string representation of the graph network
      * @returns String representation
      */
     toString(): string {
-        return `GraphNetwork(${this.containerId}: ${this.nodes.size} nodes, ${this.links.length} links, ${this.config.theme} theme)`;
+        const currentTheme = this.themeManager?.getCurrentTheme();
+        const themeName = currentTheme?.name || this.config.theme || 'unknown';
+        return `GraphNetwork(${this.containerId}: ${this.nodes.size} nodes, ${this.links.length} links, ${themeName} theme)`;
     }
 }

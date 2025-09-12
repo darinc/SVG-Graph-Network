@@ -1,35 +1,33 @@
+/**
+ * SVG Graph Network - Clean CSS without hardcoded themes
+ * All node and edge styling is now handled by ThemeManager
+ */
+
 :root {
-    /* Dark theme (default) */
+    /* Base system colors - no hardcoded node types */
     --bg-primary: #1a1a1a;
     --bg-secondary: #2a2a2a;
     --text-primary: #f0f0f0;
     --text-secondary: #a0a0a0;
     --border-color: rgba(255, 255, 255, 0.1);
-    --node-major: #2a2a2a;
-    --node-regional: #2a2a2a;
-    --node-small: #2a2a2a;
-    --node-territory: #2a2a2a;
-    --node-auxiliary: #2a2a2a;
-    --link-color: #5a5a5a;
     --panel-bg: rgba(42, 42, 42, 0.9);
+    --button-primary: #38A169;
+    --button-primary-hover: #2F855A;
+    --link-color: #4299E1;
 }
 
 [data-theme="light"] {
-    /* Light theme */
+    /* Light theme system colors */
     --bg-primary: #fafafa;
     --bg-secondary: #ffffff;
     --text-primary: #1a1a1a;
     --text-secondary: #666666;
     --border-color: rgba(0, 0, 0, 0.1);
-    --node-major: #ffffff;
-    --node-regional: #ffffff;
-    --node-small: #ffffff;
-    --node-territory: #ffffff;
-    --node-auxiliary: #ffffff;
-    --link-color: #333333;
     --panel-bg: rgba(255, 255, 255, 0.9);
+    --link-color: #2563eb;
 }
 
+/* Container and base layout */
 .graph-network-container {
     font-family: 'Inter', sans-serif;
     background-color: var(--bg-primary);
@@ -42,7 +40,18 @@
     box-sizing: border-box;
 }
 
-/* Graph paper background for both themes */
+/* Canvas and background */
+.graph-network-canvas {
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-secondary);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    position: relative;
+    transition: background-color 0.3s ease;
+}
+
+/* Grid background (will be controlled by ThemeManager canvas config) */
 .graph-network-canvas::before {
     content: '';
     position: absolute;
@@ -55,36 +64,6 @@
     border-radius: 12px;
 }
 
-/* Light mode grid */
-[data-theme="light"] .graph-network-canvas::before {
-    background-image: 
-        linear-gradient(rgba(59, 130, 246, 0.3) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(59, 130, 246, 0.3) 1px, transparent 1px),
-        linear-gradient(rgba(59, 130, 246, 0.15) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(59, 130, 246, 0.15) 1px, transparent 1px);
-    background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
-}
-
-/* Dark mode grid */
-.graph-network-canvas::before {
-    background-image: 
-        linear-gradient(rgba(59, 130, 246, 0.15) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(59, 130, 246, 0.15) 1px, transparent 1px),
-        linear-gradient(rgba(59, 130, 246, 0.08) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(59, 130, 246, 0.08) 1px, transparent 1px);
-    background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
-}
-
-.graph-network-canvas {
-    width: 100%;
-    height: 100%;
-    background-color: var(--bg-secondary);
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    position: relative;
-    transition: background-color 0.3s ease;
-}
-
 .graph-network-svg {
     width: 100%;
     height: 100%;
@@ -92,6 +71,7 @@
     z-index: 1;
 }
 
+/* Base node and text styles - minimal, theme system handles colors */
 .node-text,
 .node-label {
     font-size: 14px;
@@ -103,66 +83,12 @@
     transition: fill 0.3s ease;
 }
 
-.node-major_power { 
-    fill: var(--node-major);
-    stroke: #E53E3E;
-    stroke-width: 4px;
-}
-.node-regional_power { 
-    fill: var(--node-regional);
-    stroke: #4299E1;
-    stroke-width: 3px;
-}
-.node-small_nation { 
-    fill: var(--node-small);
-    stroke: #38A169;
-    stroke-width: 2px;
-}
-.node-territory { 
-    fill: var(--node-territory);
-    stroke: #ED8936;
-    stroke-width: 2px;
-    stroke-dasharray: 4, 2;
-}
-
-/* Generic node types for basic example */
-.node-primary { 
-    fill: var(--node-major);
-    stroke: #E53E3E;
-    stroke-width: 4px;
-}
-.node-secondary { 
-    fill: var(--node-regional);
-    stroke: #4299E1;
-    stroke-width: 3px;
-}
-.node-tertiary { 
-    fill: var(--node-small);
-    stroke: #38A169;
-    stroke-width: 2px;
-}
-.node-auxiliary { 
-    fill: var(--node-auxiliary);
-    stroke: #ED8936;
-    stroke-width: 2px;
-    stroke-dasharray: 4, 2;
-}
-
-/* Hidden connection indicator background */
-.hidden-connection-indicator {
-    fill: transparent;
-    stroke: #4299E1;
-    stroke-width: 4px;
-    stroke-dasharray: 6, 3;
-    stroke-opacity: 0.9;
-}
-
+/* Base link styles - theme system handles colors */
 .link {
-    stroke: var(--link-color);
-    stroke-width: 1.5px;
     transition: stroke 0.3s ease;
 }
 
+/* Edge label styles */
 .edge-label-background {
     fill: var(--bg-secondary);
     fill-opacity: 0.8;
@@ -182,27 +108,16 @@
     transition: fill 0.3s ease;
 }
 
-.node-shape:hover {
-    stroke: #fff;
-    stroke-width: 3px;
+/* Hidden connection indicator */
+.hidden-connection-indicator {
+    fill: transparent;
+    stroke: var(--link-color);
+    stroke-width: 4px;
+    stroke-dasharray: 6, 3;
+    stroke-opacity: 0.9;
 }
 
-.node-shape:hover + .node-text {
-    fill: #fff;
-    font-weight: bold;
-}
-
-/* Light mode hover styles */
-[data-theme="light"] .node-shape:hover {
-    stroke: #000;
-    stroke-width: 5px;
-}
-
-[data-theme="light"] .node-shape:hover + .node-text {
-    fill: #000;
-    font-weight: 900;
-}
-
+/* UI Components - Tooltip */
 .graph-network-tooltip {
     position: absolute;
     background-color: var(--panel-bg);
@@ -217,6 +132,7 @@
     z-index: 100;
 }
 
+/* UI Components - Settings Panel */
 .graph-network-settings {
     position: absolute;
     bottom: 60px;
@@ -265,7 +181,7 @@
     -webkit-appearance: none;
     width: 100%;
     height: 5px;
-    background: #5a5a5a;
+    background: var(--text-secondary);
     outline: none;
     border-radius: 5px;
 }
@@ -275,7 +191,7 @@
     appearance: none;
     width: 15px;
     height: 15px;
-    background: #f0f0f0;
+    background: var(--text-primary);
     border-radius: 50%;
     cursor: pointer;
 }
@@ -283,15 +199,16 @@
 .control-group input[type="range"]::-moz-range-thumb {
     width: 15px;
     height: 15px;
-    background: #f0f0f0;
+    background: var(--text-primary);
     border-radius: 50%;
     cursor: pointer;
     border: none;
 }
 
+/* UI Components - Buttons */
 .graph-network-reset-button {
     padding: 8px 15px;
-    background-color: #38A169;
+    background-color: var(--button-primary);
     color: white;
     border: none;
     border-radius: 5px;
@@ -301,7 +218,7 @@
 }
 
 .graph-network-reset-button:hover {
-    background-color: #2F855A;
+    background-color: var(--button-primary-hover);
 }
 
 .graph-network-controls {
@@ -315,7 +232,7 @@
 
 .graph-network-settings-toggle, 
 .graph-network-theme-toggle {
-    background-color: #38A169;
+    background-color: var(--button-primary);
     color: white;
     width: 40px;
     height: 40px;
@@ -333,10 +250,11 @@
 
 .graph-network-settings-toggle:hover, 
 .graph-network-theme-toggle:hover {
-    background-color: #2F855A;
+    background-color: var(--button-primary-hover);
     transform: scale(1.1);
 }
 
+/* UI Components - Title and Info */
 .graph-network-title {
     position: absolute;
     top: 20px;
@@ -365,7 +283,7 @@
 }
 
 .breadcrumb-link {
-    color: #4299E1;
+    color: var(--link-color);
     text-decoration: none;
     cursor: pointer;
 }
@@ -374,6 +292,7 @@
     text-decoration: underline;
 }
 
+/* UI Components - Legend */
 .graph-network-legend {
     position: absolute;
     top: 20px;
@@ -390,7 +309,6 @@
     z-index: 40;
     transition: all 0.3s ease;
 }
-
 
 .graph-network-legend-header {
     display: flex;
@@ -505,7 +423,7 @@
 
 .graph-network-zoom-button,
 .graph-network-reset-view-button {
-    background-color: #38A169;
+    background-color: var(--button-primary);
     color: white;
     width: 40px;
     height: 40px;
@@ -525,7 +443,7 @@
 
 .graph-network-zoom-button:hover,
 .graph-network-reset-view-button:hover {
-    background-color: #2F855A;
+    background-color: var(--button-primary-hover);
     transform: scale(1.1);
 }
 
@@ -545,40 +463,90 @@
     line-height: 1;
 }
 
+/* State management classes - used by ThemeManager for visual states */
+.graph-node,
+.graph-edge {
+    transition: all 0.2s ease;
+}
+
+/* Selection count indicator */
+.graph-selection-count {
+    position: absolute;
+    bottom: 80px;
+    left: 20px;
+    background-color: var(--panel-bg);
+    color: var(--text-primary);
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    border: 1px solid var(--border-color);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    z-index: 30;
+}
+
+.graph-selection-count.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Highlight legend */
+.graph-highlight-legend {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background-color: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 11px;
+    color: var(--text-primary);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    z-index: 25;
+    max-width: 200px;
+}
+
+.graph-highlight-legend.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.graph-highlight-legend h5 {
+    margin: 0 0 8px 0;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.graph-highlight-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.graph-highlight-legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+/* Multi-selection box indicator */
+.graph-selection-box {
+    fill: rgba(59, 130, 246, 0.1);
+    stroke: #3b82f6;
+    stroke-width: 2;
+    stroke-dasharray: 4, 2;
+    pointer-events: none;
+}
+
 /* Touch-friendly styles */
 @media (hover: none) and (pointer: coarse) {
-    /* Remove hover effects on touch devices */
-    .node-shape:hover {
-        stroke: inherit;
-        stroke-width: inherit;
-    }
-
-    .node-shape:hover + .node-text {
-        fill: inherit;
-        font-weight: inherit;
-    }
-
-    /* Add pressed states for touch feedback */
-    .node-shape:active {
-        stroke: #fff;
-        stroke-width: 4px;
-    }
-
-    .node-shape:active + .node-text {
-        fill: #fff;
-        font-weight: bold;
-    }
-
-    /* Light mode touch states */
-    [data-theme="light"] .node-shape:active {
-        stroke: #000;
-        stroke-width: 5px;
-    }
-
-    [data-theme="light"] .node-shape:active + .node-text {
-        fill: #000;
-        font-weight: 900;
-    }
+    /* Touch feedback is now handled by ThemeManager state management */
 }
 
 /* Responsive design for mobile devices */
@@ -648,14 +616,21 @@
         font-size: 24px;
     }
 
-    /* Larger touch targets for nodes */
-    .node-shape {
-        stroke-width: 3px;
-    }
-
     .node-text {
         font-size: 12px;
         font-weight: bold;
+    }
+
+    .graph-selection-count,
+    .graph-highlight-legend {
+        bottom: 90px;
+        left: 10px;
+        font-size: 10px;
+        padding: 6px 10px;
+    }
+    
+    .graph-highlight-legend {
+        max-width: 160px;
     }
 
     /* Hide tooltips on mobile to prevent interference */
@@ -726,299 +701,7 @@
     .edge-label-text {
         font-size: 9px;
     }
-}
 
-/* Hide mobile controls on desktop */
-@media (min-width: 769px) {
-    .graph-network-mobile-controls {
-        display: none;
-    }
-}
-
-/* ==================== Phase 5: Selection & Highlight States ==================== */
-
-/* Selection states */
-.graph-node {
-    transition: all 0.2s ease;
-}
-
-.graph-edge {
-    transition: all 0.2s ease;
-}
-
-.graph-node--normal {
-    /* Default node appearance */
-}
-
-.graph-node--selected {
-    stroke: #3b82f6 !important;
-    stroke-width: 4px !important;
-    filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6));
-}
-
-.graph-node--hover {
-    stroke: #fff !important;
-    stroke-width: 3px !important;
-    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.4));
-}
-
-[data-theme="light"] .graph-node--hover {
-    stroke: #000 !important;
-    stroke-width: 3px !important;
-    filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.4));
-}
-
-.graph-node--active {
-    stroke: #1d4ed8 !important;
-    stroke-width: 5px !important;
-    filter: drop-shadow(0 0 10px rgba(29, 78, 216, 0.8));
-}
-
-.graph-node--disabled {
-    opacity: 0.3;
-    filter: grayscale(100%);
-}
-
-.graph-node--highlighted {
-    stroke: #f59e0b !important;
-    stroke-width: 4px !important;
-    filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.7));
-}
-
-.graph-edge--normal {
-    /* Default edge appearance */
-}
-
-.graph-edge--selected {
-    stroke: #3b82f6 !important;
-    stroke-width: 3px !important;
-    filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.6));
-}
-
-.graph-edge--hover {
-    stroke: #fff !important;
-    stroke-width: 2px !important;
-    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.4));
-}
-
-[data-theme="light"] .graph-edge--hover {
-    stroke: #000 !important;
-    stroke-width: 2px !important;
-    filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.4));
-}
-
-.graph-edge--active {
-    stroke: #1d4ed8 !important;
-    stroke-width: 4px !important;
-    filter: drop-shadow(0 0 8px rgba(29, 78, 216, 0.8));
-}
-
-.graph-edge--disabled {
-    opacity: 0.3;
-    filter: grayscale(100%);
-}
-
-.graph-edge--highlighted {
-    stroke: #f59e0b !important;
-    stroke-width: 3px !important;
-    filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.7));
-}
-
-/* Highlight animation effects */
-.graph-highlight-animated {
-    animation: highlight-pulse 2s ease-in-out infinite;
-}
-
-@keyframes highlight-pulse {
-    0%, 100% {
-        filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.7));
-    }
-    50% {
-        filter: drop-shadow(0 0 16px rgba(245, 158, 11, 1));
-    }
-}
-
-.graph-highlight-glow {
-    filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.9)) brightness(1.2);
-}
-
-.graph-highlight-pulse {
-    animation: highlight-strong-pulse 1.5s ease-in-out infinite;
-}
-
-@keyframes highlight-strong-pulse {
-    0%, 100% {
-        transform: scale(1);
-        filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.8));
-    }
-    50% {
-        transform: scale(1.05);
-        filter: drop-shadow(0 0 24px rgba(245, 158, 11, 1)) brightness(1.3);
-    }
-}
-
-/* Path highlighting */
-.graph-path-flow {
-    stroke-dasharray: 8, 4;
-    animation: path-flow 2s linear infinite;
-}
-
-@keyframes path-flow {
-    0% {
-        stroke-dashoffset: 0;
-    }
-    100% {
-        stroke-dashoffset: 12;
-    }
-}
-
-/* Neighbor highlighting depth colors */
-.graph-neighbor-depth-1 {
-    stroke: #3b82f6 !important;
-    filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.7));
-}
-
-.graph-neighbor-depth-2 {
-    stroke: #8b5cf6 !important;
-    filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.6));
-}
-
-.graph-neighbor-depth-3 {
-    stroke: #ec4899 !important;
-    filter: drop-shadow(0 0 6px rgba(236, 72, 153, 0.5));
-}
-
-.graph-neighbor-depth-4 {
-    stroke: #f97316 !important;
-    filter: drop-shadow(0 0 4px rgba(249, 115, 22, 0.4));
-}
-
-.graph-neighbor-depth-5 {
-    stroke: #84cc16 !important;
-    filter: drop-shadow(0 0 4px rgba(132, 204, 22, 0.3));
-}
-
-/* Focus/camera animation states */
-.graph-focus-target {
-    stroke: #ef4444 !important;
-    stroke-width: 5px !important;
-    filter: drop-shadow(0 0 15px rgba(239, 68, 68, 0.8));
-    animation: focus-highlight 1s ease-in-out;
-}
-
-@keyframes focus-highlight {
-    0% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.1);
-    }
-    100% {
-        transform: scale(1);
-    }
-}
-
-/* Multi-selection box indicator */
-.graph-selection-box {
-    fill: rgba(59, 130, 246, 0.1);
-    stroke: #3b82f6;
-    stroke-width: 2;
-    stroke-dasharray: 4, 2;
-    pointer-events: none;
-}
-
-/* Selection count indicator */
-.graph-selection-count {
-    position: absolute;
-    bottom: 80px;
-    left: 20px;
-    background-color: var(--panel-bg);
-    color: var(--text-primary);
-    padding: 8px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: bold;
-    border: 1px solid var(--border-color);
-    opacity: 0;
-    transform: translateY(10px);
-    transition: all 0.3s ease;
-    z-index: 30;
-}
-
-.graph-selection-count.visible {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-/* Highlight legend for path/neighbor highlighting */
-.graph-highlight-legend {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    background-color: var(--panel-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 12px;
-    font-size: 11px;
-    color: var(--text-primary);
-    opacity: 0;
-    transform: translateY(10px);
-    transition: all 0.3s ease;
-    z-index: 25;
-    max-width: 200px;
-}
-
-.graph-highlight-legend.visible {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.graph-highlight-legend h5 {
-    margin: 0 0 8px 0;
-    font-size: 12px;
-    font-weight: bold;
-}
-
-.graph-highlight-legend-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 4px;
-}
-
-.graph-highlight-legend-color {
-    width: 12px;
-    height: 12px;
-    border-radius: 2px;
-    flex-shrink: 0;
-}
-
-/* Responsive adjustments for selection/highlight features */
-@media (max-width: 768px) {
-    .graph-selection-count,
-    .graph-highlight-legend {
-        bottom: 90px;
-        left: 10px;
-        font-size: 10px;
-        padding: 6px 10px;
-    }
-    
-    .graph-highlight-legend {
-        max-width: 160px;
-    }
-    
-    /* Reduce highlight effects on mobile for performance */
-    .graph-highlight-animated,
-    .graph-highlight-pulse {
-        animation: none;
-    }
-    
-    .graph-highlight-glow {
-        filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.6));
-    }
-}
-
-@media (max-width: 480px) {
     .graph-selection-count,
     .graph-highlight-legend {
         bottom: 80px;
@@ -1029,5 +712,12 @@
     
     .graph-highlight-legend {
         max-width: 140px;
+    }
+}
+
+/* Hide mobile controls on desktop */
+@media (min-width: 769px) {
+    .graph-network-mobile-controls {
+        display: none;
     }
 }

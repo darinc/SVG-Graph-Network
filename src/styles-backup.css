@@ -1,0 +1,1061 @@
+:root {
+    /* Dark theme (default) */
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2a2a2a;
+    --text-primary: #f0f0f0;
+    --text-secondary: #a0a0a0;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --node-major: #800000;        /* Solid dark red - fully opaque */
+    --node-regional: #000080;     /* Solid dark blue - fully opaque */
+    --node-small: #008000;        /* Solid dark green - fully opaque */
+    --node-territory: #808000;    /* Solid dark olive - fully opaque */
+    --node-auxiliary: #808000;    /* Solid dark olive - fully opaque */
+    --link-color: #5a5a5a;
+    --panel-bg: rgba(42, 42, 42, 0.9);
+}
+
+[data-theme="light"] {
+    /* Light theme */
+    --bg-primary: #fafafa;
+    --bg-secondary: #ffffff;
+    --text-primary: #1a1a1a;
+    --text-secondary: #666666;
+    --border-color: rgba(0, 0, 0, 0.1);
+    --node-major: #ffcccc;        /* Solid light red - fully opaque */
+    --node-regional: #ccccff;     /* Solid light blue - fully opaque */
+    --node-small: #ccffcc;        /* Solid light green - fully opaque */
+    --node-territory: #ffffcc;    /* Solid light yellow - fully opaque */
+    --node-auxiliary: #ffffcc;    /* Solid light yellow - fully opaque */
+    --link-color: #333333;
+    --panel-bg: rgba(255, 255, 255, 0.9);
+}
+
+.graph-network-container {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    position: relative;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.graph-network-container * {
+    box-sizing: border-box;
+}
+
+/* Graph paper background for both themes */
+.graph-network-canvas::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    border-radius: 12px;
+}
+
+/* Light mode grid */
+[data-theme="light"] .graph-network-canvas::before {
+    background-image: 
+        linear-gradient(rgba(59, 130, 246, 0.3) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59, 130, 246, 0.3) 1px, transparent 1px),
+        linear-gradient(rgba(59, 130, 246, 0.15) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59, 130, 246, 0.15) 1px, transparent 1px);
+    background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
+}
+
+/* Dark mode grid */
+.graph-network-canvas::before {
+    background-image: 
+        linear-gradient(rgba(59, 130, 246, 0.15) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59, 130, 246, 0.15) 1px, transparent 1px),
+        linear-gradient(rgba(59, 130, 246, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59, 130, 246, 0.08) 1px, transparent 1px);
+    background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
+}
+
+.graph-network-canvas {
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-secondary);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    position: relative;
+    transition: background-color 0.3s ease;
+}
+
+.graph-network-svg {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+/* Base node shape styles - ensure complete opacity */
+.node-shape {
+    fill-opacity: 1 !important;
+    opacity: 1 !important;
+}
+
+/* Override any parent group opacity settings from JavaScript */
+g .node-shape {
+    fill-opacity: 1 !important;
+    opacity: 1 !important;
+}
+
+.node-text,
+.node-label {
+    font-size: 14px;
+    fill: var(--text-primary);
+    pointer-events: none;
+    text-anchor: middle;
+    font-weight: bold;
+    user-select: none;
+    transition: fill 0.3s ease;
+}
+
+.node-major_power { 
+    fill: var(--node-major) !important;
+    fill-opacity: 1 !important;
+    opacity: 1 !important;
+    stroke: #E53E3E;
+    stroke-width: 4px;
+}
+.node-regional_power { 
+    fill: var(--node-regional) !important;
+    fill-opacity: 1 !important;
+    opacity: 1 !important;
+    stroke: #4299E1;
+    stroke-width: 3px;
+}
+.node-small_nation { 
+    fill: var(--node-small) !important;
+    fill-opacity: 1 !important;
+    opacity: 1 !important;
+    stroke: #38A169;
+    stroke-width: 2px;
+}
+.node-territory { 
+    fill: var(--node-territory) !important;
+    fill-opacity: 1 !important;
+    opacity: 1 !important;
+    stroke: #ED8936;
+    stroke-width: 2px;
+    stroke-dasharray: 4, 2;
+}
+
+/* Generic node types for basic example */
+.node-primary { 
+    fill: var(--node-major) !important;
+    fill-opacity: 1 !important;
+    opacity: 1 !important;
+    stroke: #E53E3E;
+    stroke-width: 4px;
+}
+.node-secondary { 
+    fill: var(--node-regional) !important;
+    fill-opacity: 1 !important;
+    opacity: 1 !important;
+    stroke: #4299E1;
+    stroke-width: 3px;
+}
+.node-tertiary { 
+    fill: var(--node-small) !important;
+    fill-opacity: 1 !important;
+    opacity: 1 !important;
+    stroke: #38A169;
+    stroke-width: 2px;
+}
+.node-auxiliary { 
+    fill: var(--node-auxiliary) !important;
+    fill-opacity: 1 !important;
+    opacity: 1 !important;
+    stroke: #ED8936;
+    stroke-width: 2px;
+    stroke-dasharray: 4, 2;
+}
+
+/* Hidden connection indicator background */
+.hidden-connection-indicator {
+    fill: transparent;
+    stroke: #4299E1;
+    stroke-width: 4px;
+    stroke-dasharray: 6, 3;
+    stroke-opacity: 0.9;
+}
+
+.link {
+    stroke: var(--link-color);
+    stroke-width: 1.5px;
+    transition: stroke 0.3s ease;
+}
+
+.edge-label-background {
+    fill: var(--bg-secondary);
+    fill-opacity: 0.8;
+    stroke: var(--border-color);
+    stroke-width: 0.5px;
+    rx: 3;
+    ry: 3;
+    transition: fill 0.3s ease, stroke 0.3s ease;
+}
+
+.edge-label-text {
+    font-size: 10px;
+    fill: var(--text-primary);
+    text-anchor: middle;
+    font-weight: bold;
+    user-select: none;
+    transition: fill 0.3s ease;
+}
+
+.node-shape:hover {
+    stroke: #fff;
+    stroke-width: 3px;
+}
+
+.node-shape:hover + .node-text {
+    fill: #fff;
+    font-weight: bold;
+}
+
+/* Light mode hover styles */
+[data-theme="light"] .node-shape:hover {
+    stroke: #000;
+    stroke-width: 5px;
+}
+
+[data-theme="light"] .node-shape:hover + .node-text {
+    fill: #000;
+    font-weight: 900;
+}
+
+.graph-network-tooltip {
+    position: absolute;
+    background-color: var(--panel-bg);
+    color: var(--text-primary);
+    padding: 8px 12px;
+    border-radius: 8px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    font-size: 14px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 100;
+}
+
+.graph-network-settings {
+    position: absolute;
+    bottom: 60px;
+    right: 20px;
+    background-color: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 200px;
+    z-index: 50;
+    
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s, background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.graph-network-settings.is-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.graph-network-settings h3 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.control-group label {
+    font-size: 12px;
+    margin-bottom: 5px;
+    color: var(--text-secondary);
+    transition: color 0.3s ease;
+}
+
+.control-group input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 5px;
+    background: #5a5a5a;
+    outline: none;
+    border-radius: 5px;
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    background: #f0f0f0;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.control-group input[type="range"]::-moz-range-thumb {
+    width: 15px;
+    height: 15px;
+    background: #f0f0f0;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+}
+
+.graph-network-reset-button {
+    padding: 8px 15px;
+    background-color: #38A169;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+}
+
+.graph-network-reset-button:hover {
+    background-color: #2F855A;
+}
+
+.graph-network-controls {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 51;
+}
+
+.graph-network-settings-toggle, 
+.graph-network-theme-toggle {
+    background-color: #38A169;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease, background-color 0.2s ease;
+}
+
+.graph-network-settings-toggle:hover, 
+.graph-network-theme-toggle:hover {
+    background-color: #2F855A;
+    transform: scale(1.1);
+}
+
+.graph-network-title {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--text-primary);
+    font-size: 24px;
+    font-weight: bold;
+    z-index: 20;
+    text-align: center;
+    transition: color 0.3s ease;
+}
+
+.graph-network-view-info {
+    position: absolute;
+    top: 60px;
+    left: 20px;
+    color: var(--text-primary);
+    font-size: 14px;
+    z-index: 20;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+    transition: color 0.3s ease;
+}
+
+.breadcrumb-link {
+    color: #4299E1;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.breadcrumb-link:hover {
+    text-decoration: underline;
+}
+
+.graph-network-legend {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    color: var(--text-primary);
+    font-size: 12px;
+    width: auto;
+    min-width: 120px;
+    z-index: 40;
+    transition: all 0.3s ease;
+}
+
+
+.graph-network-legend-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.graph-network-legend-header h4 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.graph-network-legend-toggle {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px;
+    border-radius: 3px;
+    transition: background-color 0.2s ease, color 0.3s ease;
+}
+
+.graph-network-legend-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="light"] .graph-network-legend-toggle:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.graph-network-legend-content {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.graph-network-legend.minimized .graph-network-legend-content {
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+}
+
+.graph-network-legend.minimized {
+    width: 100px;
+    padding: 8px 10px;
+    height: 36px;
+}
+
+.graph-network-legend.minimized .graph-network-legend-header {
+    margin-bottom: 0;
+}
+
+.graph-network-legend.minimized .graph-network-legend-header h4 {
+    font-size: 12px;
+}
+
+.legend-section {
+    margin-bottom: 15px;
+}
+
+.legend-section:last-child {
+    margin-bottom: 0;
+}
+
+.legend-item,
+.graph-network-legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    gap: 8px;
+}
+
+.legend-item:last-child,
+.graph-network-legend-item:last-child {
+    margin-bottom: 0;
+}
+
+.legend-shape,
+.graph-network-legend-shape {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    border-radius: 3px;
+}
+
+.graph-network-legend-shape.graph-network-legend-circle {
+    border-radius: 50%;
+}
+
+.graph-network-legend-shape.graph-network-legend-rectangle {
+    border-radius: 2px;
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.legend-text {
+    font-size: 11px;
+}
+
+/* Mobile Controls */
+.graph-network-mobile-controls {
+    display: flex;
+    gap: 8px;
+    margin-right: 10px;
+}
+
+.graph-network-zoom-button,
+.graph-network-reset-view-button {
+    background-color: #38A169;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease, background-color 0.2s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.graph-network-zoom-button:hover,
+.graph-network-reset-view-button:hover {
+    background-color: #2F855A;
+    transform: scale(1.1);
+}
+
+.graph-network-zoom-button:active,
+.graph-network-reset-view-button:active {
+    transform: scale(0.95);
+    background-color: #276749;
+}
+
+.graph-network-zoom-in {
+    font-size: 24px;
+    line-height: 1;
+}
+
+.graph-network-zoom-out {
+    font-size: 28px;
+    line-height: 1;
+}
+
+/* Touch-friendly styles */
+@media (hover: none) and (pointer: coarse) {
+    /* Remove hover effects on touch devices */
+    .node-shape:hover {
+        stroke: inherit;
+        stroke-width: inherit;
+    }
+
+    .node-shape:hover + .node-text {
+        fill: inherit;
+        font-weight: inherit;
+    }
+
+    /* Add pressed states for touch feedback */
+    .node-shape:active {
+        stroke: #fff;
+        stroke-width: 4px;
+    }
+
+    .node-shape:active + .node-text {
+        fill: #fff;
+        font-weight: bold;
+    }
+
+    /* Light mode touch states */
+    [data-theme="light"] .node-shape:active {
+        stroke: #000;
+        stroke-width: 5px;
+    }
+
+    [data-theme="light"] .node-shape:active + .node-text {
+        fill: #000;
+        font-weight: 900;
+    }
+}
+
+/* Responsive design for mobile devices */
+@media (max-width: 768px) {
+    .graph-network-container {
+        font-size: 14px;
+    }
+
+    .graph-network-title {
+        font-size: 18px;
+        top: 10px;
+    }
+
+    .graph-network-view-info {
+        top: 35px;
+        left: 10px;
+        font-size: 12px;
+    }
+
+    .graph-network-legend {
+        top: 10px;
+        right: 10px;
+        min-width: 100px;
+        font-size: 11px;
+    }
+
+    .graph-network-legend-header h4 {
+        font-size: 12px;
+    }
+
+    .legend-text {
+        font-size: 10px;
+    }
+
+    .graph-network-settings {
+        bottom: 80px;
+        right: 10px;
+        width: 180px;
+        font-size: 12px;
+    }
+
+    .graph-network-controls {
+        bottom: 10px;
+        right: 10px;
+        gap: 8px;
+    }
+
+    .graph-network-settings-toggle, 
+    .graph-network-theme-toggle {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+    }
+
+    .graph-network-zoom-button,
+    .graph-network-reset-view-button {
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
+    }
+
+    .graph-network-zoom-in {
+        font-size: 20px;
+    }
+
+    .graph-network-zoom-out {
+        font-size: 24px;
+    }
+
+    /* Larger touch targets for nodes */
+    .node-shape {
+        stroke-width: 3px;
+    }
+
+    .node-text {
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    /* Hide tooltips on mobile to prevent interference */
+    .graph-network-tooltip {
+        display: none;
+    }
+}
+
+/* Very small screens (phones in portrait) */
+@media (max-width: 480px) {
+    .graph-network-title {
+        font-size: 16px;
+        top: 5px;
+    }
+
+    .graph-network-view-info {
+        top: 25px;
+        left: 5px;
+        font-size: 11px;
+    }
+
+    .graph-network-legend {
+        top: 5px;
+        right: 5px;
+        padding: 10px;
+        min-width: 80px;
+    }
+
+    .graph-network-settings {
+        bottom: 70px;
+        right: 5px;
+        left: 5px;
+        width: auto;
+    }
+
+    .graph-network-controls {
+        bottom: 5px;
+        right: 5px;
+        gap: 6px;
+    }
+
+    .graph-network-settings-toggle, 
+    .graph-network-theme-toggle {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+
+    .graph-network-zoom-button,
+    .graph-network-reset-view-button {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+    }
+
+    .graph-network-zoom-in {
+        font-size: 18px;
+    }
+
+    .graph-network-zoom-out {
+        font-size: 20px;
+    }
+
+    .node-text {
+        font-size: 11px;
+    }
+
+    .edge-label-text {
+        font-size: 9px;
+    }
+}
+
+/* Hide mobile controls on desktop */
+@media (min-width: 769px) {
+    .graph-network-mobile-controls {
+        display: none;
+    }
+}
+
+/* ==================== Phase 5: Selection & Highlight States ==================== */
+
+/* Selection states */
+.graph-node {
+    transition: all 0.2s ease;
+}
+
+.graph-edge {
+    transition: all 0.2s ease;
+}
+
+.graph-node--normal {
+    /* Default node appearance */
+}
+
+.graph-node--selected {
+    stroke: #3b82f6 !important;
+    stroke-width: 4px !important;
+    filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6));
+}
+
+.graph-node--hover {
+    stroke: #fff !important;
+    stroke-width: 3px !important;
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.4));
+}
+
+[data-theme="light"] .graph-node--hover {
+    stroke: #000 !important;
+    stroke-width: 3px !important;
+    filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.4));
+}
+
+.graph-node--active {
+    stroke: #1d4ed8 !important;
+    stroke-width: 5px !important;
+    filter: drop-shadow(0 0 10px rgba(29, 78, 216, 0.8));
+}
+
+.graph-node--disabled {
+    opacity: 0.3;
+    filter: grayscale(100%);
+}
+
+.graph-node--highlighted {
+    stroke: #f59e0b !important;
+    stroke-width: 4px !important;
+    filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.7));
+}
+
+.graph-edge--normal {
+    /* Default edge appearance */
+}
+
+.graph-edge--selected {
+    stroke: #3b82f6 !important;
+    stroke-width: 3px !important;
+    filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.6));
+}
+
+.graph-edge--hover {
+    stroke: #fff !important;
+    stroke-width: 2px !important;
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.4));
+}
+
+[data-theme="light"] .graph-edge--hover {
+    stroke: #000 !important;
+    stroke-width: 2px !important;
+    filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.4));
+}
+
+.graph-edge--active {
+    stroke: #1d4ed8 !important;
+    stroke-width: 4px !important;
+    filter: drop-shadow(0 0 8px rgba(29, 78, 216, 0.8));
+}
+
+.graph-edge--disabled {
+    opacity: 0.3;
+    filter: grayscale(100%);
+}
+
+.graph-edge--highlighted {
+    stroke: #f59e0b !important;
+    stroke-width: 3px !important;
+    filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.7));
+}
+
+/* Highlight animation effects */
+.graph-highlight-animated {
+    animation: highlight-pulse 2s ease-in-out infinite;
+}
+
+@keyframes highlight-pulse {
+    0%, 100% {
+        filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.7));
+    }
+    50% {
+        filter: drop-shadow(0 0 16px rgba(245, 158, 11, 1));
+    }
+}
+
+.graph-highlight-glow {
+    filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.9)) brightness(1.2);
+}
+
+.graph-highlight-pulse {
+    animation: highlight-strong-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes highlight-strong-pulse {
+    0%, 100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.8));
+    }
+    50% {
+        transform: scale(1.05);
+        filter: drop-shadow(0 0 24px rgba(245, 158, 11, 1)) brightness(1.3);
+    }
+}
+
+/* Path highlighting */
+.graph-path-flow {
+    stroke-dasharray: 8, 4;
+    animation: path-flow 2s linear infinite;
+}
+
+@keyframes path-flow {
+    0% {
+        stroke-dashoffset: 0;
+    }
+    100% {
+        stroke-dashoffset: 12;
+    }
+}
+
+/* Neighbor highlighting depth colors */
+.graph-neighbor-depth-1 {
+    stroke: #3b82f6 !important;
+    filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.7));
+}
+
+.graph-neighbor-depth-2 {
+    stroke: #8b5cf6 !important;
+    filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.6));
+}
+
+.graph-neighbor-depth-3 {
+    stroke: #ec4899 !important;
+    filter: drop-shadow(0 0 6px rgba(236, 72, 153, 0.5));
+}
+
+.graph-neighbor-depth-4 {
+    stroke: #f97316 !important;
+    filter: drop-shadow(0 0 4px rgba(249, 115, 22, 0.4));
+}
+
+.graph-neighbor-depth-5 {
+    stroke: #84cc16 !important;
+    filter: drop-shadow(0 0 4px rgba(132, 204, 22, 0.3));
+}
+
+/* Focus/camera animation states */
+.graph-focus-target {
+    stroke: #ef4444 !important;
+    stroke-width: 5px !important;
+    filter: drop-shadow(0 0 15px rgba(239, 68, 68, 0.8));
+    animation: focus-highlight 1s ease-in-out;
+}
+
+@keyframes focus-highlight {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Multi-selection box indicator */
+.graph-selection-box {
+    fill: rgba(59, 130, 246, 0.1);
+    stroke: #3b82f6;
+    stroke-width: 2;
+    stroke-dasharray: 4, 2;
+    pointer-events: none;
+}
+
+/* Selection count indicator */
+.graph-selection-count {
+    position: absolute;
+    bottom: 80px;
+    left: 20px;
+    background-color: var(--panel-bg);
+    color: var(--text-primary);
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    border: 1px solid var(--border-color);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    z-index: 30;
+}
+
+.graph-selection-count.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Highlight legend for path/neighbor highlighting */
+.graph-highlight-legend {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background-color: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 11px;
+    color: var(--text-primary);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    z-index: 25;
+    max-width: 200px;
+}
+
+.graph-highlight-legend.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.graph-highlight-legend h5 {
+    margin: 0 0 8px 0;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.graph-highlight-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.graph-highlight-legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+/* Responsive adjustments for selection/highlight features */
+@media (max-width: 768px) {
+    .graph-selection-count,
+    .graph-highlight-legend {
+        bottom: 90px;
+        left: 10px;
+        font-size: 10px;
+        padding: 6px 10px;
+    }
+    
+    .graph-highlight-legend {
+        max-width: 160px;
+    }
+    
+    /* Reduce highlight effects on mobile for performance */
+    .graph-highlight-animated,
+    .graph-highlight-pulse {
+        animation: none;
+    }
+    
+    .graph-highlight-glow {
+        filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.6));
+    }
+}
+
+@media (max-width: 480px) {
+    .graph-selection-count,
+    .graph-highlight-legend {
+        bottom: 80px;
+        left: 5px;
+        font-size: 9px;
+        padding: 5px 8px;
+    }
+    
+    .graph-highlight-legend {
+        max-width: 140px;
+    }
+}

@@ -1,7 +1,7 @@
 // Import the library for development
 import GraphNetwork from '../src/index.ts';
 
-// Make it available globally
+// Make it available globally  
 window.GraphNetwork = GraphNetwork;
 
 console.log('Advanced example loaded');
@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             damping: 0.95,
             repulsionStrength: 6500,
             attractionStrength: 0.001,
-            filterDepth: 2
+            filterDepth: 1
         }
     });
 

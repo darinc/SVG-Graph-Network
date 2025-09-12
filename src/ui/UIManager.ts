@@ -1,5 +1,6 @@
 import { Node } from '../Node';
 import { UIConfig, NodeData, UIElements } from '../types/index';
+import { ThemeManager } from '../theming/ThemeManager';
 
 /**
  * Callback function signatures for UI interactions
@@ -76,18 +77,24 @@ export class UIManager {
     // Settings state
     private settingsVisible: boolean = false;
 
+    // Theme manager
+    private themeManager: ThemeManager;
+
     /**
      * Create a new UIManager instance
      * @param container - DOM container element
      * @param config - UI configuration
      * @param callbacks - UI event callbacks
+     * @param themeManager - Theme manager instance
      */
     constructor(
         container: HTMLElement,
         config: Partial<UIConfig> = {},
-        callbacks: UICallbacks = {}
+        callbacks: UICallbacks = {},
+        themeManager: ThemeManager
     ) {
         this.container = container;
+        this.themeManager = themeManager;
         this.config = {
             showControls: true,
             showLegend: true,
@@ -134,7 +141,71 @@ export class UIManager {
         this.titleElement = document.createElement('h2');
         this.setElementClass(this.titleElement, 'graph-network-title');
         this.titleElement.textContent = this.config.title;
+        
+        // Apply theme colors
+        this.updateTitleTheme();
+        
         this.container.appendChild(this.titleElement);
+    }
+
+    /**
+     * Update title color based on current theme
+     */
+    private updateTitleTheme(): void {
+        if (!this.titleElement) return;
+        
+        const foregroundColor = this.themeManager.getColor('foreground');
+        if (foregroundColor) {
+            this.titleElement.style.color = foregroundColor;
+        }
+    }
+
+    /**
+     * Update legend styling based on current theme
+     */
+    private updateLegendTheme(): void {
+        if (!this.legendElement) return;
+        
+        const backgroundColor = this.themeManager.getColor('background');
+        const foregroundColor = this.themeManager.getColor('foreground');
+        const currentTheme = this.themeManager.getCurrentTheme();
+        
+        // Update legend background and shadow
+        if (backgroundColor) {
+            this.legendElement.style.backgroundColor = backgroundColor;
+            
+            // Add appropriate shadow based on theme
+            if (currentTheme.name === 'dark' || currentTheme.name === 'default') {
+                // Dark themes need light shadow
+                this.legendElement.style.boxShadow = '0 4px 12px rgba(255, 255, 255, 0.1)';
+            } else {
+                // Light themes use dark shadow
+                this.legendElement.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+            }
+        }
+        
+        // Update legend text colors
+        if (foregroundColor) {
+            const header = this.legendElement.querySelector('.graph-network-legend-header');
+            if (header && header instanceof HTMLElement) {
+                header.style.color = foregroundColor;
+            }
+            
+            // Update toggle button color
+            const toggleButton = this.legendElement.querySelector('.graph-network-legend-toggle');
+            if (toggleButton && toggleButton instanceof HTMLElement) {
+                toggleButton.style.color = foregroundColor;
+                toggleButton.style.borderColor = foregroundColor;
+            }
+            
+            // Update all legend item text
+            const legendItems = this.legendElement.querySelectorAll('.graph-network-legend-item span');
+            legendItems.forEach(item => {
+                if (item instanceof HTMLElement) {
+                    item.style.color = foregroundColor;
+                }
+            });
+        }
     }
 
     /**
@@ -174,23 +245,21 @@ export class UIManager {
     }
 
     /**
-     * Get color for node type
+     * Get color for node type from current theme
      * @param type - Node type string
      * @returns CSS color value
      */
     private getNodeTypeColor(type: string): string {
-        const colorMap: Record<string, string> = {
-            primary: '#E53E3E',
-            secondary: '#4299E1',
-            tertiary: '#38A169',
-            auxiliary: '#ED8936',
-            // Fallback for legacy types
-            major_power: '#E53E3E',
-            regional_power: '#4299E1',
-            small_nation: '#38A169',
-            territory: '#ED8936'
-        };
-        return colorMap[type] || '#666666';
+        // Get the node style from theme manager
+        const nodeStyle = this.themeManager.getNodeStyle(type);
+        
+        // Return the fill color from the style, or fallback to theme primary color
+        if (nodeStyle.fill) {
+            return nodeStyle.fill;
+        }
+        
+        // Fallback to theme primary color or default
+        return this.themeManager.getColor('primary') || '#666666';
     }
 
     /**
@@ -221,6 +290,9 @@ export class UIManager {
             this.legendElement.appendChild(content);
 
             this.container.appendChild(this.legendElement);
+            
+            // Apply initial theme styling
+            this.updateLegendTheme();
         }
 
         this.updateLegend(nodes);
@@ -682,6 +754,15 @@ export class UIManager {
             type: 'UIManager',
             version: '2.0.0'
         };
+    }
+
+    /**
+     * Update all UI theme colors when theme changes
+     */
+    updateThemeColors(): void {
+        this.updateTitleTheme();
+        this.updateLegendTheme();
+        // Legend colors will automatically update due to getNodeTypeColor using theme
     }
 
     /**
