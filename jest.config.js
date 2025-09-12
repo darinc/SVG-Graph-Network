@@ -3,11 +3,22 @@ module.exports = {
   testEnvironment: 'jsdom',
   
   // Module file extensions for importing
-  moduleFileExtensions: ['js', 'json'],
+  moduleFileExtensions: ['ts', 'js', 'json'],
   
-  // Transform files with babel
+  // Transform files with appropriate loaders
   transform: {
+    '^.+\\.ts$': 'ts-jest',
     '^.+\\.js$': 'babel-jest',
+  },
+  
+  // TypeScript configuration
+  preset: 'ts-jest/presets/default-esm',
+  extensionsToTreatAsEsm: ['.ts'],
+  globals: {
+    'ts-jest': {
+      useESM: true,
+      tsconfig: 'tsconfig.test.json'
+    }
   },
   
   // Setup files to run after the test framework is installed
@@ -16,7 +27,9 @@ module.exports = {
   // Test match patterns
   testMatch: [
     '<rootDir>/tests/**/*.test.js',
-    '<rootDir>/tests/**/*.spec.js'
+    '<rootDir>/tests/**/*.spec.js',
+    '<rootDir>/tests/**/*.test.ts',
+    '<rootDir>/tests/**/*.spec.ts'
   ],
   
   // Ignore patterns
@@ -32,8 +45,11 @@ module.exports = {
   collectCoverage: false,
   collectCoverageFrom: [
     'src/**/*.js',
+    'src/**/*.ts',
     '!src/**/*.test.js',
-    '!src/**/*.spec.js'
+    '!src/**/*.spec.js',
+    '!src/**/*.test.ts',
+    '!src/**/*.spec.ts'
   ],
   
   // Coverage thresholds

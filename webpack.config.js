@@ -22,6 +22,11 @@ const config = {
   module: {
     rules: [
       {
+        test: /\.ts$/,
+        exclude: /node_modules/,
+        use: 'ts-loader'
+      },
+      {
         test: /\.js$/,
         exclude: /node_modules/,
         use: {
@@ -48,7 +53,7 @@ const config = {
     ] : [])
   ],
   resolve: {
-    extensions: ['.js']
+    extensions: ['.ts', '.js']
   }
 };
 

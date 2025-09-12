@@ -1301,63 +1301,63 @@ export class SVGRenderer {
         let hiddenIndicator = <span class="cstat-no" title="statement not covered" >null;</span>
         
 <span class="cstat-no" title="statement not covered" >        switch(node.data.shape) {</span>
-            case 'rectangle':
-                const textWidth = <span class="cstat-no" title="statement not covered" >this.measureTextWidth(node.data.name);</span>
-                const padding = <span class="cstat-no" title="statement not covered" >20;</span>
-                const minWidth = <span class="cstat-no" title="statement not covered" >node.size * 2;</span>
-                const rectWidth = <span class="cstat-no" title="statement not covered" >Math.max(minWidth, textWidth + padding);</span>
-                const rectHeight = <span class="cstat-no" title="statement not covered" >node.size * 1.4;</span>
+        case 'rectangle':
+            const textWidth = <span class="cstat-no" title="statement not covered" >this.measureTextWidth(node.data.name);</span>
+            const padding = <span class="cstat-no" title="statement not covered" >20;</span>
+            const minWidth = <span class="cstat-no" title="statement not covered" >node.size * 2;</span>
+            const rectWidth = <span class="cstat-no" title="statement not covered" >Math.max(minWidth, textWidth + padding);</span>
+            const rectHeight = <span class="cstat-no" title="statement not covered" >node.size * 1.4;</span>
                 
-                // Store dynamic dimensions on node
-<span class="cstat-no" title="statement not covered" >                node.dynamicWidth = rectWidth;</span>
-<span class="cstat-no" title="statement not covered" >                node.dynamicHeight = rectHeight;</span>
+            // Store dynamic dimensions on node
+<span class="cstat-no" title="statement not covered" >            node.dynamicWidth = rectWidth;</span>
+<span class="cstat-no" title="statement not covered" >            node.dynamicHeight = rectHeight;</span>
                 
-                // Create hidden connection indicator
-                const indicatorPadding = <span class="cstat-no" title="statement not covered" >4;</span>
-<span class="cstat-no" title="statement not covered" >                hiddenIndicator = document.createElementNS('http://www.w3.org/2000/svg', 'rect');</span>
-<span class="cstat-no" title="statement not covered" >                hiddenIndicator.setAttribute('x', -(rectWidth + indicatorPadding) / 2);</span>
-<span class="cstat-no" title="statement not covered" >                hiddenIndicator.setAttribute('y', -(rectHeight + indicatorPadding) / 2);</span>
-<span class="cstat-no" title="statement not covered" >                hiddenIndicator.setAttribute('width', rectWidth + indicatorPadding);</span>
-<span class="cstat-no" title="statement not covered" >                hiddenIndicator.setAttribute('height', rectHeight + indicatorPadding);</span>
-<span class="cstat-no" title="statement not covered" >                hiddenIndicator.setAttribute('rx', 5);</span>
-<span class="cstat-no" title="statement not covered" >                hiddenIndicator.classList.add('hidden-connection-indicator');</span>
-<span class="cstat-no" title="statement not covered" >                hiddenIndicator.style.display = 'none';</span>
+            // Create hidden connection indicator
+            const indicatorPadding = <span class="cstat-no" title="statement not covered" >4;</span>
+<span class="cstat-no" title="statement not covered" >            hiddenIndicator = document.createElementNS('http://www.w3.org/2000/svg', 'rect');</span>
+<span class="cstat-no" title="statement not covered" >            hiddenIndicator.setAttribute('x', -(rectWidth + indicatorPadding) / 2);</span>
+<span class="cstat-no" title="statement not covered" >            hiddenIndicator.setAttribute('y', -(rectHeight + indicatorPadding) / 2);</span>
+<span class="cstat-no" title="statement not covered" >            hiddenIndicator.setAttribute('width', rectWidth + indicatorPadding);</span>
+<span class="cstat-no" title="statement not covered" >            hiddenIndicator.setAttribute('height', rectHeight + indicatorPadding);</span>
+<span class="cstat-no" title="statement not covered" >            hiddenIndicator.setAttribute('rx', 5);</span>
+<span class="cstat-no" title="statement not covered" >            hiddenIndicator.classList.add('hidden-connection-indicator');</span>
+<span class="cstat-no" title="statement not covered" >            hiddenIndicator.style.display = 'none';</span>
                 
-<span class="cstat-no" title="statement not covered" >                shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'rect');</span>
-<span class="cstat-no" title="statement not covered" >                shapeElement.setAttribute('x', -rectWidth / 2);</span>
-<span class="cstat-no" title="statement not covered" >                shapeElement.setAttribute('y', -rectHeight / 2);</span>
-<span class="cstat-no" title="statement not covered" >                shapeElement.setAttribute('width', rectWidth);</span>
-<span class="cstat-no" title="statement not covered" >                shapeElement.setAttribute('height', rectHeight);</span>
-<span class="cstat-no" title="statement not covered" >                shapeElement.setAttribute('rx', 5);</span>
-<span class="cstat-no" title="statement not covered" >                break;</span>
+<span class="cstat-no" title="statement not covered" >            shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'rect');</span>
+<span class="cstat-no" title="statement not covered" >            shapeElement.setAttribute('x', -rectWidth / 2);</span>
+<span class="cstat-no" title="statement not covered" >            shapeElement.setAttribute('y', -rectHeight / 2);</span>
+<span class="cstat-no" title="statement not covered" >            shapeElement.setAttribute('width', rectWidth);</span>
+<span class="cstat-no" title="statement not covered" >            shapeElement.setAttribute('height', rectHeight);</span>
+<span class="cstat-no" title="statement not covered" >            shapeElement.setAttribute('rx', 5);</span>
+<span class="cstat-no" title="statement not covered" >            break;</span>
                 
-            case 'square':
-                const squareSize = <span class="cstat-no" title="statement not covered" >node.size * 1.4;</span>
-<span class="cstat-no" title="statement not covered" >                shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'rect');</span>
-<span class="cstat-no" title="statement not covered" >                shapeElement.setAttribute('x', -squareSize / 2);</span>
-<span class="cstat-no" title="statement not covered" >                shapeElement.setAttribute('y', -squareSize / 2);</span>
-<span class="cstat-no" title="statement not covered" >                shapeElement.setAttribute('width', squareSize);</span>
-<span class="cstat-no" title="statement not covered" >                shapeElement.setAttribute('height', squareSize);</span>
-<span class="cstat-no" title="statement not covered" >                shapeElement.setAttribute('rx', 5);</span>
-<span class="cstat-no" title="statement not covered" >                break;</span>
+        case 'square':
+            const squareSize = <span class="cstat-no" title="statement not covered" >node.size * 1.4;</span>
+<span class="cstat-no" title="statement not covered" >            shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'rect');</span>
+<span class="cstat-no" title="statement not covered" >            shapeElement.setAttribute('x', -squareSize / 2);</span>
+<span class="cstat-no" title="statement not covered" >            shapeElement.setAttribute('y', -squareSize / 2);</span>
+<span class="cstat-no" title="statement not covered" >            shapeElement.setAttribute('width', squareSize);</span>
+<span class="cstat-no" title="statement not covered" >            shapeElement.setAttribute('height', squareSize);</span>
+<span class="cstat-no" title="statement not covered" >            shapeElement.setAttribute('rx', 5);</span>
+<span class="cstat-no" title="statement not covered" >            break;</span>
                 
-            case 'triangle':
-                const triangleSize = <span class="cstat-no" title="statement not covered" >node.size * 1.4;</span>
-                const h = <span class="cstat-no" title="statement not covered" >triangleSize * Math.sqrt(3) / 2;</span>
-                const points = <span class="cstat-no" title="statement not covered" >[</span>
-                    [0, -h / 2],
-                    [-triangleSize / 2, h / 2],
-                    [triangleSize / 2, h / 2]
-                ].map(<span class="fstat-no" title="function not covered" >po</span>int =&gt; <span class="cstat-no" title="statement not covered" >point.join(','))</span>.join(' ');
+        case 'triangle':
+            const triangleSize = <span class="cstat-no" title="statement not covered" >node.size * 1.4;</span>
+            const h = <span class="cstat-no" title="statement not covered" >triangleSize * Math.sqrt(3) / 2;</span>
+            const points = <span class="cstat-no" title="statement not covered" >[</span>
+                [0, -h / 2],
+                [-triangleSize / 2, h / 2],
+                [triangleSize / 2, h / 2]
+            ].map(<span class="fstat-no" title="function not covered" >po</span>int =&gt; <span class="cstat-no" title="statement not covered" >point.join(','))</span>.join(' ');
                 
-<span class="cstat-no" title="statement not covered" >                shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');</span>
-<span class="cstat-no" title="statement not covered" >                shapeElement.setAttribute('points', points);</span>
-<span class="cstat-no" title="statement not covered" >                break;</span>
+<span class="cstat-no" title="statement not covered" >            shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');</span>
+<span class="cstat-no" title="statement not covered" >            shapeElement.setAttribute('points', points);</span>
+<span class="cstat-no" title="statement not covered" >            break;</span>
                 
-            default: // circle
-<span class="cstat-no" title="statement not covered" >                shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'circle');</span>
-<span class="cstat-no" title="statement not covered" >                shapeElement.setAttribute('r', node.size);</span>
-<span class="cstat-no" title="statement not covered" >                break;</span>
+        default: // circle
+<span class="cstat-no" title="statement not covered" >            shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'circle');</span>
+<span class="cstat-no" title="statement not covered" >            shapeElement.setAttribute('r', node.size);</span>
+<span class="cstat-no" title="statement not covered" >            break;</span>
         }
         
         // Apply node styling
@@ -1591,7 +1591,7 @@ export class SVGRenderer {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-09-11T20:37:36.934Z
+                at 2025-09-11T20:39:11.729Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
