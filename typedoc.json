@@ -1,0 +1,73 @@
+{
+  "name": "SVG Graph Network API Documentation",
+  "entryPoints": ["src/index.ts"],
+  "out": "docs/api",
+  "theme": "default",
+  "includeVersion": true,
+  "excludePrivate": true,
+  "excludeProtected": false,
+  "excludeExternals": true,
+  "readme": "README.md",
+  "validation": {
+    "notExported": true,
+    "invalidLink": true,
+    "notDocumented": false
+  },
+  "categorizeByGroup": true,
+  "defaultCategory": "Other",
+  "categoryOrder": [
+    "Core",
+    "Data Management", 
+    "Selection",
+    "Styling", 
+    "Highlighting",
+    "Camera",
+    "Events",
+    "Utilities",
+    "*"
+  ],
+  "sort": ["source-order"],
+  "kindSortOrder": [
+    "Reference",
+    "Project", 
+    "Module",
+    "Namespace",
+    "Enum",
+    "EnumMember",
+    "Class",
+    "Interface", 
+    "TypeAlias",
+    "Constructor",
+    "Property",
+    "Variable",
+    "Function", 
+    "Method",
+    "Parameter"
+  ],
+  "visibilityFilters": {
+    "protected": false,
+    "private": false,
+    "inherited": true,
+    "external": false,
+    "@alpha": false,
+    "@beta": false
+  },
+  "searchInComments": true,
+  "cleanOutputDir": true,
+  "titleLink": "https://github.com/yourname/svg-graph-network",
+  "navigationLinks": {
+    "GitHub": "https://github.com/yourname/svg-graph-network",
+    "NPM": "https://www.npmjs.com/package/svg-graph-network"
+  },
+  "sidebarLinks": {
+    "Examples": "https://github.com/yourname/svg-graph-network/tree/main/examples",
+    "Contributing": "https://github.com/yourname/svg-graph-network/blob/main/CONTRIBUTING.md"
+  },
+  "hostedBaseUrl": "https://yourname.github.io/svg-graph-network/",
+  "githubPages": true,
+  "hideGenerator": false,
+  "navigation": {
+    "includeCategories": true,
+    "includeGroups": true
+  }
+}

@@ -17,7 +17,7 @@
     "dev": "webpack serve --mode=development",
     "watch": "webpack --mode=development --watch",
     "clean": "rm -rf dist .tsbuildinfo",
-    "prepare": "npm run clean && npm run build && husky install",
+    "prepare": "husky",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -25,7 +25,13 @@
     "lint:fix": "eslint src --ext .ts --fix",
     "format": "prettier --write 'src/**/*.{js,ts}'",
     "type-check": "tsc --noEmit",
-    "type-check:watch": "tsc --noEmit --watch"
+    "type-check:watch": "tsc --noEmit --watch",
+    "docs": "typedoc",
+    "docs:serve": "npm run docs && npx http-server docs/api -p 8080 -o",
+    "docs:watch": "typedoc --watch",
+    "size": "size-limit",
+    "size:analyze": "size-limit --why",
+    "size:ci": "size-limit"
   },
   "keywords": [
     "graph",
@@ -57,6 +63,7 @@
     "@babel/core": "^7.22.0",
     "@babel/preset-env": "^7.22.0",
     "@eslint/js": "^9.35.0",
+    "@size-limit/preset-big-lib": "^11.2.0",
     "@testing-library/jest-dom": "^6.8.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.3.1",
@@ -69,13 +76,17 @@
     "eslint-plugin-jest": "^29.0.1",
     "eslint-plugin-prettier": "^5.5.4",
     "html-webpack-plugin": "^5.5.0",
+    "husky": "^9.1.7",
     "jest": "^30.1.3",
     "jest-environment-jsdom": "^30.1.2",
+    "lint-staged": "^16.1.6",
     "mini-css-extract-plugin": "^2.7.0",
     "prettier": "^3.6.2",
+    "size-limit": "^11.2.0",
     "style-loader": "^3.3.0",
     "ts-jest": "^29.4.1",
     "ts-loader": "^9.5.4",
+    "typedoc": "^0.28.12",
     "typescript": "^5.9.2",
     "webpack": "^5.88.0",
     "webpack-cli": "^5.1.0",
@@ -88,5 +99,30 @@
     "> 1%",
     "last 2 versions",
     "not dead"
+  ],
+  "lint-staged": {
+    "src/**/*.{ts,js}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "src/**/*.ts": [
+      "npm run type-check"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
+  },
+  "size-limit": [
+    {
+      "name": "SVG Graph Network (minified)",
+      "path": "dist/svg-graph-network.min.js",
+      "limit": "100 KB"
+    },
+    {
+      "name": "SVG Graph Network (gzipped)", 
+      "path": "dist/svg-graph-network.min.js",
+      "gzip": true,
+      "limit": "30 KB"
+    }
   ]
 }
