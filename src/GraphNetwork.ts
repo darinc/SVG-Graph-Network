@@ -1875,8 +1875,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
 
             // Initialize event handling after elements are created
             if (this.events && this.renderer) {
-                this.events.updateCallbacks(this.eventCallbacks);
-                this.events.initialize(this.renderer.getSVGElement()!, this.nodes);
+                this.events.initialize(this.renderer.getSVGElement()!, this.nodes, this.eventCallbacks);
             }
 
             // Update UI with new data
