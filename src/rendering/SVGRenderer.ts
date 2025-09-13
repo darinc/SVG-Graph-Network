@@ -89,7 +89,12 @@ export class SVGRenderer {
      * @param themeManager - Theme manager instance
      * @param config - Renderer configuration options
      */
-    constructor(container: HTMLElement, containerId: string, themeManager: ThemeManager, config: RendererConfig = {}) {
+    constructor(
+        container: HTMLElement,
+        containerId: string,
+        themeManager: ThemeManager,
+        config: RendererConfig = {}
+    ) {
         this.container = container;
         this.containerId = containerId;
         this.themeManager = themeManager;
@@ -242,7 +247,11 @@ export class SVGRenderer {
             linkEl.setAttribute('data-id', `${link.source.getId()}-${link.target.getId()}`);
 
             // Apply theme-based edge styling
-            this.applyEdgeStyles(linkEl, link.line_type || 'default', `${link.source.getId()}-${link.target.getId()}`);
+            this.applyEdgeStyles(
+                linkEl,
+                link.line_type || 'default',
+                `${link.source.getId()}-${link.target.getId()}`
+            );
 
             // Apply additional styling from data
             if (link.weight) {
@@ -264,7 +273,7 @@ export class SVGRenderer {
             const labelText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             labelText.textContent = link.label || '';
             labelText.classList.add('edge-label-text');
-            
+
             // Apply theme styling to edge labels
             const foregroundColor = this.themeManager.getColor('foreground');
             const backgroundColor = this.themeManager.getColor('background');
@@ -274,7 +283,7 @@ export class SVGRenderer {
             if (backgroundColor) {
                 labelBackground.style.fill = backgroundColor;
             }
-            
+
             this.labelGroup!.appendChild(labelText);
 
             this.linkElements.set(link, { linkEl, labelText, labelBackground });
@@ -411,7 +420,7 @@ export class SVGRenderer {
             shapeElement.classList.add(`node-${nodeType}`);
             shapeElement.setAttribute('data-type', nodeType);
         }
-        
+
         // Apply theme-based styling
         this.applyNodeStyles(shapeElement, nodeType || 'default', node.getId());
 
@@ -439,7 +448,7 @@ export class SVGRenderer {
     private applyNodeStyles(element: SVGElement, nodeType: string, nodeId: string): void {
         const states = this.themeManager.getElementStates(nodeId);
         const style = this.themeManager.getNodeStyle(nodeType, states);
-        
+
         // Apply each style attribute
         Object.entries(style).forEach(([attr, value]) => {
             if (value !== undefined) {
@@ -455,7 +464,7 @@ export class SVGRenderer {
     private applyEdgeStyles(element: SVGElement, edgeType: string, edgeId: string): void {
         const states = this.themeManager.getElementStates(edgeId);
         const style = this.themeManager.getEdgeStyle(edgeType, states);
-        
+
         // Apply each style attribute
         Object.entries(style).forEach(([attr, value]) => {
             if (value !== undefined) {
@@ -469,24 +478,26 @@ export class SVGRenderer {
      */
     public applyCanvasTheming(): void {
         const canvasConfig = this.themeManager.getCanvasConfig();
-        
+
         if (this.svg) {
             // Apply background color
             if (canvasConfig.background) {
                 this.svg.style.backgroundColor = canvasConfig.background;
             }
-            
+
             // Apply grid pattern
             if (canvasConfig.showGrid && canvasConfig.gridColor && canvasConfig.gridSize) {
                 const gridSize = canvasConfig.gridSize;
                 const gridColor = canvasConfig.gridColor;
-                
+
                 const backgroundImage = `linear-gradient(${gridColor} 1px, transparent 1px), linear-gradient(90deg, ${gridColor} 1px, transparent 1px)`;
-                
+
                 this.svg.style.backgroundImage = backgroundImage;
                 this.svg.style.backgroundSize = `${gridSize}px ${gridSize}px`;
-                
-                console.log(`Applied grid pattern: ${gridColor} at ${gridSize}px for theme: ${this.themeManager.getCurrentTheme().name}`);
+
+                console.log(
+                    `Applied grid pattern: ${gridColor} at ${gridSize}px for theme: ${this.themeManager.getCurrentTheme().name}`
+                );
             } else {
                 // Remove grid if disabled
                 this.svg.style.backgroundImage = '';
@@ -500,14 +511,14 @@ export class SVGRenderer {
      */
     updateElementState(elementId: string, state: VisualState, enabled: boolean): void {
         this.themeManager.setElementState(elementId, state, enabled);
-        
+
         // Re-apply styles for the element
         // Find the element and re-apply its styles
         const element = this.svg?.querySelector(`[data-id="${elementId}"]`);
         if (element) {
             const isNode = element.classList.contains('node-shape');
             const isEdge = element.classList.contains('link');
-            
+
             if (isNode) {
                 const nodeType = element.getAttribute('data-type') || 'default';
                 this.applyNodeStyles(element as SVGElement, nodeType, elementId);
@@ -540,6 +551,9 @@ export class SVGRenderer {
         if (this.transformGroup) {
             this.transformGroup.style.transform = `translate(${this.transformState.x}px, ${this.transformState.y}px) scale(${this.transformState.scale})`;
         }
+
+        // Synchronize background transform if enabled
+        this.updateBackgroundTransform();
 
         // Update link positions
         this.updateLinkPositions(links, filteredNodes);
@@ -937,6 +951,32 @@ export class SVGRenderer {
         this.labelGroup = null;
         this.textCanvas = null;
         this.textContext = null;
+    }
+
+    /**
+     * Update background transform to synchronize with graph transforms
+     * Applies zoom and pan transforms to the background grid pattern
+     */
+    private updateBackgroundTransform(): void {
+        if (!this.svg) return;
+
+        const canvasConfig = this.themeManager.getCanvasConfig();
+
+        // Only apply background transform if sync is enabled and grid is shown
+        if (!canvasConfig.syncBackgroundTransform || !canvasConfig.showGrid) {
+            return;
+        }
+
+        const { scale, x, y } = this.transformState;
+
+        // Apply transform to background position and size
+        // The background moves opposite to the graph transform to create synchronized movement
+        const backgroundPositionX = x * scale;
+        const backgroundPositionY = y * scale;
+        const backgroundSize = (canvasConfig.gridSize || 20) * scale;
+
+        this.svg.style.backgroundPosition = `${backgroundPositionX}px ${backgroundPositionY}px`;
+        this.svg.style.backgroundSize = `${backgroundSize}px ${backgroundSize}px`;
     }
 
     /**

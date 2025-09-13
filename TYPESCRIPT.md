@@ -226,7 +226,8 @@ const customTheme: ThemeConfig = {
         showGrid: true,
         gridColor: 'rgba(255, 255, 255, 0.1)',
         gridSize: 30,
-        gridOpacity: 0.1
+        gridOpacity: 0.1,
+        syncBackgroundTransform: true  // Grid follows zoom/pan transforms
     } as CanvasConfig
 };
 

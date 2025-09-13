@@ -298,7 +298,43 @@ const stablePhysics = {
 };
 ```
 
-### 3. Event Handling Examples
+### 3. Background Synchronization Configuration
+
+```javascript
+// Default: Background grid moves with zoom and pan
+const syncedBackground = {
+    canvas: {
+        showGrid: true,
+        gridColor: 'rgba(100, 100, 100, 0.3)',
+        gridSize: 25,
+        syncBackgroundTransform: true  // Default behavior
+    }
+};
+
+// Alternative: Static background grid
+const staticBackground = {
+    canvas: {
+        showGrid: true,
+        gridColor: 'rgba(50, 50, 50, 0.5)',
+        gridSize: 20,
+        syncBackgroundTransform: false  // Grid stays fixed during zoom/pan
+    }
+};
+
+// Apply synchronized background theme
+graph.setTheme({
+    name: 'synced-grid',
+    ...syncedBackground
+});
+
+// Or disable sync for performance on large datasets
+graph.setTheme({
+    name: 'performance-optimized',
+    ...staticBackground
+});
+```
+
+### 4. Event Handling Examples
 
 ```javascript
 // Track user interactions
@@ -326,7 +362,7 @@ graph.on('themeChanged', (data) => {
 });
 ```
 
-### 4. Integration with UI Frameworks
+### 5. Integration with UI Frameworks
 
 #### React Integration
 ```jsx

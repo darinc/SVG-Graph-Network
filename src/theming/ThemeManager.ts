@@ -1,6 +1,6 @@
 /**
  * ThemeManager - Core theming system for flexible visual customization
- * 
+ *
  * Provides centralized theme management with support for:
  * - Dynamic node/edge type styling
  * - Visual state management
@@ -35,6 +35,7 @@ export interface CanvasConfig {
     gridSize?: number;
     gridOpacity?: number;
     gridStyle?: 'lines' | 'dots' | 'crosses';
+    syncBackgroundTransform?: boolean;
 }
 
 export interface StateStyles {
@@ -56,25 +57,25 @@ export interface ColorScheme {
 export interface ThemeConfig {
     name: string;
     version?: string;
-    
+
     // Canvas styling
     canvas?: CanvasConfig;
-    
+
     // Color scheme
     colors?: ColorScheme;
-    
+
     // Node styles by type (fully dynamic)
     nodeStyles?: {
         default?: NodeStyleConfig;
         [nodeType: string]: NodeStyleConfig | undefined;
     };
-    
+
     // Edge styles by type
     edgeStyles?: {
         default?: EdgeStyleConfig;
         [edgeType: string]: EdgeStyleConfig | undefined;
     };
-    
+
     // Visual states
     states?: {
         normal?: StateStyles;
@@ -91,12 +92,12 @@ export class ThemeManager {
     private currentTheme: ThemeConfig;
     private registeredThemes = new Map<string, ThemeConfig>();
     private elementStates = new Map<string, Set<VisualState>>();
-    
+
     constructor(initialTheme?: ThemeConfig) {
         this.currentTheme = initialTheme || this.getDefaultTheme();
         this.registerBuiltinThemes();
     }
-    
+
     /**
      * Get the default minimal theme
      */
@@ -108,7 +109,8 @@ export class ThemeManager {
                 showGrid: true,
                 gridColor: 'rgba(255, 165, 0, 0.1)',
                 gridSize: 30,
-                gridOpacity: 0.1
+                gridOpacity: 0.1,
+                syncBackgroundTransform: true
             },
             colors: {
                 primary: '#3b82f6',
@@ -212,7 +214,8 @@ export class ThemeManager {
             name: 'minimal',
             canvas: {
                 background: '#ffffff',
-                showGrid: false
+                showGrid: false,
+                syncBackgroundTransform: true
             },
             colors: {
                 primary: '#000000',
@@ -309,7 +312,8 @@ export class ThemeManager {
                 showGrid: true,
                 gridColor: 'rgba(255, 165, 0, 0.1)',
                 gridSize: 30,
-                gridOpacity: 0.1
+                gridOpacity: 0.1,
+                syncBackgroundTransform: true
             },
             colors: {
                 primary: '#60a5fa',
@@ -426,7 +430,8 @@ export class ThemeManager {
                 showGrid: true,
                 gridColor: 'rgba(0, 100, 255, 0.1)',
                 gridSize: 30,
-                gridOpacity: 0.1
+                gridOpacity: 0.1,
+                syncBackgroundTransform: true
             },
             colors: {
                 primary: '#2563eb',
@@ -531,7 +536,7 @@ export class ThemeManager {
             }
         };
     }
-    
+
     /**
      * Register built-in themes
      */
@@ -541,7 +546,7 @@ export class ThemeManager {
         this.registeredThemes.set('dark', this.getDarkTheme());
         this.registeredThemes.set('light', this.getLightTheme());
     }
-    
+
     /**
      * Set the current theme
      */
@@ -549,44 +554,49 @@ export class ThemeManager {
         if (typeof theme === 'string') {
             const registeredTheme = this.registeredThemes.get(theme);
             if (!registeredTheme) {
-                throw new Error(`Theme '${theme}' not found. Available themes: ${Array.from(this.registeredThemes.keys()).join(', ')}`);
+                throw new Error(
+                    `Theme '${theme}' not found. Available themes: ${Array.from(this.registeredThemes.keys()).join(', ')}`
+                );
             }
             this.currentTheme = registeredTheme;
         } else {
             this.currentTheme = theme;
         }
     }
-    
+
     /**
      * Get the current theme
      */
     getCurrentTheme(): ThemeConfig {
         return this.currentTheme;
     }
-    
+
     /**
      * Register a new theme
      */
     registerTheme(name: string, theme: ThemeConfig): void {
         this.registeredThemes.set(name, { ...theme, name });
     }
-    
+
     /**
      * Get node styles for a specific type and states
      */
-    getNodeStyle(nodeType: string, states: Set<VisualState> = new Set(['normal'])): NodeStyleConfig {
+    getNodeStyle(
+        nodeType: string,
+        states: Set<VisualState> = new Set(['normal'])
+    ): NodeStyleConfig {
         let style: NodeStyleConfig = {};
-        
+
         // Start with default styles
         if (this.currentTheme.nodeStyles?.default) {
             style = { ...this.currentTheme.nodeStyles.default };
         }
-        
+
         // Apply type-specific styles
         if (nodeType && this.currentTheme.nodeStyles?.[nodeType]) {
             style = { ...style, ...this.currentTheme.nodeStyles[nodeType] };
         }
-        
+
         // Apply state styles (in priority order)
         const stateOrder: VisualState[] = ['normal', 'hover', 'active', 'selected', 'disabled'];
         for (const state of stateOrder) {
@@ -594,26 +604,29 @@ export class ThemeManager {
                 style = { ...style, ...this.currentTheme.states[state]!.nodes };
             }
         }
-        
+
         return style;
     }
-    
+
     /**
      * Get edge styles for a specific type and states
      */
-    getEdgeStyle(edgeType: string, states: Set<VisualState> = new Set(['normal'])): EdgeStyleConfig {
+    getEdgeStyle(
+        edgeType: string,
+        states: Set<VisualState> = new Set(['normal'])
+    ): EdgeStyleConfig {
         let style: EdgeStyleConfig = {};
-        
+
         // Start with default styles
         if (this.currentTheme.edgeStyles?.default) {
             style = { ...this.currentTheme.edgeStyles.default };
         }
-        
+
         // Apply type-specific styles
         if (edgeType && this.currentTheme.edgeStyles?.[edgeType]) {
             style = { ...style, ...this.currentTheme.edgeStyles[edgeType] };
         }
-        
+
         // Apply state styles
         const stateOrder: VisualState[] = ['normal', 'hover', 'active', 'selected', 'disabled'];
         for (const state of stateOrder) {
@@ -621,24 +634,24 @@ export class ThemeManager {
                 style = { ...style, ...this.currentTheme.states[state]!.edges };
             }
         }
-        
+
         return style;
     }
-    
+
     /**
      * Get canvas configuration
      */
     getCanvasConfig(): CanvasConfig {
         return this.currentTheme.canvas || {};
     }
-    
+
     /**
      * Get color from the color scheme
      */
     getColor(colorKey: string): string | undefined {
         return this.currentTheme.colors?.[colorKey];
     }
-    
+
     /**
      * Set element state
      */
@@ -646,9 +659,9 @@ export class ThemeManager {
         if (!this.elementStates.has(elementId)) {
             this.elementStates.set(elementId, new Set(['normal']));
         }
-        
+
         const states = this.elementStates.get(elementId)!;
-        
+
         if (enabled) {
             states.add(state);
             // Remove normal state when other states are active
@@ -663,21 +676,21 @@ export class ThemeManager {
             }
         }
     }
-    
+
     /**
      * Get element states
      */
     getElementStates(elementId: string): Set<VisualState> {
         return this.elementStates.get(elementId) || new Set(['normal']);
     }
-    
+
     /**
      * Clear all element states
      */
     clearElementStates(): void {
         this.elementStates.clear();
     }
-    
+
     /**
      * Update theme partially
      */
@@ -686,14 +699,24 @@ export class ThemeManager {
             ...this.currentTheme,
             ...updates,
             // Deep merge for nested objects
-            canvas: updates.canvas ? { ...this.currentTheme.canvas, ...updates.canvas } : this.currentTheme.canvas,
-            colors: updates.colors ? { ...this.currentTheme.colors, ...updates.colors } : this.currentTheme.colors,
-            nodeStyles: updates.nodeStyles ? { ...this.currentTheme.nodeStyles, ...updates.nodeStyles } : this.currentTheme.nodeStyles,
-            edgeStyles: updates.edgeStyles ? { ...this.currentTheme.edgeStyles, ...updates.edgeStyles } : this.currentTheme.edgeStyles,
-            states: updates.states ? { ...this.currentTheme.states, ...updates.states } : this.currentTheme.states
+            canvas: updates.canvas
+                ? { ...this.currentTheme.canvas, ...updates.canvas }
+                : this.currentTheme.canvas,
+            colors: updates.colors
+                ? { ...this.currentTheme.colors, ...updates.colors }
+                : this.currentTheme.colors,
+            nodeStyles: updates.nodeStyles
+                ? { ...this.currentTheme.nodeStyles, ...updates.nodeStyles }
+                : this.currentTheme.nodeStyles,
+            edgeStyles: updates.edgeStyles
+                ? { ...this.currentTheme.edgeStyles, ...updates.edgeStyles }
+                : this.currentTheme.edgeStyles,
+            states: updates.states
+                ? { ...this.currentTheme.states, ...updates.states }
+                : this.currentTheme.states
         };
     }
-    
+
     /**
      * Set styles for a specific node type
      */
@@ -706,7 +729,7 @@ export class ThemeManager {
             ...style
         };
     }
-    
+
     /**
      * Set styles for a specific edge type
      */
@@ -719,14 +742,14 @@ export class ThemeManager {
             ...style
         };
     }
-    
+
     /**
      * Get list of available themes
      */
     getAvailableThemes(): string[] {
         return Array.from(this.registeredThemes.keys());
     }
-    
+
     /**
      * Configure grid settings for current theme
      */
@@ -739,7 +762,7 @@ export class ThemeManager {
         if (!this.currentTheme.canvas) {
             this.currentTheme.canvas = {};
         }
-        
+
         if (options.enabled !== undefined) {
             this.currentTheme.canvas.showGrid = options.enabled;
         }
@@ -752,11 +775,11 @@ export class ThemeManager {
         if (options.opacity !== undefined) {
             this.currentTheme.canvas.gridOpacity = options.opacity;
         }
-        
+
         // Note: Grid changes will be applied when applyCanvasTheming() is called
         // No need to trigger theme change callback here as it's just a grid config change
     }
-    
+
     /**
      * Get current grid configuration
      */

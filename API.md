@@ -360,7 +360,8 @@ graph.configureGrid({
     showGrid: true,
     gridColor: 'rgba(255, 165, 0, 0.2)',
     gridSize: 40,
-    gridStyle: 'lines'
+    gridStyle: 'lines',
+    syncBackgroundTransform: true  // Grid moves with zoom/pan (default: true)
 });
 ```
 
@@ -369,6 +370,38 @@ graph.configureGrid({
 Gets the current grid configuration.
 
 **Returns:** CanvasConfig object
+
+### Background Transform Synchronization
+
+**Feature**: The `syncBackgroundTransform` option enables the background grid to move and scale in sync with graph zoom and pan operations, creating a cohesive visual experience.
+
+**Default Behavior**: This feature is enabled by default (`syncBackgroundTransform: true`) in all built-in themes.
+
+**How it works**:
+- When you zoom the graph, the background grid scales proportionally
+- When you pan the graph, the background grid moves accordingly
+- This creates the visual effect of the graph and background being part of the same coordinate system
+
+**Configuration**:
+```javascript
+// Enable background sync (default)
+graph.setTheme({
+    name: 'custom',
+    canvas: {
+        showGrid: true,
+        syncBackgroundTransform: true
+    }
+});
+
+// Disable background sync for static grid
+graph.setTheme({
+    name: 'static-grid',
+    canvas: {
+        showGrid: true,
+        syncBackgroundTransform: false
+    }
+});
+```
 
 ### `applyNodeStyle(nodeId, styles)`
 
@@ -588,6 +621,7 @@ interface ThemeConfig {
         gridSize?: number;        // Grid cell size
         gridOpacity?: number;     // Grid transparency
         gridStyle?: 'lines' | 'dots' | 'crosses';
+        syncBackgroundTransform?: boolean; // Synchronize background with zoom/pan (default: true)
     };
 }
 ```
