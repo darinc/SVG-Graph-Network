@@ -18,9 +18,6 @@ import {
     DataReplacementOptions,
     DataMergeOptions,
     TransactionState,
-    TransactionOperation,
-    NodeUpdate,
-    LinkUpdate,
     DEFAULT_CONFIG,
     isGraphData,
     isNodeData,
@@ -40,7 +37,7 @@ import { SelectionManager } from './selection/SelectionManager';
 import { StyleManager } from './styling/StyleManager';
 import { HighlightManager } from './highlighting/HighlightManager';
 import { CameraController } from './camera/CameraController';
-import { ThemeManager, ThemeConfig } from './theming/ThemeManager';
+import { ThemeManager } from './theming/ThemeManager';
 import {
     SelectionOptions,
     NodeStyles,
@@ -130,7 +127,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
     private readonly edges = new Map<string, LinkData>(); // Track edges by ID for Phase 3 API
     private filteredNodes: Set<string> | null = null;
     private currentFilterNodeId: string | null = null;
-    
+
     // Transaction management (Phase 4)
     private currentTransaction: TransactionState | null = null;
     private transactionIdCounter: number = 0;
@@ -147,7 +144,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
     private renderer: SVGRenderer | null = null;
     private ui: UIManager | null = null;
     private events: EventManager<T> | null = null;
-    
+
     // Phase 5: Styling & Interactivity managers
     private selectionManager: SelectionManager | null = null;
     private styleManager: StyleManager | null = null;
@@ -314,21 +311,13 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         this.createTooltip();
 
         // Initialize Phase 5: Styling & Interactivity managers
-        this.selectionManager = new SelectionManager(
-            (event) => this.emit('selectionChanged', event)
-        );
-        
-        this.styleManager = new StyleManager(
-            (event) => this.emit('styleChanged', event)
-        );
-        
-        this.highlightManager = new HighlightManager(
-            (event) => this.emit('highlightChanged', event)
-        );
-        
-        this.cameraController = new CameraController(
-            (event) => this.emit('focusChanged', event)
-        );
+        this.selectionManager = new SelectionManager(event => this.emit('selectionChanged', event));
+
+        this.styleManager = new StyleManager(event => this.emit('styleChanged', event));
+
+        this.highlightManager = new HighlightManager(event => this.emit('highlightChanged', event));
+
+        this.cameraController = new CameraController(event => this.emit('focusChanged', event));
 
         // Set initial theme after all modules are initialized
         this.setTheme(this.config.theme);
@@ -337,7 +326,6 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             console.log('GraphNetwork: All modules initialized successfully');
         }
     }
-
 
     /**
      * Parse and validate input data
@@ -411,9 +399,9 @@ export class GraphNetwork<T extends NodeData = NodeData> {
 
             // Also populate edges Map for Phase 3 API compatibility
             const edgeId = linkData.id || `${linkData.source}-${linkData.target}`;
-            this.edges.set(edgeId, { 
-                id: edgeId, 
-                ...linkData 
+            this.edges.set(edgeId, {
+                id: edgeId,
+                ...linkData
             });
         });
 
@@ -771,12 +759,11 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         if (!this.themeManager) {
             throw new Error('ThemeManager not initialized');
         }
-        
+
         const currentTheme = this.themeManager.getCurrentTheme();
         const newThemeName = currentTheme.name === 'light' ? 'dark' : 'light';
         this.setTheme(newThemeName);
     }
-
 
     /**
      * Handle breadcrumb navigation
@@ -922,7 +909,11 @@ export class GraphNetwork<T extends NodeData = NodeData> {
                     throw new NodeValidationError('Node id must be a non-empty string', nodeData);
                 }
 
-                if (!nodeData.name || typeof nodeData.name !== 'string' || nodeData.name.trim() === '') {
+                if (
+                    !nodeData.name ||
+                    typeof nodeData.name !== 'string' ||
+                    nodeData.name.trim() === ''
+                ) {
                     throw new NodeValidationError('Node name must be a non-empty string', nodeData);
                 }
 
@@ -931,8 +922,17 @@ export class GraphNetwork<T extends NodeData = NodeData> {
                     throw new NodeValidationError('Node type must be a string', nodeData);
                 }
 
-                if (nodeData.size !== undefined && (typeof nodeData.size !== 'number' || nodeData.size <= 0 || !isFinite(nodeData.size) || isNaN(nodeData.size))) {
-                    throw new NodeValidationError('Node size must be a positive finite number', nodeData);
+                if (
+                    nodeData.size !== undefined &&
+                    (typeof nodeData.size !== 'number' ||
+                        nodeData.size <= 0 ||
+                        !isFinite(nodeData.size) ||
+                        isNaN(nodeData.size))
+                ) {
+                    throw new NodeValidationError(
+                        'Node size must be a positive finite number',
+                        nodeData
+                    );
                 }
             }
 
@@ -945,9 +945,9 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             const rect = this.container.getBoundingClientRect();
             const width = rect.width || 800;
             const height = rect.height || 600;
-            
+
             const node = new Node(nodeData, width, height);
-            
+
             // Apply initial positioning if provided
             if (options.x !== undefined && options.y !== undefined) {
                 node.position.x = options.x;
@@ -978,8 +978,8 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             }
 
             // Emit enhanced event
-            this.emit('nodeAdded', { 
-                node, 
+            this.emit('nodeAdded', {
+                node,
                 nodeId: nodeData.id,
                 nodeData: { ...nodeData },
                 type: 'nodeAdded',
@@ -987,10 +987,12 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             });
 
             return node;
-
         } catch (error) {
             if (this.debug) {
-                console.error('GraphNetwork: Failed to add node:', GraphErrorUtils.getErrorDetails(error));
+                console.error(
+                    'GraphNetwork: Failed to add node:',
+                    GraphErrorUtils.getErrorDetails(error)
+                );
             }
             throw error;
         }
@@ -1012,7 +1014,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             const connectedLinks: LinkData[] = [];
 
             // Collect connected links for event emission
-            this.edges.forEach((edgeData, edgeId) => {
+            this.edges.forEach((edgeData, _edgeId) => {
                 if (edgeData.source === nodeId || edgeData.target === nodeId) {
                     connectedLinks.push({ ...edgeData });
                 }
@@ -1064,12 +1066,14 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             }
 
             if (this.debug) {
-                console.log(`GraphNetwork: Deleted node "${nodeId}" and ${connectedLinks.length} connected edges`);
+                console.log(
+                    `GraphNetwork: Deleted node "${nodeId}" and ${connectedLinks.length} connected edges`
+                );
             }
 
             // Emit enhanced events
-            this.emit('nodeRemoved', { 
-                nodeId, 
+            this.emit('nodeRemoved', {
+                nodeId,
                 nodeData,
                 connectedEdges: connectedLinks,
                 type: 'nodeRemoved',
@@ -1086,10 +1090,12 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             });
 
             return true;
-
         } catch (error) {
             if (this.debug) {
-                console.error('GraphNetwork: Failed to delete node:', GraphErrorUtils.getErrorDetails(error));
+                console.error(
+                    'GraphNetwork: Failed to delete node:',
+                    GraphErrorUtils.getErrorDetails(error)
+                );
             }
             throw error;
         }
@@ -1117,11 +1123,17 @@ export class GraphNetwork<T extends NodeData = NodeData> {
                 }
 
                 if (!edgeData.source || typeof edgeData.source !== 'string') {
-                    throw new EdgeValidationError('Edge source must be a non-empty string', edgeData);
+                    throw new EdgeValidationError(
+                        'Edge source must be a non-empty string',
+                        edgeData
+                    );
                 }
 
                 if (!edgeData.target || typeof edgeData.target !== 'string') {
-                    throw new EdgeValidationError('Edge target must be a non-empty string', edgeData);
+                    throw new EdgeValidationError(
+                        'Edge target must be a non-empty string',
+                        edgeData
+                    );
                 }
 
                 if (edgeData.source === edgeData.target) {
@@ -1138,21 +1150,37 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             const sourceNode = this.nodes.get(edgeData.source);
             const targetNode = this.nodes.get(edgeData.target);
             const missingNodes: string[] = [];
-            
+
             if (!sourceNode) missingNodes.push(edgeData.source);
             if (!targetNode) missingNodes.push(edgeData.target);
-            
+
             if (missingNodes.length > 0) {
-                throw new InvalidEdgeReferencesError(edgeData.source, edgeData.target, missingNodes);
+                throw new InvalidEdgeReferencesError(
+                    edgeData.source,
+                    edgeData.target,
+                    missingNodes
+                );
             }
 
             // Validate optional fields
-            if (edgeData.weight !== undefined && (typeof edgeData.weight !== 'number' || edgeData.weight < 0)) {
-                throw new EdgeValidationError('Edge weight must be a non-negative number', edgeData);
+            if (
+                edgeData.weight !== undefined &&
+                (typeof edgeData.weight !== 'number' || edgeData.weight < 0)
+            ) {
+                throw new EdgeValidationError(
+                    'Edge weight must be a non-negative number',
+                    edgeData
+                );
             }
 
-            if (edgeData.line_type !== undefined && !['solid', 'dashed', 'dotted'].includes(edgeData.line_type)) {
-                throw new EdgeValidationError('Edge line_type must be "solid", "dashed", or "dotted"', edgeData);
+            if (
+                edgeData.line_type !== undefined &&
+                !['solid', 'dashed', 'dotted'].includes(edgeData.line_type)
+            ) {
+                throw new EdgeValidationError(
+                    'Edge line_type must be "solid", "dashed", or "dotted"',
+                    edgeData
+                );
             }
 
             // Create render link
@@ -1185,11 +1213,13 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             }
 
             if (this.debug) {
-                console.log(`GraphNetwork: Added edge "${edgeData.id}" (${edgeData.source} -> ${edgeData.target})`);
+                console.log(
+                    `GraphNetwork: Added edge "${edgeData.id}" (${edgeData.source} -> ${edgeData.target})`
+                );
             }
 
             // Emit enhanced event
-            this.emit('linkAdded', { 
+            this.emit('linkAdded', {
                 linkData: { ...edgeData },
                 edgeId: edgeData.id,
                 type: 'linkAdded',
@@ -1197,10 +1227,12 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             });
 
             return renderLink;
-
         } catch (error) {
             if (this.debug) {
-                console.error('GraphNetwork: Failed to add edge:', GraphErrorUtils.getErrorDetails(error));
+                console.error(
+                    'GraphNetwork: Failed to add edge:',
+                    GraphErrorUtils.getErrorDetails(error)
+                );
             }
             throw error;
         }
@@ -1246,9 +1278,13 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             const initialLength = this.links.length;
             this.links = this.links.filter(link => {
                 const linkId = `${link.source.getId()}-${link.target.getId()}`;
-                return linkId !== edgeId && 
-                       !(link.source.getId() === edgeData.source && 
-                         link.target.getId() === edgeData.target);
+                return (
+                    linkId !== edgeId &&
+                    !(
+                        link.source.getId() === edgeData.source &&
+                        link.target.getId() === edgeData.target
+                    )
+                );
             });
 
             const removed = this.links.length < initialLength;
@@ -1256,7 +1292,9 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             if (!removed) {
                 // Edge was in tracking but not in links - should not happen
                 if (this.debug) {
-                    console.warn(`GraphNetwork: Edge "${edgeId}" was tracked but not found in render links`);
+                    console.warn(
+                        `GraphNetwork: Edge "${edgeId}" was tracked but not found in render links`
+                    );
                 }
                 return false;
             }
@@ -1278,11 +1316,13 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             }
 
             if (this.debug) {
-                console.log(`GraphNetwork: Deleted edge "${edgeId}" (${edgeData.source} -> ${edgeData.target})`);
+                console.log(
+                    `GraphNetwork: Deleted edge "${edgeId}" (${edgeData.source} -> ${edgeData.target})`
+                );
             }
 
             // Emit enhanced event
-            this.emit('linkRemoved', { 
+            this.emit('linkRemoved', {
                 linkData: { ...edgeData },
                 edgeId: edgeId,
                 type: 'linkRemoved',
@@ -1290,10 +1330,12 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             });
 
             return true;
-
         } catch (error) {
             if (this.debug) {
-                console.error('GraphNetwork: Failed to delete edge:', GraphErrorUtils.getErrorDetails(error));
+                console.error(
+                    'GraphNetwork: Failed to delete edge:',
+                    GraphErrorUtils.getErrorDetails(error)
+                );
             }
             throw error;
         }
@@ -1338,7 +1380,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         }
 
         if (removed) {
-            this.emit('linkRemoved', { 
+            this.emit('linkRemoved', {
                 linkData: { source: sourceId, target: targetId },
                 type: 'linkRemoved',
                 timestamp: Date.now()
@@ -1425,7 +1467,11 @@ export class GraphNetwork<T extends NodeData = NodeData> {
      * @param updates - Partial node data with updates
      * @param options - Update options
      */
-    updateNode(nodeId: string, updates: Partial<Omit<T, 'id'>>, options: { skipRedraw?: boolean } = {}): boolean {
+    updateNode(
+        nodeId: string,
+        updates: Partial<Omit<T, 'id'>>,
+        options: { skipRedraw?: boolean } = {}
+    ): boolean {
         try {
             const node = this.nodes.get(nodeId);
             if (!node) {
@@ -1433,7 +1479,10 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             }
 
             // Validate updates
-            if (updates.name !== undefined && (typeof updates.name !== 'string' || updates.name.trim() === '')) {
+            if (
+                updates.name !== undefined &&
+                (typeof updates.name !== 'string' || updates.name.trim() === '')
+            ) {
                 throw new NodeValidationError('Node name must be a non-empty string', updates);
             }
 
@@ -1441,7 +1490,10 @@ export class GraphNetwork<T extends NodeData = NodeData> {
                 throw new NodeValidationError('Node type must be a string', updates);
             }
 
-            if (updates.size !== undefined && (typeof updates.size !== 'number' || updates.size <= 0)) {
+            if (
+                updates.size !== undefined &&
+                (typeof updates.size !== 'number' || updates.size <= 0)
+            ) {
                 throw new NodeValidationError('Node size must be a positive number', updates);
             }
 
@@ -1480,10 +1532,12 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             });
 
             return true;
-
         } catch (error) {
             if (this.debug) {
-                console.error('GraphNetwork: Failed to update node:', GraphErrorUtils.getErrorDetails(error));
+                console.error(
+                    'GraphNetwork: Failed to update node:',
+                    GraphErrorUtils.getErrorDetails(error)
+                );
             }
             throw error;
         }
@@ -1495,7 +1549,11 @@ export class GraphNetwork<T extends NodeData = NodeData> {
      * @param updates - Partial edge data with updates
      * @param options - Update options
      */
-    updateEdge(edgeId: string, updates: Partial<Omit<EdgeData, 'id' | 'source' | 'target'>>, options: { skipRedraw?: boolean } = {}): boolean {
+    updateEdge(
+        edgeId: string,
+        updates: Partial<Omit<EdgeData, 'id' | 'source' | 'target'>>,
+        options: { skipRedraw?: boolean } = {}
+    ): boolean {
         try {
             const edgeData = this.edges.get(edgeId);
             if (!edgeData) {
@@ -1503,12 +1561,21 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             }
 
             // Validate updates
-            if (updates.weight !== undefined && (typeof updates.weight !== 'number' || updates.weight < 0)) {
+            if (
+                updates.weight !== undefined &&
+                (typeof updates.weight !== 'number' || updates.weight < 0)
+            ) {
                 throw new EdgeValidationError('Edge weight must be a non-negative number', updates);
             }
 
-            if (updates.line_type !== undefined && !['solid', 'dashed', 'dotted'].includes(updates.line_type)) {
-                throw new EdgeValidationError('Edge line_type must be "solid", "dashed", or "dotted"', updates);
+            if (
+                updates.line_type !== undefined &&
+                !['solid', 'dashed', 'dotted'].includes(updates.line_type)
+            ) {
+                throw new EdgeValidationError(
+                    'Edge line_type must be "solid", "dashed", or "dotted"',
+                    updates
+                );
             }
 
             // Apply updates to edge data
@@ -1517,9 +1584,10 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             this.edges.set(edgeId, edgeData);
 
             // Update corresponding render link
-            const renderLink = this.links.find(link => 
-                link.source.getId() === edgeData.source && 
-                link.target.getId() === edgeData.target
+            const renderLink = this.links.find(
+                link =>
+                    link.source.getId() === edgeData.source &&
+                    link.target.getId() === edgeData.target
             );
 
             if (renderLink) {
@@ -1558,10 +1626,12 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             });
 
             return true;
-
         } catch (error) {
             if (this.debug) {
-                console.error('GraphNetwork: Failed to update edge:', GraphErrorUtils.getErrorDetails(error));
+                console.error(
+                    'GraphNetwork: Failed to update edge:',
+                    GraphErrorUtils.getErrorDetails(error)
+                );
             }
             throw error;
         }
@@ -1575,7 +1645,10 @@ export class GraphNetwork<T extends NodeData = NodeData> {
      * @param options - Bulk update options
      * @returns Array of successfully updated node IDs
      */
-    updateNodes(nodesData: Array<{ id: string } & Partial<Omit<T, 'id'>>>, options: BulkUpdateOptions = {}): string[] {
+    updateNodes(
+        nodesData: Array<{ id: string } & Partial<Omit<T, 'id'>>>,
+        options: BulkUpdateOptions = {}
+    ): string[] {
         try {
             const updatedNodeIds: string[] = [];
             const errors: Array<{ nodeId: string; error: Error }> = [];
@@ -1584,7 +1657,10 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             if (!options.skipValidation) {
                 for (const nodeUpdate of nodesData) {
                     if (!nodeUpdate.id || typeof nodeUpdate.id !== 'string') {
-                        throw new NodeValidationError('Node update must include a valid ID', nodeUpdate);
+                        throw new NodeValidationError(
+                            'Node update must include a valid ID',
+                            nodeUpdate
+                        );
                     }
 
                     if (!this.nodes.has(nodeUpdate.id)) {
@@ -1596,23 +1672,37 @@ export class GraphNetwork<T extends NodeData = NodeData> {
                     }
 
                     // Validate update fields
-                    if (nodeUpdate.name !== undefined && (typeof nodeUpdate.name !== 'string' || nodeUpdate.name.trim() === '')) {
+                    if (
+                        nodeUpdate.name !== undefined &&
+                        (typeof nodeUpdate.name !== 'string' || nodeUpdate.name.trim() === '')
+                    ) {
                         errors.push({
                             nodeId: nodeUpdate.id,
-                            error: new NodeValidationError('Node name must be a non-empty string', nodeUpdate)
+                            error: new NodeValidationError(
+                                'Node name must be a non-empty string',
+                                nodeUpdate
+                            )
                         });
                     }
 
-                    if (nodeUpdate.size !== undefined && (typeof nodeUpdate.size !== 'number' || nodeUpdate.size <= 0)) {
+                    if (
+                        nodeUpdate.size !== undefined &&
+                        (typeof nodeUpdate.size !== 'number' || nodeUpdate.size <= 0)
+                    ) {
                         errors.push({
                             nodeId: nodeUpdate.id,
-                            error: new NodeValidationError('Node size must be a positive number', nodeUpdate)
+                            error: new NodeValidationError(
+                                'Node size must be a positive number',
+                                nodeUpdate
+                            )
                         });
                     }
                 }
 
                 if (errors.length > 0) {
-                    throw new Error(`Bulk node update validation failed for ${errors.length} nodes: ${errors.map(e => `${e.nodeId}: ${e.error.message}`).join(', ')}`);
+                    throw new Error(
+                        `Bulk node update validation failed for ${errors.length} nodes: ${errors.map(e => `${e.nodeId}: ${e.error.message}`).join(', ')}`
+                    );
                 }
             }
 
@@ -1633,8 +1723,8 @@ export class GraphNetwork<T extends NodeData = NodeData> {
                 if (!node) continue;
 
                 const oldData = { ...node.data };
-                const { id, ...updates } = nodeUpdate;
-                
+                const { id: _, ...updates } = nodeUpdate;
+
                 // Apply updates to node data
                 Object.assign(node.data, updates);
                 updatedNodeIds.push(nodeUpdate.id);
@@ -1674,10 +1764,12 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             }
 
             return updatedNodeIds;
-
         } catch (error) {
             if (this.debug) {
-                console.error('GraphNetwork: Failed to bulk update nodes:', GraphErrorUtils.getErrorDetails(error));
+                console.error(
+                    'GraphNetwork: Failed to bulk update nodes:',
+                    GraphErrorUtils.getErrorDetails(error)
+                );
             }
             throw error;
         }
@@ -1689,7 +1781,10 @@ export class GraphNetwork<T extends NodeData = NodeData> {
      * @param options - Bulk update options
      * @returns Array of successfully updated edge IDs
      */
-    updateEdges(edgesData: Array<{ id: string } & Partial<Omit<EdgeData, 'id' | 'source' | 'target'>>>, options: BulkUpdateOptions = {}): string[] {
+    updateEdges(
+        edgesData: Array<{ id: string } & Partial<Omit<EdgeData, 'id' | 'source' | 'target'>>>,
+        options: BulkUpdateOptions = {}
+    ): string[] {
         try {
             const updatedEdgeIds: string[] = [];
             const errors: Array<{ edgeId: string; error: Error }> = [];
@@ -1698,7 +1793,10 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             if (!options.skipValidation) {
                 for (const edgeUpdate of edgesData) {
                     if (!edgeUpdate.id || typeof edgeUpdate.id !== 'string') {
-                        throw new EdgeValidationError('Edge update must include a valid ID', edgeUpdate);
+                        throw new EdgeValidationError(
+                            'Edge update must include a valid ID',
+                            edgeUpdate
+                        );
                     }
 
                     if (!this.edges.has(edgeUpdate.id)) {
@@ -1710,23 +1808,37 @@ export class GraphNetwork<T extends NodeData = NodeData> {
                     }
 
                     // Validate update fields
-                    if (edgeUpdate.weight !== undefined && (typeof edgeUpdate.weight !== 'number' || edgeUpdate.weight < 0)) {
+                    if (
+                        edgeUpdate.weight !== undefined &&
+                        (typeof edgeUpdate.weight !== 'number' || edgeUpdate.weight < 0)
+                    ) {
                         errors.push({
                             edgeId: edgeUpdate.id,
-                            error: new EdgeValidationError('Edge weight must be a non-negative number', edgeUpdate)
+                            error: new EdgeValidationError(
+                                'Edge weight must be a non-negative number',
+                                edgeUpdate
+                            )
                         });
                     }
 
-                    if (edgeUpdate.line_type !== undefined && !['solid', 'dashed', 'dotted'].includes(edgeUpdate.line_type)) {
+                    if (
+                        edgeUpdate.line_type !== undefined &&
+                        !['solid', 'dashed', 'dotted'].includes(edgeUpdate.line_type)
+                    ) {
                         errors.push({
                             edgeId: edgeUpdate.id,
-                            error: new EdgeValidationError('Edge line_type must be "solid", "dashed", or "dotted"', edgeUpdate)
+                            error: new EdgeValidationError(
+                                'Edge line_type must be "solid", "dashed", or "dotted"',
+                                edgeUpdate
+                            )
                         });
                     }
                 }
 
                 if (errors.length > 0) {
-                    throw new Error(`Bulk edge update validation failed for ${errors.length} edges: ${errors.map(e => `${e.edgeId}: ${e.error.message}`).join(', ')}`);
+                    throw new Error(
+                        `Bulk edge update validation failed for ${errors.length} edges: ${errors.map(e => `${e.edgeId}: ${e.error.message}`).join(', ')}`
+                    );
                 }
             }
 
@@ -1747,16 +1859,17 @@ export class GraphNetwork<T extends NodeData = NodeData> {
                 if (!edgeData) continue;
 
                 const oldData = { ...edgeData };
-                const { id, ...updates } = edgeUpdate;
-                
+                const { id: _, ...updates } = edgeUpdate;
+
                 // Apply updates to edge data
                 Object.assign(edgeData, updates);
                 this.edges.set(edgeUpdate.id, edgeData);
 
                 // Update corresponding render link
-                const renderLink = this.links.find(link => 
-                    link.source.getId() === edgeData.source && 
-                    link.target.getId() === edgeData.target
+                const renderLink = this.links.find(
+                    link =>
+                        link.source.getId() === edgeData.source &&
+                        link.target.getId() === edgeData.target
                 );
 
                 if (renderLink) {
@@ -1801,10 +1914,12 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             }
 
             return updatedEdgeIds;
-
         } catch (error) {
             if (this.debug) {
-                console.error('GraphNetwork: Failed to bulk update edges:', GraphErrorUtils.getErrorDetails(error));
+                console.error(
+                    'GraphNetwork: Failed to bulk update edges:',
+                    GraphErrorUtils.getErrorDetails(error)
+                );
             }
             throw error;
         }
@@ -1874,7 +1989,11 @@ export class GraphNetwork<T extends NodeData = NodeData> {
 
             // Initialize event handling after elements are created
             if (this.events && this.renderer) {
-                this.events.initialize(this.renderer.getSVGElement()!, this.nodes, this.eventCallbacks);
+                this.events.initialize(
+                    this.renderer.getSVGElement()!,
+                    this.nodes,
+                    this.eventCallbacks
+                );
             }
 
             // Update UI with new data
@@ -1883,7 +2002,10 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             }
 
             // Handle layout options
-            if (options.layout === 'reset' || (!options.preservePositions && options.layout !== 'preserve')) {
+            if (
+                options.layout === 'reset' ||
+                (!options.preservePositions && options.layout !== 'preserve')
+            ) {
                 this.resetAllNodePositions();
             }
 
@@ -1914,12 +2036,16 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             });
 
             if (this.debug) {
-                console.log(`GraphNetwork: Data set successfully with ${this.nodes.size} nodes and ${this.links.length} links`);
+                console.log(
+                    `GraphNetwork: Data set successfully with ${this.nodes.size} nodes and ${this.links.length} links`
+                );
             }
-
         } catch (error) {
             if (this.debug) {
-                console.error('GraphNetwork: Failed to set data:', GraphErrorUtils.getErrorDetails(error));
+                console.error(
+                    'GraphNetwork: Failed to set data:',
+                    GraphErrorUtils.getErrorDetails(error)
+                );
             }
             throw error;
         }
@@ -1947,7 +2073,9 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             };
 
             if (this.debug) {
-                console.log(`GraphNetwork: Merging data with ${data.nodes.length} nodes and ${data.links.length} links`);
+                console.log(
+                    `GraphNetwork: Merging data with ${data.nodes.length} nodes and ${data.links.length} links`
+                );
             }
 
             // Track transaction operation if in transaction
@@ -1965,7 +2093,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             for (const nodeData of data.nodes) {
                 try {
                     const exists = this.nodes.has(nodeData.id);
-                    
+
                     if (exists) {
                         // Handle node conflicts
                         if (options.nodeConflictResolution === 'error') {
@@ -1975,8 +2103,12 @@ export class GraphNetwork<T extends NodeData = NodeData> {
                             continue;
                         } else {
                             // Update existing node
-                            const { id, ...updates } = nodeData;
-                            this.updateNode(nodeData.id, updates as unknown as Partial<Omit<T, 'id'>>, { skipRedraw: true });
+                            const { id: _, ...updates } = nodeData;
+                            this.updateNode(
+                                nodeData.id,
+                                updates as unknown as Partial<Omit<T, 'id'>>,
+                                { skipRedraw: true }
+                            );
                             results.nodesUpdated++;
                         }
                     } else {
@@ -1986,7 +2118,10 @@ export class GraphNetwork<T extends NodeData = NodeData> {
                     }
                 } catch (error) {
                     // Re-throw NodeExistsError when conflict resolution is 'error'
-                    if (error instanceof NodeExistsError && options.nodeConflictResolution === 'error') {
+                    if (
+                        error instanceof NodeExistsError &&
+                        options.nodeConflictResolution === 'error'
+                    ) {
                         throw error;
                     }
                     const errorMessage = error instanceof Error ? error.message : String(error);
@@ -2000,7 +2135,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
                     // Generate ID if not present
                     const edgeId = linkData.id || `${linkData.source}-${linkData.target}`;
                     const exists = this.edges.has(edgeId);
-                    
+
                     if (exists) {
                         // Handle edge conflicts
                         if (options.edgeConflictResolution === 'error') {
@@ -2010,7 +2145,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
                             continue;
                         } else {
                             // Update existing edge
-                            const { id, source, target, ...updates } = linkData;
+                            const { id: _, source: __, target: ___, ...updates } = linkData;
                             this.updateEdge(edgeId, updates, { skipRedraw: true });
                             results.edgesUpdated++;
                         }
@@ -2030,7 +2165,9 @@ export class GraphNetwork<T extends NodeData = NodeData> {
                     }
                 } catch (error) {
                     const errorMessage = error instanceof Error ? error.message : String(error);
-                    results.errors.push(`Edge ${linkData.source}-${linkData.target}: ${errorMessage}`);
+                    results.errors.push(
+                        `Edge ${linkData.source}-${linkData.target}: ${errorMessage}`
+                    );
                 }
             }
 
@@ -2054,10 +2191,12 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             if (results.errors.length > 0 && this.debug) {
                 console.warn('GraphNetwork: Merge completed with errors:', results.errors);
             }
-
         } catch (error) {
             if (this.debug) {
-                console.error('GraphNetwork: Failed to merge data:', GraphErrorUtils.getErrorDetails(error));
+                console.error(
+                    'GraphNetwork: Failed to merge data:',
+                    GraphErrorUtils.getErrorDetails(error)
+                );
             }
             throw error;
         }
@@ -2117,10 +2256,12 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             if (this.debug) {
                 console.log('GraphNetwork: Data cleared successfully');
             }
-
         } catch (error) {
             if (this.debug) {
-                console.error('GraphNetwork: Failed to clear data:', GraphErrorUtils.getErrorDetails(error));
+                console.error(
+                    'GraphNetwork: Failed to clear data:',
+                    GraphErrorUtils.getErrorDetails(error)
+                );
             }
             throw error;
         }
@@ -2143,11 +2284,13 @@ export class GraphNetwork<T extends NodeData = NodeData> {
      */
     startTransaction(): string {
         if (this.currentTransaction) {
-            throw new Error('Transaction already in progress. Commit or rollback current transaction first.');
+            throw new Error(
+                'Transaction already in progress. Commit or rollback current transaction first.'
+            );
         }
 
         const transactionId = `tx-${++this.transactionIdCounter}-${Date.now()}`;
-        
+
         this.currentTransaction = {
             id: transactionId,
             startTime: Date.now(),
@@ -2173,7 +2316,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
 
         const transaction = this.currentTransaction;
         const duration = Date.now() - transaction.startTime;
-        
+
         // Transaction is already applied (operations were executed during transaction)
         // Just clean up the transaction state
         this.currentTransaction = null;
@@ -2185,7 +2328,9 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         };
 
         if (this.debug) {
-            console.log(`GraphNetwork: Committed transaction "${transaction.id}" with ${transaction.operations.length} operations in ${duration}ms`);
+            console.log(
+                `GraphNetwork: Committed transaction "${transaction.id}" with ${transaction.operations.length} operations in ${duration}ms`
+            );
         }
 
         // Emit transaction committed event
@@ -2214,13 +2359,15 @@ export class GraphNetwork<T extends NodeData = NodeData> {
 
         try {
             if (this.debug) {
-                console.log(`GraphNetwork: Rolling back transaction "${transaction.id}" with ${transaction.operations.length} operations`);
+                console.log(
+                    `GraphNetwork: Rolling back transaction "${transaction.id}" with ${transaction.operations.length} operations`
+                );
             }
 
             // Restore the snapshot from before the transaction
-            this.setData(transaction.beforeSnapshot, { 
+            this.setData(transaction.beforeSnapshot, {
                 skipValidation: true,
-                preservePositions: false 
+                preservePositions: false
             });
 
             const summary = {
@@ -2233,7 +2380,9 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             this.currentTransaction = null;
 
             if (this.debug) {
-                console.log(`GraphNetwork: Rolled back transaction "${transaction.id}" in ${duration}ms`);
+                console.log(
+                    `GraphNetwork: Rolled back transaction "${transaction.id}" in ${duration}ms`
+                );
             }
 
             // Emit transaction rolled back event
@@ -2246,13 +2395,15 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             });
 
             return summary;
-
         } catch (error) {
             // Clear transaction state even if rollback fails
             this.currentTransaction = null;
-            
+
             if (this.debug) {
-                console.error('GraphNetwork: Failed to rollback transaction:', GraphErrorUtils.getErrorDetails(error));
+                console.error(
+                    'GraphNetwork: Failed to rollback transaction:',
+                    GraphErrorUtils.getErrorDetails(error)
+                );
             }
             throw error;
         }
@@ -2262,7 +2413,12 @@ export class GraphNetwork<T extends NodeData = NodeData> {
      * Get current transaction status
      * @returns Transaction info or null if no active transaction
      */
-    getTransactionStatus(): { id: string; startTime: number; operationCount: number; duration: number } | null {
+    getTransactionStatus(): {
+        id: string;
+        startTime: number;
+        operationCount: number;
+        duration: number;
+    } | null {
         if (!this.currentTransaction) {
             return null;
         }
@@ -2686,7 +2842,11 @@ export class GraphNetwork<T extends NodeData = NodeData> {
      * @param options - Path highlight options
      * @returns Array of highlighted element IDs or null if no path found
      */
-    highlightPath(sourceId: string, targetId: string, options?: PathHighlightOptions): string[] | null {
+    highlightPath(
+        sourceId: string,
+        targetId: string,
+        options?: PathHighlightOptions
+    ): string[] | null {
         return this.highlightManager?.highlightPath(sourceId, targetId, options) || null;
     }
 
@@ -2933,13 +3093,13 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         this.renderer?.destroy();
         this.ui?.destroy();
         this.events?.destroy();
-        
+
         // Clean up Phase 5 managers
         this.selectionManager?.clearSelection();
         this.styleManager?.clearStyles();
         this.highlightManager?.clearHighlights();
         this.cameraController?.stopAnimation();
-        
+
         this.selectionManager = null;
         this.styleManager = null;
         this.highlightManager = null;
@@ -2973,33 +3133,40 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         if (!this.themeManager) {
             throw new Error('ThemeManager not initialized');
         }
-        
+
         try {
             this.themeManager.setTheme(theme);
-            
+
             // Re-render to apply new theme
             if (this.renderer && this.nodes && this.links) {
                 this.renderer.createElements(this.nodes, this.links);
                 // Re-initialize events after recreating elements
                 if (this.events) {
-                    this.events.initialize(this.renderer.getSVGElement()!, this.nodes, this.eventCallbacks);
+                    this.events.initialize(
+                        this.renderer.getSVGElement()!,
+                        this.nodes,
+                        this.eventCallbacks
+                    );
                 }
             }
-            
+
             // Update UI theme colors
             if (this.ui) {
                 this.ui.updateThemeColors(Array.from(this.nodes.values()));
             }
-            
+
             // Emit theme change event
             this.emit('themeChanged', {
                 theme: typeof theme === 'string' ? theme : theme.name,
                 type: 'themeChanged',
                 timestamp: Date.now()
             });
-            
+
             if (this.debug) {
-                console.log('GraphNetwork: Theme changed to:', typeof theme === 'string' ? theme : theme.name);
+                console.log(
+                    'GraphNetwork: Theme changed to:',
+                    typeof theme === 'string' ? theme : theme.name
+                );
             }
         } catch (error) {
             if (this.debug) {
@@ -3040,9 +3207,9 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         if (!this.themeManager) {
             throw new Error('ThemeManager not initialized');
         }
-        
+
         this.themeManager.registerTheme(name, theme);
-        
+
         if (this.debug) {
             console.log(`GraphNetwork: Registered custom theme '${name}'`);
         }
@@ -3056,23 +3223,27 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         if (!this.themeManager) {
             throw new Error('ThemeManager not initialized');
         }
-        
+
         this.themeManager.updateTheme(updates);
-        
+
         // Re-render to apply changes
         if (this.renderer && this.nodes && this.links) {
             this.renderer.createElements(this.nodes, this.links);
             // Re-initialize events after recreating elements
             if (this.events) {
-                this.events.initialize(this.renderer.getSVGElement()!, this.nodes, this.eventCallbacks);
+                this.events.initialize(
+                    this.renderer.getSVGElement()!,
+                    this.nodes,
+                    this.eventCallbacks
+                );
             }
         }
-        
+
         // Update UI theme colors
         if (this.ui) {
             this.ui.updateThemeColors(Array.from(this.nodes.values()));
         }
-        
+
         if (this.debug) {
             console.log('GraphNetwork: Theme updated');
         }
@@ -3083,22 +3254,29 @@ export class GraphNetwork<T extends NodeData = NodeData> {
      * @param nodeType - Node type to style
      * @param style - Style configuration
      */
-    setNodeTypeStyle(nodeType: string, style: import('./theming/ThemeManager').NodeStyleConfig): void {
+    setNodeTypeStyle(
+        nodeType: string,
+        style: import('./theming/ThemeManager').NodeStyleConfig
+    ): void {
         if (!this.themeManager) {
             throw new Error('ThemeManager not initialized');
         }
-        
+
         this.themeManager.setNodeStyle(nodeType, style);
-        
+
         // Re-render affected nodes
         if (this.renderer && this.nodes && this.links) {
             this.renderer.createElements(this.nodes, this.links);
             // Re-initialize events after recreating elements
             if (this.events) {
-                this.events.initialize(this.renderer.getSVGElement()!, this.nodes, this.eventCallbacks);
+                this.events.initialize(
+                    this.renderer.getSVGElement()!,
+                    this.nodes,
+                    this.eventCallbacks
+                );
             }
         }
-        
+
         if (this.debug) {
             console.log(`GraphNetwork: Updated style for node type '${nodeType}'`);
         }
@@ -3109,22 +3287,29 @@ export class GraphNetwork<T extends NodeData = NodeData> {
      * @param edgeType - Edge type to style
      * @param style - Style configuration
      */
-    setEdgeTypeStyle(edgeType: string, style: import('./theming/ThemeManager').EdgeStyleConfig): void {
+    setEdgeTypeStyle(
+        edgeType: string,
+        style: import('./theming/ThemeManager').EdgeStyleConfig
+    ): void {
         if (!this.themeManager) {
             throw new Error('ThemeManager not initialized');
         }
-        
+
         this.themeManager.setEdgeStyle(edgeType, style);
-        
+
         // Re-render affected edges
         if (this.renderer && this.nodes && this.links) {
             this.renderer.createElements(this.nodes, this.links);
             // Re-initialize events after recreating elements
             if (this.events) {
-                this.events.initialize(this.renderer.getSVGElement()!, this.nodes, this.eventCallbacks);
+                this.events.initialize(
+                    this.renderer.getSVGElement()!,
+                    this.nodes,
+                    this.eventCallbacks
+                );
             }
         }
-        
+
         if (this.debug) {
             console.log(`GraphNetwork: Updated style for edge type '${edgeType}'`);
         }
@@ -3136,14 +3321,18 @@ export class GraphNetwork<T extends NodeData = NodeData> {
      * @param state - Visual state to apply
      * @param enabled - Whether to enable or disable the state
      */
-    setElementState(elementId: string, state: import('./theming/ThemeManager').VisualState, enabled: boolean = true): void {
+    setElementState(
+        elementId: string,
+        state: import('./theming/ThemeManager').VisualState,
+        enabled: boolean = true
+    ): void {
         if (!this.themeManager || !this.renderer) {
             throw new Error('ThemeManager or Renderer not initialized');
         }
-        
+
         this.themeManager.setElementState(elementId, state, enabled);
         this.renderer.updateElementState(elementId, state, enabled);
-        
+
         if (this.debug) {
             console.log(`GraphNetwork: Set element '${elementId}' state '${state}' to ${enabled}`);
         }
@@ -3156,7 +3345,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
     getThemeManager(): import('./theming/ThemeManager').ThemeManager | null {
         return this.themeManager;
     }
-    
+
     /**
      * Configure grid settings
      */
@@ -3169,15 +3358,15 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         if (!this.themeManager) {
             throw new Error('ThemeManager not initialized');
         }
-        
+
         this.themeManager.configureGrid(options);
-        
+
         // Re-apply canvas theming to show grid changes immediately
         if (this.renderer) {
             this.renderer.applyCanvasTheming();
         }
     }
-    
+
     /**
      * Get current grid configuration
      */
@@ -3190,7 +3379,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         if (!this.themeManager) {
             throw new Error('ThemeManager not initialized');
         }
-        
+
         return this.themeManager.getGridConfig();
     }
 

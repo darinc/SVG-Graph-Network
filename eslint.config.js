@@ -40,7 +40,10 @@ export default [
       
       // Disable base rules that are covered by TypeScript
       'no-unused-vars': 'off',
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': ['error', { 
+        argsIgnorePattern: '^_', 
+        varsIgnorePattern: '^_' 
+      }],
       
       // TypeScript specific rules
       '@typescript-eslint/explicit-function-return-type': 'off',
@@ -85,7 +88,10 @@ export default [
       'jest/no-focused-tests': 'error',
       'jest/prefer-to-have-length': 'warn',
       'jest/valid-expect': 'error',
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': ['error', { 
+        argsIgnorePattern: '^_', 
+        varsIgnorePattern: '^_' 
+      }],
       '@typescript-eslint/no-explicit-any': 'off'
     }
   },

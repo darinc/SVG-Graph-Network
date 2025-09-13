@@ -15,7 +15,7 @@ export interface UICallbacks {
     /** Toggle theme callback */
     onToggleTheme?: () => void;
     /** Configuration change callback */
-    onConfigChange?: (key: string, value: any) => void;
+    onConfigChange?: (key: string, value: unknown) => void;
     /** Breadcrumb navigation callback */
     onBreadcrumbClick?: (action: string) => void;
 }
@@ -141,10 +141,10 @@ export class UIManager {
         this.titleElement = document.createElement('h2');
         this.setElementClass(this.titleElement, 'graph-network-title');
         this.titleElement.textContent = this.config.title;
-        
+
         // Apply theme colors
         this.updateTitleTheme();
-        
+
         this.container.appendChild(this.titleElement);
     }
 
@@ -153,7 +153,7 @@ export class UIManager {
      */
     private updateTitleTheme(): void {
         if (!this.titleElement) return;
-        
+
         const foregroundColor = this.themeManager.getColor('foreground');
         if (foregroundColor) {
             this.titleElement.style.color = foregroundColor;
@@ -165,15 +165,15 @@ export class UIManager {
      */
     private updateLegendTheme(): void {
         if (!this.legendElement) return;
-        
+
         const backgroundColor = this.themeManager.getColor('background');
         const foregroundColor = this.themeManager.getColor('foreground');
         const currentTheme = this.themeManager.getCurrentTheme();
-        
+
         // Update legend background and shadow
         if (backgroundColor) {
             this.legendElement.style.backgroundColor = backgroundColor;
-            
+
             // Add appropriate shadow based on theme
             if (currentTheme.name === 'dark' || currentTheme.name === 'default') {
                 // Dark themes need light shadow
@@ -183,23 +183,25 @@ export class UIManager {
                 this.legendElement.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
             }
         }
-        
+
         // Update legend text colors
         if (foregroundColor) {
             const header = this.legendElement.querySelector('.graph-network-legend-header');
             if (header && header instanceof HTMLElement) {
                 header.style.color = foregroundColor;
             }
-            
+
             // Update toggle button color
             const toggleButton = this.legendElement.querySelector('.graph-network-legend-toggle');
             if (toggleButton && toggleButton instanceof HTMLElement) {
                 toggleButton.style.color = foregroundColor;
                 toggleButton.style.borderColor = foregroundColor;
             }
-            
+
             // Update all legend item text
-            const legendItems = this.legendElement.querySelectorAll('.graph-network-legend-item span');
+            const legendItems = this.legendElement.querySelectorAll(
+                '.graph-network-legend-item span'
+            );
             legendItems.forEach(item => {
                 if (item instanceof HTMLElement) {
                     item.style.color = foregroundColor;
@@ -252,12 +254,12 @@ export class UIManager {
     private getNodeTypeColor(type: string): string {
         // Get the node style from theme manager
         const nodeStyle = this.themeManager.getNodeStyle(type);
-        
+
         // Return the fill color from the style, or fallback to theme primary color
         if (nodeStyle.fill) {
             return nodeStyle.fill;
         }
-        
+
         // Fallback to theme primary color or default
         return this.themeManager.getColor('primary') || '#666666';
     }
@@ -290,7 +292,7 @@ export class UIManager {
             this.legendElement.appendChild(content);
 
             this.container.appendChild(this.legendElement);
-            
+
             // Apply initial theme styling
             this.updateLegendTheme();
         }
@@ -326,7 +328,7 @@ export class UIManager {
 
             const label = document.createElement('span');
             label.textContent = item.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-            
+
             // Apply theme text color
             const foregroundColor = this.themeManager.getColor('foreground');
             if (foregroundColor) {
@@ -768,7 +770,7 @@ export class UIManager {
     updateThemeColors<T extends NodeData>(nodes?: Node<T>[]): void {
         this.updateTitleTheme();
         this.updateLegendTheme();
-        
+
         // Regenerate legend with new theme colors
         if (nodes && this.legendElement) {
             this.updateLegend(nodes);
