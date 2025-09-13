@@ -35,6 +35,8 @@ interface LegendItem {
     type: string;
     shape: 'circle' | 'rectangle' | 'square' | 'triangle';
     color: string;
+    stroke?: string;
+    strokeWidth?: string;
 }
 
 /**
@@ -234,11 +236,13 @@ export class UIManager {
             const type = node.getType();
             if (type && !nodeTypes.has(type)) {
                 nodeTypes.add(type);
+                const nodeStyle = this.themeManager.getNodeStyle(type);
                 typeInfo.set(type, {
                     type: type,
                     shape: node.getShape(),
-                    // Use first node of this type as representative
-                    color: this.getNodeTypeColor(type)
+                    color: this.getNodeTypeColor(type),
+                    stroke: nodeStyle.stroke,
+                    strokeWidth: nodeStyle.strokeWidth?.toString()
                 });
             }
         });
@@ -325,6 +329,16 @@ export class UIManager {
                 `graph-network-legend-shape graph-network-legend-${item.shape}`
             );
             shape.style.backgroundColor = item.color;
+
+            // Apply border styling to match node stroke
+            if (item.stroke) {
+                const strokeWidth = item.strokeWidth ? `${item.strokeWidth}px` : '2px';
+                shape.style.border = `${strokeWidth} solid ${item.stroke}`;
+            } else {
+                // Fallback border for better visibility when no stroke is defined
+                const fallbackColor = this.themeManager.getColor('foreground') || '#666666';
+                shape.style.border = `2px solid ${fallbackColor}`;
+            }
 
             const label = document.createElement('span');
             label.textContent = item.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
