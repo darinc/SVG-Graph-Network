@@ -2988,7 +2988,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             
             // Update UI theme colors
             if (this.ui) {
-                this.ui.updateThemeColors();
+                this.ui.updateThemeColors(Array.from(this.nodes.values()));
             }
             
             // Emit theme change event
@@ -3070,7 +3070,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         
         // Update UI theme colors
         if (this.ui) {
-            this.ui.updateThemeColors();
+            this.ui.updateThemeColors(Array.from(this.nodes.values()));
         }
         
         if (this.debug) {

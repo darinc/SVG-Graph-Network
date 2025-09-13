@@ -326,6 +326,12 @@ export class UIManager {
 
             const label = document.createElement('span');
             label.textContent = item.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            
+            // Apply theme text color
+            const foregroundColor = this.themeManager.getColor('foreground');
+            if (foregroundColor) {
+                label.style.color = foregroundColor;
+            }
 
             legendItem.appendChild(shape);
             legendItem.appendChild(label);
@@ -759,10 +765,14 @@ export class UIManager {
     /**
      * Update all UI theme colors when theme changes
      */
-    updateThemeColors(): void {
+    updateThemeColors<T extends NodeData>(nodes?: Node<T>[]): void {
         this.updateTitleTheme();
         this.updateLegendTheme();
-        // Legend colors will automatically update due to getNodeTypeColor using theme
+        
+        // Regenerate legend with new theme colors
+        if (nodes && this.legendElement) {
+            this.updateLegend(nodes);
+        }
     }
 
     /**
