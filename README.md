@@ -1,464 +1,321 @@
 # SVG Graph Network
 
-An interactive SVG graph visualization library with force-directed layout and physics simulation. Create beautiful, interactive network diagrams with customizable nodes, links, and physics parameters.
+A modern, interactive SVG graph visualization library with advanced theming, physics simulation, and mobile-first design. Create beautiful, customizable network diagrams with dynamic styling and responsive controls.
 
-## Features
+## ✨ Key Features
 
-- 🎯 **Force-directed layout** with customizable physics simulation
-- 🎨 **Interactive controls** for pan, zoom, drag, and filter
-- 📱 **Full mobile support** with touch gestures and mobile-optimized UI
-- 👆 **Touch interactions** - pinch-to-zoom, tap-to-pan, double-tap filtering
-- 🎛️ **Real-time configuration** with sliders for all physics parameters  
-- 🌓 **Theme support** (dark/light modes)
-- 📊 **Responsive design** that adapts to all screen sizes
-- 🔍 **Node filtering** to focus on specific parts of the network
-- 🎮 **Multiple node shapes** (circle, rectangle, square, triangle)
-- 🔗 **Flexible link styling** (solid, dashed, dotted lines)
-- 🎪 **Event system** for custom interactions
-- 📦 **Zero dependencies** - pure JavaScript and SVG
+### 🎨 Advanced Theming System
+- **Dynamic node/edge styling** - No hardcoded types, fully configurable
+- **Runtime theme switching** between dark and light modes  
+- **Configurable grid backgrounds** with theme-specific colors and patterns
+- **Visual state management** (normal, hover, selected, active, disabled)
+- **Theme-synchronized UI** - All elements update with theme changes
 
-## Demo
+### ⚡ High-Performance Physics
+- **Customizable force-directed layout** with fine-tuned physics parameters
+- **Multi-force simulation**: node repulsion, link attraction, type-based grouping
+- **Real-time physics controls** with immediate visual feedback
+- **Stable simulation** with configurable damping and convergence
 
-🌐 [Live Demo](https://yourusername.github.io/svg-graph-network/)
+### 📱 Mobile-First Design  
+- **Touch-optimized interactions** - pinch-to-zoom, drag, double-tap filtering
+- **Responsive UI controls** that adapt to screen size
+- **Mobile gesture support** with smooth animations
+- **Progressive enhancement** from mobile to desktop
 
-## Installation
+### 🎯 Rich Interactions
+- **Multi-level filtering** by node connections with configurable depth
+- **Smooth pan/zoom/drag** with momentum and constraints  
+- **Event system** for custom integrations and analytics
+- **Keyboard accessibility** and screen reader support
 
-### NPM
+### 🔧 Developer Experience
+- **TypeScript-first** with comprehensive type definitions
+- **Modular architecture** with clean separation of concerns
+- **Zero dependencies** - pure JavaScript and SVG
+- **Extensive configuration** options for every aspect
+- **Built-in error handling** with detailed error messages
+
+### 🎪 Visual Flexibility
+- **Multiple node shapes** (circle, rectangle, square, triangle)
+- **Flexible link styling** (solid, dashed, dotted with custom colors)
+- **Dynamic legends** that update with data and themes
+- **Customizable grid patterns** integrated into the core library
+- **SVG-based rendering** for crisp visuals at any scale
+
+## 🚀 Quick Start
+
+### Installation
+
 ```bash
 npm install svg-graph-network
 ```
 
-### CDN
-```html
-<script src="https://unpkg.com/svg-graph-network/dist/svg-graph-network.min.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/svg-graph-network/dist/svg-graph-network.css">
-```
-
-### Download
-Download the latest release from [GitHub Releases](https://github.com/yourusername/svg-graph-network/releases)
-
-## Quick Start
-
-### HTML
-```html
-<!DOCTYPE html>
-<html>
-<head>
-    <link rel="stylesheet" href="path/to/svg-graph-network.css">
-</head>
-<body>
-    <div id="graph-container" style="width: 800px; height: 600px;"></div>
-    <script src="path/to/svg-graph-network.js"></script>
-</body>
-</html>
-```
-
-### JavaScript
-```javascript
-const graphData = {
-    nodes: [
-        { id: "A", name: "Node A", type: "major_power", shape: "rectangle", size: 30 },
-        { id: "B", name: "Node B", type: "regional_power", shape: "circle", size: 25 },
-        { id: "C", name: "Node C", type: "small_nation", shape: "square", size: 20 }
-    ],
-    links: [
-        { source: "A", target: "B", label: "alliance", weight: 3, line_type: "solid" },
-        { source: "B", target: "C", label: "trade", weight: 2, line_type: "dashed" }
-    ]
-};
-
-const graph = new GraphNetwork('graph-container', {
-    data: graphData,
-    config: {
-        theme: 'dark',
-        showControls: true,
-        showLegend: true
-    }
-});
-```
-
-## Mobile Usage
-
-The library provides full mobile and touch support with optimized interactions for phones and tablets.
-
-### Mobile HTML Setup
-
-For optimal mobile experience, include proper viewport meta tags:
-
-```html
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes, viewport-fit=cover">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="stylesheet" href="path/to/svg-graph-network.css">
-</head>
-<body>
-    <div id="graph-container" style="width: 100vw; height: 100vh;"></div>
-    <script src="path/to/svg-graph-network.js"></script>
-</body>
-</html>
-```
-
-### Touch Gestures
-
-| Gesture | Action |
-|---------|--------|
-| **Single finger drag on background** | Pan around the graph |
-| **Single finger drag on node** | Drag node to new position |
-| **Double-tap node** | Filter to show only that node and connections |
-| **Double-tap background** | Reset filter to show all nodes |
-| **Pinch with two fingers** | Zoom in/out |
-| **Tap zoom controls** | Zoom in (+), zoom out (−), reset view (⊙) |
-
-### Mobile Controls
-
-On mobile devices (screens ≤768px), floating action buttons appear:
-
-- **+ button**: Zoom in
-- **− button**: Zoom out  
-- **⊙ button**: Reset view and layout
-- **🌙/🌞 button**: Toggle dark/light theme
-- **^ button**: Open settings panel
-
-### Responsive Behavior
-
-The library automatically adapts to different screen sizes:
-
-- **Desktop (>768px)**: Full controls, hover effects, detailed tooltips
-- **Tablet (≤768px)**: Touch controls, larger buttons, simplified UI
-- **Phone (≤480px)**: Compact layout, full-width settings panel
-
-### Mobile-Specific Methods
+### Basic Usage
 
 ```javascript
-// Programmatic zoom controls (used by mobile buttons)
-graph.zoomIn();   // Zoom in by 10x sensitivity factor
-graph.zoomOut();  // Zoom out by 10x sensitivity factor
+import GraphNetwork from 'svg-graph-network';
 
-// Check if device supports touch
-const isTouchDevice = 'ontouchstart' in window;
-```
-
-## API Reference
-
-### Constructor
-
-```javascript
-new GraphNetwork(containerId, options)
-```
-
-#### Parameters
-- `containerId` (string): ID of the HTML container element
-- `options` (object): Configuration options
-
-#### Options
-```javascript
-{
-    data: {
-        nodes: [...],  // Array of node objects
-        links: [...]   // Array of link objects
-    },
-    config: {
-        // Physics
-        damping: 0.95,                    // Velocity damping (0.35 - 1.0)
-        repulsionStrength: 6500,          // Node repulsion force
-        attractionStrength: 0.001,        // Link attraction force
-        groupingStrength: 0.001,          // Same-type node grouping force
-        
-        // Interaction
-        zoomSensitivity: 1.01,            // Mouse wheel zoom sensitivity
-        filterDepth: 1,                   // Default filter depth
-        
-        // UI Elements
-        showControls: true,               // Show control buttons
-        showLegend: true,                 // Show legend
-        showTitle: true,                  // Show title
-        showBreadcrumbs: true,            // Show breadcrumb navigation
-        
-        // Appearance
-        theme: 'dark',                    // 'dark' or 'light'
-        title: 'Graph Network'            // Graph title
-    }
-}
-```
-
-### Data Format
-
-#### Node Object
-```javascript
-{
-    id: "unique-id",           // Required: Unique identifier
-    name: "Display Name",      // Required: Display text
-    type: "major_power",       // Node type for styling/grouping
-    shape: "rectangle",        // "circle", "rectangle", "square", "triangle"
-    size: 30                   // Radius/size in pixels
-}
-```
-
-#### Link Object
-```javascript
-{
-    source: "node-id-1",       // Required: Source node ID
-    target: "node-id-2",       // Required: Target node ID
-    label: "relationship",     // Display text on the link
-    weight: 3,                 // Line thickness
-    line_type: "solid"         // "solid", "dashed", "dotted"
-}
-```
-
-### Methods
-
-#### Data Management
-```javascript
-// Set new graph data
-graph.setData(graphData);
-
-// Add a single node
-graph.addNode({
-    id: "new-node",
-    name: "New Node",
-    type: "small_nation",
-    shape: "circle",
-    size: 20
-});
-
-// Remove a node
-graph.removeNode("node-id");
-
-// Get node by ID
-const node = graph.getNode("node-id");
-
-// Get all nodes
-const nodes = graph.getNodes();
-
-// Get all links  
-const links = graph.getLinks();
-```
-
-#### View Control
-```javascript
-// Reset layout and view
-graph.resetViewAndLayout();
-
-// Fit graph to container
-graph.fitToView();
-
-// Programmatic zoom controls
-graph.zoomIn();    // Zoom in (mobile button functionality)
-graph.zoomOut();   // Zoom out (mobile button functionality)
-
-// Filter by node (show only neighbors)
-graph.filterByNode("node-id", depth);
-
-// Reset filter (show all nodes)
-graph.resetFilter();
-```
-
-#### Appearance
-```javascript
-// Set theme
-graph.setTheme('light'); // or 'dark'
-
-// Toggle theme
-graph.toggleTheme();
-```
-
-#### Cleanup
-```javascript
-// Destroy the graph and clean up
-graph.destroy();
-```
-
-### Events
-
-The library provides an event system for custom interactions:
-
-```javascript
-// Listen for events
-graph.on('eventName', (data) => {
-    console.log('Event fired:', data);
-});
-
-// Available events:
-graph.on('nodeMouseDown', (data) => { /* node, event */ });
-graph.on('nodeDoubleClick', (data) => { /* node, event */ });
-graph.on('filtered', (data) => { /* nodeId, depth, visibleNodes */ });
-graph.on('filterReset', () => { /* filter was reset */ });
-graph.on('themeChanged', (data) => { /* theme */ });
-graph.on('zoom', (data) => { /* scale, x, y */ });
-graph.on('resize', (data) => { /* width, height */ });
-graph.on('reset', () => { /* layout was reset */ });
-graph.on('nodeAdded', (data) => { /* node */ });
-graph.on('nodeRemoved', (data) => { /* nodeId */ });
-graph.on('fitted', (data) => { /* scale, x, y */ });
-graph.on('destroyed', () => { /* graph was destroyed */ });
-```
-
-### Styling
-
-The library uses CSS custom properties (variables) for theming. You can override these to customize appearance:
-
-```css
-:root {
-    /* Dark theme colors */
-    --bg-primary: #1a1a1a;
-    --bg-secondary: #2a2a2a;
-    --text-primary: #f0f0f0;
-    --text-secondary: #a0a0a0;
-    --border-color: rgba(255, 255, 255, 0.1);
-    --link-color: #5a5a5a;
-    --panel-bg: rgba(42, 42, 42, 0.9);
-}
-
-[data-theme="light"] {
-    /* Light theme colors */
-    --bg-primary: #fafafa;
-    --bg-secondary: #ffffff;
-    --text-primary: #1a1a1a;
-    --text-secondary: #666666;
-    --border-color: rgba(0, 0, 0, 0.1);
-    --link-color: #333333;
-    --panel-bg: rgba(255, 255, 255, 0.9);
-}
-```
-
-### Node Types and Colors
-
-Built-in node types with default colors:
-- `major_power`: Red (#E53E3E)
-- `regional_power`: Blue (#4299E1) 
-- `small_nation`: Green (#38A169)
-- `territory`: Orange (#ED8936)
-
-## Examples
-
-### Basic Network
-```javascript
-const simpleGraph = new GraphNetwork('container', {
+const graph = new GraphNetwork('container-id', {
     data: {
         nodes: [
-            { id: "1", name: "Alice", type: "person", shape: "circle", size: 20 },
-            { id: "2", name: "Bob", type: "person", shape: "circle", size: 20 },
-            { id: "3", name: "Charlie", type: "person", shape: "circle", size: 20 }
+            { id: "1", name: "Alice", type: "person", shape: "circle", size: 25 },
+            { id: "2", name: "Bob", type: "person", shape: "rectangle", size: 30 },
+            { id: "3", name: "Carol", type: "organization", shape: "square", size: 20 }
         ],
         links: [
             { source: "1", target: "2", label: "friends", weight: 2, line_type: "solid" },
-            { source: "2", target: "3", label: "colleagues", weight: 1, line_type: "dashed" }
+            { source: "2", target: "3", label: "works at", weight: 3, line_type: "dashed" }
         ]
     },
     config: {
-        theme: 'light',
-        showControls: false
+        theme: 'dark',
+        showControls: true,
+        showLegend: true,
+        showGrid: true
     }
 });
 ```
 
-### Custom Physics
+## 📖 API Reference
+
+### Constructor Options
+
+```typescript
+interface GraphNetworkOptions {
+    data: {
+        nodes: NodeData[];
+        links: LinkData[];
+    };
+    config?: {
+        // Physics Configuration
+        damping?: number;              // Velocity damping (0.35-1.0, default: 0.95)
+        repulsionStrength?: number;    // Node repulsion force (default: 6500)
+        attractionStrength?: number;   // Link attraction force (default: 0.001)
+        groupingStrength?: number;     // Type-based grouping force (default: 0.001)
+        
+        // Interaction Configuration  
+        zoomSensitivity?: number;      // Mouse wheel sensitivity (default: 1.01)
+        filterDepth?: number;          // Connection depth for filtering (default: 1)
+        
+        // UI Configuration
+        showControls?: boolean;        // Show zoom/control buttons (default: true)
+        showLegend?: boolean;          // Show node type legend (default: true)
+        showTitle?: boolean;           // Show graph title (default: true)
+        showBreadcrumbs?: boolean;     // Show navigation breadcrumbs (default: true)
+        
+        // Theming Configuration
+        theme?: 'dark' | 'light';     // Visual theme (default: 'dark')
+        title?: string;                // Graph title text
+        showGrid?: boolean;            // Show background grid (default: true)
+    };
+}
+```
+
+### Data Types
+
+```typescript
+interface NodeData {
+    id: string;                       // Unique identifier
+    name: string;                     // Display name
+    type?: string;                    // Type for styling/grouping (fully configurable)
+    shape?: 'circle' | 'rectangle' | 'square' | 'triangle';
+    size?: number;                    // Size in pixels
+    [key: string]: any;              // Custom properties
+}
+
+interface LinkData {
+    source: string;                   // Source node ID
+    target: string;                   // Target node ID
+    label?: string;                   // Display label
+    weight?: number;                  // Visual weight/thickness
+    line_type?: 'solid' | 'dashed' | 'dotted';
+    color?: string;                   // Custom color
+    [key: string]: any;              // Custom properties
+}
+```
+
+### Core Methods
+
 ```javascript
-const graph = new GraphNetwork('container', {
-    data: graphData,
-    config: {
-        damping: 0.8,              // More bouncy
-        repulsionStrength: 10000,  // Stronger repulsion
-        attractionStrength: 0.005, // Stronger link attraction
-        groupingStrength: 0.002    // Group similar nodes
+// Data Management
+graph.setData(graphData);             // Replace all data
+graph.addNode(nodeData);              // Add single node
+graph.removeNode(nodeId);             // Remove node and connected links
+graph.addEdge(linkData);              // Add single link
+graph.removeEdge(linkId);             // Remove specific link
+
+// View Control
+graph.resetViewAndLayout();           // Reset zoom and restart physics
+graph.fitToView();                    // Fit graph to container bounds
+graph.zoomIn();                       // Programmatic zoom in
+graph.zoomOut();                      // Programmatic zoom out
+
+// Filtering
+graph.filterByNode(nodeId, depth);   // Show only connected nodes
+graph.resetFilter();                  // Show all nodes
+
+// Theming
+graph.setTheme('light' | 'dark');    // Change theme
+graph.toggleTheme();                  // Switch between themes
+graph.configureGrid(gridConfig);     // Customize background grid
+
+// Cleanup
+graph.destroy();                      // Clean up resources
+```
+
+### Advanced Theming
+
+```javascript
+// Configure custom themes
+graph.setTheme({
+    name: 'custom',
+    colors: {
+        background: '#1a1a2e',
+        foreground: '#e94560',
+        primary: '#0f3460',
+        secondary: '#16213e'
+    },
+    nodeStyles: {
+        // Dynamic node type styling - no hardcoded types!
+        'user': { fill: '#4CAF50', stroke: '#2E7D32' },
+        'admin': { fill: '#FF9800', stroke: '#F57C00' },
+        'system': { fill: '#2196F3', stroke: '#1976D2' }
+    },
+    canvas: {
+        showGrid: true,
+        gridColor: 'rgba(233, 69, 96, 0.1)',
+        gridSize: 40
     }
 });
 ```
 
-### Event Handling
-```javascript
-const graph = new GraphNetwork('container', { data: graphData });
+### Event System
 
+```javascript
+// Listen for events
 graph.on('nodeDoubleClick', (data) => {
-    alert(`You double-clicked: ${data.node.data.name}`);
+    console.log('Node double-clicked:', data.node);
+});
+
+graph.on('themeChanged', (data) => {
+    console.log('Theme changed to:', data.theme);
 });
 
 graph.on('filtered', (data) => {
     console.log(`Showing ${data.visibleNodes.length} nodes`);
+});
+
+// Available events
+'nodeMouseDown' | 'nodeDoubleClick' | 'filtered' | 'filterReset' |
+'themeChanged' | 'zoom' | 'resize' | 'reset' | 'nodeAdded' |
+'nodeRemoved' | 'fitted' | 'destroyed'
+```
+
+## 📱 Mobile Support
+
+Full touch gesture support with mobile-optimized UI:
+
+### Touch Gestures
+- **Drag background**: Pan the graph
+- **Drag nodes**: Move individual nodes  
+- **Double-tap node**: Filter to show connections
+- **Double-tap background**: Reset filter
+- **Pinch/spread**: Zoom in/out
+- **Tap controls**: Use floating action buttons
+
+### Mobile HTML Setup
+```html
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+```
+
+## 🎨 Styling & Customization
+
+The library uses CSS custom properties for comprehensive theming:
+
+```css
+:root {
+    /* Colors */
+    --graph-bg-primary: #1a1a1a;
+    --graph-text-primary: #f0f0f0;
+    --graph-border-color: rgba(255, 255, 255, 0.1);
     
-    // Custom logic when filter changes
-    updateInfoPanel(data.visibleNodes);
-});
+    /* Grid */
+    --graph-grid-color: rgba(255, 165, 0, 0.1);
+    --graph-grid-size: 30px;
+    
+    /* Controls */
+    --graph-control-bg: rgba(42, 42, 42, 0.9);
+    --graph-control-border: 1px solid #444;
+}
+
+[data-theme="light"] {
+    --graph-bg-primary: #fafafa;
+    --graph-text-primary: #1a1a1a;
+    --graph-grid-color: rgba(0, 100, 200, 0.1);
+}
 ```
 
-### Mobile-Optimized Setup
-```javascript
-// Create a mobile-friendly graph
-const mobileGraph = new GraphNetwork('mobile-container', {
-    data: graphData,
-    config: {
-        theme: 'light',           // Light theme often better on mobile
-        showControls: true,       // Enable mobile zoom controls
-        showLegend: true,         // Collapsible legend
-        showTitle: false,         // Save space on small screens
-        showBreadcrumbs: true,    // Navigation breadcrumbs
-        
-        // Optimize physics for touch interaction
-        damping: 0.9,             // Less bouncy for stability
-        repulsionStrength: 5000,  // Moderate spacing
-        zoomSensitivity: 1.05     // Slightly more zoom per gesture
-    }
-});
+## 🏗️ Architecture
 
-// Listen for mobile-specific events
-mobileGraph.on('zoom', (data) => {
-    // Adjust UI based on zoom level
-    if (data.scale < 0.5) {
-        // Hide details at low zoom
-        document.querySelector('.detail-panel').style.display = 'none';
-    }
-});
-```
+### Core Components
+- **GraphNetwork**: Main orchestrator class
+- **ThemeManager**: Dynamic theming and styling system  
+- **PhysicsEngine**: Force-directed layout simulation
+- **SVGRenderer**: High-performance SVG rendering
+- **EventManager**: Touch and mouse interaction handling
+- **UIManager**: Responsive controls and interface
+- **CameraController**: Pan/zoom/view management
 
-## Browser Support
+### Design Principles
+- **Modular**: Clean separation of concerns
+- **Configurable**: Everything is customizable
+- **Performance**: Optimized for smooth 60fps
+- **Accessibility**: Screen reader and keyboard support
+- **Mobile-first**: Touch interactions as primary interface
 
-### Desktop
-- Chrome 60+
-- Firefox 55+
-- Safari 12+
-- Edge 79+
+## 🌐 Browser Support
 
-### Mobile
-- iOS Safari 12+
-- Chrome Mobile 60+
-- Samsung Internet 8+
-- Firefox Mobile 68+
+- **Desktop**: Chrome 60+, Firefox 55+, Safari 12+, Edge 79+
+- **Mobile**: iOS Safari 12+, Chrome Mobile 60+, Samsung Internet 8+
 
-**Touch Features**: Full gesture support including pinch-to-zoom, double-tap, and drag interactions on all supported mobile browsers.
+## 📈 Performance
 
-## Development
+- **Efficient rendering**: SVG-based with minimal DOM manipulation
+- **Smart physics**: Adaptive simulation that stops when stable
+- **Memory management**: Proper cleanup and event listener removal
+- **Bundle size**: ~30KB gzipped with zero dependencies
+
+## 🔗 Examples
+
+- **[Basic Example](./examples/basic.html)**: Simple network with default styling
+- **[Advanced Example](./examples/advanced.html)**: Complex network with custom themes
+- **[Mobile Demo](./examples/mobile.html)**: Touch-optimized interface
+
+## 📝 Development
 
 ```bash
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-
-# Build for production
-npm run build
-
-# Watch for changes
-npm run watch
+npm install          # Install dependencies
+npm run dev         # Start development server (localhost:8080)
+npm run build       # Build for production
+npm run test        # Run test suite
+npm run lint        # Check code quality
 ```
 
-## Contributing
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
+4. Push to the branch (`git push origin feature/amazing-feature`) 
 5. Open a Pull Request
 
-## License
+## 📄 License
 
-MIT © [Your Name](https://github.com/yourusername)
+MIT © [Contributors](https://github.com/yourusername/svg-graph-network/contributors)
 
-## Acknowledgments
+---
 
-Inspired by D3.js force-directed layouts and built for modern web applications requiring interactive network visualizations without heavy dependencies.
+**Built for modern web applications requiring interactive network visualizations with professional theming and mobile support.**

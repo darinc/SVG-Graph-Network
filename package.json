@@ -1,7 +1,7 @@
 {
   "name": "svg-graph-network",
   "version": "1.0.0",
-  "description": "Interactive SVG graph visualization library with force-directed layout and physics simulation",
+  "description": "Modern SVG graph visualization library with advanced theming, mobile-first design, and customizable physics simulation. Features dynamic node/edge styling, touch optimization, and zero dependencies.",
   "main": "dist/svg-graph-network.min.js",
   "module": "dist/svg-graph-network.min.js",
   "types": "dist/index.d.ts",
@@ -41,9 +41,19 @@
     "force-directed",
     "physics",
     "interactive",
+    "theming",
+    "mobile-first",
+    "touch-gestures",
     "d3-alternative",
     "network-graph",
-    "node-link-diagram"
+    "node-link-diagram",
+    "typescript",
+    "zero-dependencies",
+    "responsive",
+    "dark-theme",
+    "light-theme",
+    "customizable",
+    "modular"
   ],
   "author": {
     "name": "Your Name",
