@@ -83,10 +83,11 @@ export interface ThemeConfig {
         selected?: StateStyles;
         active?: StateStyles;
         disabled?: StateStyles;
+        highlighted?: StateStyles;
     };
 }
 
-export type VisualState = 'normal' | 'hover' | 'selected' | 'active' | 'disabled';
+export type VisualState = 'normal' | 'hover' | 'selected' | 'active' | 'disabled' | 'highlighted';
 
 export class ThemeManager {
     private currentTheme: ThemeConfig;

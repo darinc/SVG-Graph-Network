@@ -9,7 +9,7 @@
  * - Transform update callbacks
  */
 
-import { TransformState } from '../../types/index';
+import { TransformState, NodeData } from '../../types/index';
 import { EventManagerCallbacks } from '../EventManager';
 
 export interface TransformConfig {
@@ -24,16 +24,16 @@ export interface TransformConfig {
 /**
  * Manages viewport transform operations
  */
-export class TransformManager {
+export class TransformManager<T extends NodeData = NodeData> {
     private transformState: TransformState;
     private config: TransformConfig;
-    private callbacks: EventManagerCallbacks;
+    private callbacks: EventManagerCallbacks<T>;
     private eventEmitter: { emit: (event: string, data: any) => void };
     private svg: SVGSVGElement | null = null;
 
     constructor(
         config: Partial<TransformConfig> = {},
-        callbacks: EventManagerCallbacks = {},
+        callbacks: EventManagerCallbacks<T> = {} as EventManagerCallbacks<T>,
         eventEmitter: { emit: (event: string, data: any) => void }
     ) {
         this.config = {
@@ -329,7 +329,7 @@ export class TransformManager {
     /**
      * Update callbacks
      */
-    updateCallbacks(callbacks: Partial<EventManagerCallbacks>): void {
+    updateCallbacks(callbacks: Partial<EventManagerCallbacks<T>>): void {
         Object.assign(this.callbacks, callbacks);
     }
 

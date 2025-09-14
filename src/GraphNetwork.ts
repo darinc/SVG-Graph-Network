@@ -392,6 +392,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             this.links.push({
                 source: sourceNode,
                 target: targetNode,
+                data: linkData,
                 label: linkData.label || '',
                 weight: linkData.weight || 1,
                 line_type: linkData.line_type || 'solid'
@@ -1187,6 +1188,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             const renderLink: RenderLink<T> = {
                 source: sourceNode!,
                 target: targetNode!,
+                data: edgeData,
                 label: edgeData.label || '',
                 weight: edgeData.weight || 1,
                 line_type: edgeData.line_type || 'solid'

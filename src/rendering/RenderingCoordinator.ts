@@ -7,7 +7,7 @@
 
 import { SVGRenderer, RenderLink } from './SVGRenderer';
 import { Node } from '../Node';
-import { ThemeManager } from '../theming/ThemeManager';
+import { ThemeManager, VisualState } from '../theming/ThemeManager';
 import { NodeData, RendererConfig } from '../types/index';
 
 /**
@@ -198,7 +198,7 @@ export class RenderingCoordinator<T extends NodeData = NodeData> {
     /**
      * Update specific element state
      */
-    updateElementState(elementId: string, state: string, enabled: boolean): void {
+    updateElementState(elementId: string, state: VisualState, enabled: boolean): void {
         this.renderer.updateElementState(elementId, state, enabled);
     }
 

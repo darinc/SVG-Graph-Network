@@ -43,7 +43,7 @@ export class RefactoredEventManager<T extends NodeData = NodeData> {
     // Focused component managers
     private readonly mouseHandler: MouseInteractionHandler<T>;
     private readonly touchHandler: TouchInteractionHandler<T>;
-    private readonly transformManager: TransformManager;
+    private readonly transformManager: TransformManager<T>;
     private readonly eventEmitter: InteractionEventEmitter<T>;
     private readonly coordinateConverter: CoordinateConverter;
 
@@ -72,7 +72,7 @@ export class RefactoredEventManager<T extends NodeData = NodeData> {
 
         // Initialize components with shared dependencies
         this.eventEmitter = new InteractionEventEmitter<T>();
-        this.transformManager = new TransformManager(
+        this.transformManager = new TransformManager<T>(
             {
                 minScale: 0.2,
                 maxScale: 2.0,

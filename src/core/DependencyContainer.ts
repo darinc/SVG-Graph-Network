@@ -5,6 +5,8 @@
  * between components and enable easier testing.
  */
 
+import 'reflect-metadata';
+
 import {
     IDependencyContainer,
     Token,

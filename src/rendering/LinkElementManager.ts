@@ -6,7 +6,7 @@
  */
 
 import { Node } from '../Node';
-import { NodeData } from '../types/index';
+import { NodeData, LinkData } from '../types/index';
 import { ThemeManager, VisualState } from '../theming/ThemeManager';
 
 /**
@@ -15,6 +15,7 @@ import { ThemeManager, VisualState } from '../theming/ThemeManager';
 export interface RenderLink<T extends NodeData = NodeData> {
     source: Node<T>;
     target: Node<T>;
+    data: LinkData;
     label?: string;
     weight?: number;
     line_type?: 'solid' | 'dashed' | 'dotted';

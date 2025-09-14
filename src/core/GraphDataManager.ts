@@ -68,7 +68,7 @@ export class GraphDataManager<T extends NodeData = NodeData> implements IGraphDa
 
     // ==================== NODE MANAGEMENT ====================
 
-    addNode(nodeData: T, _options: NodeCreationOptions = {}): Node<T> {
+    addNode(nodeData: T, options: NodeCreationOptions = {}): Node<T> {
         if (!this.validateNodeData(nodeData)) {
             throw new Error(`Invalid node data for ID: ${nodeData.id}`);
         }
@@ -307,7 +307,7 @@ export class GraphDataManager<T extends NodeData = NodeData> implements IGraphDa
         return {
             nodes: this.getNodes(),
             links: this.getLinks(),
-            edges: Array.from(this.edges.values())
+            edges: Array.from(this.edges.values()).filter(edge => edge.id) as EdgeData[]
         };
     }
 

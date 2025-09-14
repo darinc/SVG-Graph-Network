@@ -52,6 +52,8 @@ export interface GraphData {
     nodes: NodeData[];
     /** Array of link data */
     links: LinkData[];
+    /** Array of edge data (for backward compatibility) */
+    edges?: EdgeData[];
 }
 
 // ==================== Configuration Types ====================
@@ -271,6 +273,10 @@ export interface NodeCreationOptions {
     x?: number;
     /** Initial Y position (optional) */
     y?: number;
+    /** Initial position (alternative to x/y) */
+    position?: Position;
+    /** Whether the node should be fixed in place */
+    fixed?: boolean;
     /** Skip validation (for internal use) */
     skipValidation?: boolean;
     /** Skip redraw after creation */
@@ -385,7 +391,7 @@ export interface SVGElements {
     transformGroup: SVGGElement;
     linkGroup: SVGGElement;
     nodeGroup: SVGGElement;
-    labelGroup: SVGGElement;
+    labelGroup: SVGGElement | null;
 }
 
 /**
@@ -487,6 +493,54 @@ export const LINE_TYPES = ['solid', 'dashed', 'dotted'] as const;
  * Supported themes
  */
 export const THEMES = ['light', 'dark'] as const;
+
+// ==================== Missing Interface Re-exports ====================
+
+/**
+ * Tooltip configuration
+ */
+export interface TooltipConfig {
+    enabled: boolean;
+    showPosition: boolean;
+    showType: boolean;
+    customFields?: string[];
+    formatter?: (node: any) => string;
+}
+
+/**
+ * Graph statistics and metrics
+ */
+export interface GraphStats {
+    nodeCount: number;
+    linkCount: number;
+    visibleNodeCount: number;
+    filteredNodeId: string | null;
+    filterDepth: number;
+}
+
+/**
+ * Rendering configuration options
+ */
+export interface RendererConfig {
+    /** Show edge labels */
+    showLabels?: boolean;
+    /** Animation duration in milliseconds */
+    animationDuration?: number;
+    /** Text font family */
+    fontFamily?: string;
+    /** Default font size */
+    fontSize?: number;
+    /** Show background grid */
+    showGrid?: boolean;
+    /** Grid opacity */
+    gridOpacity?: number;
+    /** Grid line color */
+    gridColor?: string;
+    /** Enable animations */
+    enableAnimations?: boolean;
+    /** Renderer quality settings */
+    quality?: 'low' | 'medium' | 'high';
+}
 
 // ==================== Phase 5: Styling & Interactivity Types ====================
 

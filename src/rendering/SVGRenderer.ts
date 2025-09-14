@@ -10,6 +10,7 @@ import { NodeShapeFactory } from './NodeShapeFactory';
 export interface RenderLink<T extends NodeData = NodeData> {
     source: Node<T>;
     target: Node<T>;
+    data: LinkData;
     label?: string;
     weight?: number;
     line_type?: 'solid' | 'dashed' | 'dotted';
@@ -810,6 +811,7 @@ export class SVGRenderer {
         return {
             source,
             target,
+            data: linkData,
             label: linkData.label,
             weight: linkData.weight,
             line_type: linkData.line_type
