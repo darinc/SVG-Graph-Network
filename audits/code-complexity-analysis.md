@@ -14,7 +14,7 @@ This analysis evaluates code complexity across multiple dimensions including cyc
 - **EventManager.ts**: 1,024 lines - Complex event handling
 
 ### 2. High Cyclomatic Complexity Functions
-- **createNodeShape()** in SVGRenderer.ts:339-427 - **CC: 12** (lines 345-413 switch)
+- ✅ **RESOLVED**: **createNodeShape()** in SVGRenderer.ts → Refactored using NodeShapeFactory pattern (CC: 12 → 3)
 - **handleTouchMove()** in EventManager.ts:518-537 - **CC: 11** (nested conditions)
 - **updateLinkPositions()** in SVGRenderer.ts:569-639 - **CC: 10** (complex edge calculations)
 
@@ -470,8 +470,8 @@ class ThemeApplicator {
 | Issue | Importance | Effort | Priority | Timeline | Status |
 |-------|------------|---------|----------|----------|---------|
 | ✅ GraphNetwork God Object | 10/10 | High | **Critical** | Sprint 1-2 | **RESOLVED** |
-| createNodeShape() CC:12 | 9/10 | Medium | **High** | Sprint 1 | 🔄 **NEXT** |
-| SVGRenderer size (989 lines) | 9/10 | High | **High** | Sprint 2 | Pending |
+| ✅ createNodeShape() CC:12 | 9/10 | Medium | **High** | Sprint 1 | **RESOLVED** |
+| SVGRenderer size (989 lines) | 9/10 | High | **High** | Sprint 2 | 🔄 **NEXT** |
 | EventManager complexity | 8/10 | High | **High** | Sprint 2-3 | Pending |
 | handleTouchMove() CC:11 | 8/10 | Medium | **Medium** | Sprint 2 | Pending |
 | ✅ Coupling GraphNetwork ↔ modules | 10/10 | High | **Critical** | Sprint 1 | **RESOLVED** |
