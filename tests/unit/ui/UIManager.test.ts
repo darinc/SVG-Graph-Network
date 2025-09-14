@@ -102,7 +102,7 @@ describe('UIManager', () => {
             const customConfig: Partial<UIConfig> = {
                 showTitle: false,
                 showLegend: false,
-                showZoomControls: false
+                showControls: false
             };
 
             const customManager = new UIManager(container, customConfig, callbacks, themeManager);
@@ -111,7 +111,7 @@ describe('UIManager', () => {
             // Should not create elements when disabled
             expect(container.querySelector('.graph-network-title')).toBeNull();
             expect(container.querySelector('.graph-network-legend')).toBeNull();
-            expect(container.querySelector('.graph-network-zoom-controls')).toBeNull();
+            expect(container.querySelector('.graph-network-mobile-controls')).toBeNull();
 
             customManager.destroy();
         });
@@ -160,7 +160,7 @@ describe('UIManager', () => {
             const breadcrumbContainer = container.querySelector('.graph-network-breadcrumbs');
             expect(breadcrumbContainer).not.toBeNull();
 
-            const breadcrumbItems = breadcrumbContainer?.querySelectorAll('.breadcrumb-item');
+            const breadcrumbItems = breadcrumbContainer?.querySelectorAll('.graph-network-breadcrumb');
             expect(breadcrumbItems?.length).toBe(2);
         });
 
@@ -172,7 +172,7 @@ describe('UIManager', () => {
 
             uiManager.renderBreadcrumbs(breadcrumbs);
 
-            const clickableItem = container.querySelector('.breadcrumb-item[data-action="reset"]') as HTMLElement;
+            const clickableItem = container.querySelector('.graph-network-breadcrumb[data-action="reset"]') as HTMLElement;
             expect(clickableItem).not.toBeNull();
 
             // Simulate click
@@ -188,7 +188,7 @@ describe('UIManager', () => {
 
             uiManager.renderBreadcrumbs(breadcrumbs);
 
-            const item = container.querySelector('.breadcrumb-item:not([data-action])');
+            const item = container.querySelector('.graph-network-breadcrumb:not([data-action])');
             expect(item).not.toBeNull();
             expect(item?.classList.contains('clickable')).toBeFalsy();
         });
@@ -200,17 +200,17 @@ describe('UIManager', () => {
         });
 
         test('should create legend from nodes', () => {
-            uiManager.createLegend(mockNodes);
+            uiManager.updateLegend(mockNodes);
 
             const legendElement = container.querySelector('.graph-network-legend');
             expect(legendElement).not.toBeNull();
 
-            const legendItems = legendElement?.querySelectorAll('.legend-item');
+            const legendItems = legendElement?.querySelectorAll('.graph-network-legend-item');
             expect(legendItems?.length).toBeGreaterThan(0);
         });
 
         test('should update legend with new nodes', () => {
-            uiManager.createLegend(mockNodes);
+            uiManager.updateLegend(mockNodes);
 
             const newNodes = [
                 ...mockNodes,
@@ -224,7 +224,7 @@ describe('UIManager', () => {
 
             uiManager.updateLegend(newNodes);
 
-            const legendItems = container.querySelectorAll('.legend-item');
+            const legendItems = container.querySelectorAll('.graph-network-legend-item');
             expect(legendItems.length).toBeGreaterThan(mockNodes.length);
         });
 
@@ -239,20 +239,20 @@ describe('UIManager', () => {
                 }, 800, 600)
             ];
 
-            uiManager.createLegend(duplicateTypeNodes);
+            uiManager.updateLegend(duplicateTypeNodes);
 
-            const legendItems = container.querySelectorAll('.legend-item');
+            const legendItems = container.querySelectorAll('.graph-network-legend-item');
             // Should group duplicates, so fewer items than total nodes
             expect(legendItems.length).toBeLessThan(duplicateTypeNodes.length);
         });
 
         test('should handle empty node array', () => {
-            uiManager.createLegend([]);
+            uiManager.updateLegend([]);
 
             const legendElement = container.querySelector('.graph-network-legend');
             expect(legendElement).not.toBeNull();
 
-            const legendItems = legendElement?.querySelectorAll('.legend-item');
+            const legendItems = legendElement?.querySelectorAll('.graph-network-legend-item');
             expect(legendItems?.length).toBe(0);
         });
     });
@@ -263,12 +263,12 @@ describe('UIManager', () => {
         });
 
         test('should create zoom control buttons', () => {
-            const zoomControls = container.querySelector('.graph-network-zoom-controls');
+            const zoomControls = container.querySelector('.graph-network-mobile-controls');
             expect(zoomControls).not.toBeNull();
 
-            const zoomInBtn = zoomControls?.querySelector('.graph-network-zoom-in-btn');
-            const zoomOutBtn = zoomControls?.querySelector('.graph-network-zoom-out-btn');
-            const resetBtn = zoomControls?.querySelector('.graph-network-reset-view-btn');
+            const zoomInBtn = zoomControls?.querySelector('.graph-network-zoom-in');
+            const zoomOutBtn = zoomControls?.querySelector('.graph-network-zoom-out');
+            const resetBtn = zoomControls?.querySelector('.graph-network-reset-view-button');
 
             expect(zoomInBtn).not.toBeNull();
             expect(zoomOutBtn).not.toBeNull();
@@ -276,21 +276,21 @@ describe('UIManager', () => {
         });
 
         test('should handle zoom in button click', () => {
-            const zoomInBtn = container.querySelector('.graph-network-zoom-in-btn') as HTMLElement;
+            const zoomInBtn = container.querySelector('.graph-network-zoom-in') as HTMLElement;
             zoomInBtn.click();
 
             expect(callbacks.onZoomIn).toHaveBeenCalled();
         });
 
         test('should handle zoom out button click', () => {
-            const zoomOutBtn = container.querySelector('.graph-network-zoom-out-btn') as HTMLElement;
+            const zoomOutBtn = container.querySelector('.graph-network-zoom-out') as HTMLElement;
             zoomOutBtn.click();
 
             expect(callbacks.onZoomOut).toHaveBeenCalled();
         });
 
         test('should handle reset view button click', () => {
-            const resetBtn = container.querySelector('.graph-network-reset-view-btn') as HTMLElement;
+            const resetBtn = container.querySelector('.graph-network-reset-view-button') as HTMLElement;
             resetBtn.click();
 
             expect(callbacks.onResetView).toHaveBeenCalled();
@@ -303,19 +303,19 @@ describe('UIManager', () => {
         });
 
         test('should create theme toggle button', () => {
-            const themeToggle = container.querySelector('.graph-network-theme-toggle-btn');
+            const themeToggle = container.querySelector('.graph-network-theme-toggle');
             expect(themeToggle).not.toBeNull();
         });
 
         test('should handle theme toggle click', () => {
-            const themeToggle = container.querySelector('.graph-network-theme-toggle-btn') as HTMLElement;
+            const themeToggle = container.querySelector('.graph-network-theme-toggle') as HTMLElement;
             themeToggle.click();
 
             expect(callbacks.onToggleTheme).toHaveBeenCalled();
         });
 
         test('should update theme toggle appearance', () => {
-            const themeToggle = container.querySelector('.graph-network-theme-toggle-btn') as HTMLElement;
+            const themeToggle = container.querySelector('.graph-network-theme-toggle') as HTMLElement;
             
             uiManager.updateThemeToggle('light');
             expect(themeToggle.textContent).toBe('🌙');
@@ -437,7 +437,7 @@ describe('UIManager', () => {
         });
 
         test('should apply theme to all UI elements', () => {
-            uiManager.createLegend(mockNodes);
+            uiManager.updateLegend(mockNodes);
             uiManager.updateThemeColors(mockNodes);
 
             // Elements should have theme colors applied
@@ -452,7 +452,7 @@ describe('UIManager', () => {
     describe('Cleanup and Destruction', () => {
         test('should clean up all DOM elements on destroy', () => {
             uiManager.initialize();
-            uiManager.createLegend(mockNodes);
+            uiManager.updateLegend(mockNodes);
 
             // Verify elements exist
             expect(container.children.length).toBeGreaterThan(0);
@@ -531,9 +531,9 @@ describe('UIManager', () => {
         });
 
         test('should add proper ARIA labels to buttons', () => {
-            const zoomInBtn = container.querySelector('.zoom-in-btn');
-            const zoomOutBtn = container.querySelector('.zoom-out-btn');
-            const themeToggle = container.querySelector('.graph-network-theme-toggle-btn');
+            const zoomInBtn = container.querySelector('.graph-network-zoom-in');
+            const zoomOutBtn = container.querySelector('.graph-network-zoom-out');
+            const themeToggle = container.querySelector('.graph-network-theme-toggle');
 
             expect(zoomInBtn?.getAttribute('aria-label')).toBeTruthy();
             expect(zoomOutBtn?.getAttribute('aria-label')).toBeTruthy();
@@ -563,7 +563,7 @@ describe('UIManager', () => {
             uiManager.initialize();
 
             const startTime = performance.now();
-            uiManager.createLegend(largeNodeSet);
+            uiManager.updateLegend(largeNodeSet);
             const endTime = performance.now();
 
             // Should complete within reasonable time (< 100ms)

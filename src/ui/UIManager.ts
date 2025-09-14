@@ -414,6 +414,7 @@ export class UIManager {
         this.zoomInButton = document.createElement('button');
         this.setElementClass(this.zoomInButton, 'graph-network-zoom-button graph-network-zoom-in');
         this.zoomInButton.textContent = '+';
+        this.zoomInButton.setAttribute('aria-label', 'Zoom in');
         this.zoomInButton.addEventListener('click', () => {
             this.callbacks.onZoomIn?.();
         });
@@ -425,6 +426,7 @@ export class UIManager {
             'graph-network-zoom-button graph-network-zoom-out'
         );
         this.zoomOutButton.textContent = '−';
+        this.zoomOutButton.setAttribute('aria-label', 'Zoom out');
         this.zoomOutButton.addEventListener('click', () => {
             this.callbacks.onZoomOut?.();
         });
@@ -450,6 +452,7 @@ export class UIManager {
         this.themeToggle = document.createElement('button');
         this.setElementClass(this.themeToggle, 'graph-network-theme-toggle');
         this.themeToggle.textContent = this.config.theme === 'light' ? '🌙' : '🌞';
+        this.themeToggle.setAttribute('aria-label', 'Toggle theme');
         this.themeToggle.addEventListener('click', () => {
             this.callbacks.onToggleTheme?.();
         });
@@ -635,6 +638,9 @@ export class UIManager {
                 breadcrumb.classList.add('active');
             }
             breadcrumb.textContent = item.name;
+            if (item.action) {
+                breadcrumb.setAttribute('data-action', item.action);
+            }
             breadcrumb.addEventListener('click', () => {
                 if (item.action) {
                     this.callbacks.onBreadcrumbClick?.(item.action);
