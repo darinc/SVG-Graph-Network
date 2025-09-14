@@ -6,7 +6,7 @@
  * - PhysicsManager: Physics simulation management
  * - RenderingCoordinator: Rendering coordination and optimization
  * - EventBus: Inter-module communication
- * - GraphDataManager: Node and edge data management  
+ * - GraphDataManager: Node and edge data management
  * - GraphAnimationController: Animation loop management
  * - DependencyContainer: Service resolution and lifecycle
  *
@@ -16,7 +16,10 @@
 
 import { DependencyContainer, SERVICE_TOKENS } from '../core/DependencyContainer';
 import { IGraphDataManager, GraphDataManager } from '../core/GraphDataManager';
-import { IGraphAnimationController, GraphAnimationController } from '../core/GraphAnimationController';
+import {
+    IGraphAnimationController,
+    GraphAnimationController
+} from '../core/GraphAnimationController';
 import { EventBus } from '../events/EventBus';
 import { PhysicsManager } from '../physics/PhysicsManager';
 import { RenderingCoordinator } from '../rendering/RenderingCoordinator';
@@ -24,23 +27,15 @@ import { ThemeManager } from '../theming/ThemeManager';
 import { UIManager } from '../ui/UIManager';
 import { EventManager } from '../interaction/EventManager';
 import { PhysicsEngine } from '../physics/PhysicsEngine';
-import { 
-    NodeData, 
-    GraphData, 
-    GraphConfig, 
-    Position,
-    InteractionConfig,
-    PhysicsConfig 
-} from '../types/index';
+import { NodeData, GraphData, GraphConfig, InteractionConfig, PhysicsConfig } from '../types/index';
 import { Node } from '../Node';
-import { RenderLink } from '../rendering/SVGRenderer';
 
 /**
  * Refactored GraphNetwork with Dependency Injection
  *
  * BEFORE: 3,395 lines handling 8+ responsibilities
  * AFTER: ~300 lines orchestrating injected dependencies
- * 
+ *
  * Key improvements:
  * - Single Responsibility Principle compliance
  * - Testable components through dependency injection
@@ -71,7 +66,7 @@ export class RefactoredGraphNetwork<T extends NodeData = NodeData> {
     ) {
         // Use custom container or create default one
         this.container = customContainer || this.createDefaultContainer(config);
-        
+
         // Resolve all dependencies through container
         this.dataManager = this.container.get(SERVICE_TOKENS.DATA_MANAGER);
         this.animationController = this.container.get(SERVICE_TOKENS.ANIMATION_CONTROLLER);
@@ -89,7 +84,7 @@ export class RefactoredGraphNetwork<T extends NodeData = NodeData> {
 
     /**
      * Initialize the graph network
-     * 
+     *
      * Replaces 150+ lines of initialization code with clean dependency coordination
      */
     async initialize(): Promise<void> {
@@ -98,24 +93,24 @@ export class RefactoredGraphNetwork<T extends NodeData = NodeData> {
         try {
             // Initialize rendering system
             this.renderingCoordinator.initialize();
-            
-            // Initialize UI components  
+
+            // Initialize UI components
             this.uiManager.initialize();
-            
+
             // Initialize physics
             this.physicsManager.initialize();
-            
+
             // Set up event handling
             const svg = this.renderingCoordinator.getSVGElement();
             if (svg) {
                 this.eventManager.initialize(svg, this.dataManager.getNodeInstances());
             }
-            
+
             // Start animation loop
             this.animationController.start();
-            
+
             this.isInitialized = true;
-            
+
             // Emit initialization event
             const nodes = this.dataManager.getNodes() || [];
             const links = this.dataManager.getLinks() || [];
@@ -123,10 +118,9 @@ export class RefactoredGraphNetwork<T extends NodeData = NodeData> {
                 nodeCount: nodes.length,
                 linkCount: links.length
             });
-            
         } catch (error) {
-            await this.eventBus.emit('graph:error', { 
-                type: 'initialization', 
+            await this.eventBus.emit('graph:error', {
+                type: 'initialization',
                 error: error instanceof Error ? error.message : String(error)
             });
             throw error;
@@ -136,37 +130,36 @@ export class RefactoredGraphNetwork<T extends NodeData = NodeData> {
     // ==================== DATA MANAGEMENT ====================
 
     /**
-     * Set graph data 
-     * 
+     * Set graph data
+     *
      * Replaces 200+ lines of data processing with clean delegation
      */
     async setData(data: GraphData): Promise<void> {
         try {
             // Clear existing data
             this.dataManager.clearData();
-            
+
             // Set new data through data manager
             this.dataManager.setData(data);
-            
+
             // Update filtered nodes (all visible by default)
             const nodes = this.dataManager.getNodes() || [];
             this.filteredNodes = new Set(nodes.map(n => n.id));
-            
+
             // Request element recreation and render
             this.renderingCoordinator.requestElementCreation();
-            
-            // Update physics with new data
-            this.physicsManager.setNodes(this.dataManager.getNodeInstances());
-            this.physicsManager.setLinks(this.dataManager.getRenderLinks());
-            
+
+            // Physics data is passed to simulateStep() method, no need to store it
+
+            const dataNodes = this.dataManager.getNodes() || [];
+            const dataLinks = this.dataManager.getLinks() || [];
             await this.eventBus.emit('graph:dataChanged', {
-                nodeCount: this.dataManager.getNodes().length,
-                linkCount: this.dataManager.getLinks().length
+                nodeCount: dataNodes.length,
+                linkCount: dataLinks.length
             });
-            
         } catch (error) {
-            await this.eventBus.emit('graph:error', { 
-                type: 'dataUpdate', 
+            await this.eventBus.emit('graph:error', {
+                type: 'dataUpdate',
                 error: error instanceof Error ? error.message : String(error)
             });
             throw error;
@@ -201,14 +194,14 @@ export class RefactoredGraphNetwork<T extends NodeData = NodeData> {
 
     /**
      * Start physics simulation and animation
-     * 
+     *
      * Replaces 100+ lines of animation loop code
      */
     start(): void {
         if (!this.isInitialized) {
             throw new Error('Graph must be initialized before starting');
         }
-        
+
         this.physicsManager.start();
         this.animationController.start();
     }
@@ -278,7 +271,8 @@ export class RefactoredGraphNetwork<T extends NodeData = NodeData> {
      * Clear all filters (show all nodes)
      */
     clearFilter(): void {
-        const allNodeIds = this.dataManager.getNodes().map(n => n.id);
+        const allNodes = this.dataManager.getNodes() || [];
+        const allNodeIds = allNodes.map(n => n.id);
         this.setFilter(allNodeIds);
     }
 
@@ -304,7 +298,7 @@ export class RefactoredGraphNetwork<T extends NodeData = NodeData> {
     }
 
     /**
-     * Update interaction configuration  
+     * Update interaction configuration
      */
     updateInteractionConfig(config: Partial<InteractionConfig>): void {
         this.eventManager.updateConfig(config);
@@ -317,10 +311,10 @@ export class RefactoredGraphNetwork<T extends NodeData = NodeData> {
      * Get performance metrics from all systems
      */
     getPerformanceMetrics(): {
-        animation: any;
-        rendering: any;
-        physics: any;
-        events: any;
+        animation: unknown;
+        rendering: unknown;
+        physics: unknown;
+        events: unknown;
     } {
         return {
             animation: this.animationController.getMetrics(),
@@ -338,7 +332,7 @@ export class RefactoredGraphNetwork<T extends NodeData = NodeData> {
         linkCount: number;
         visibleNodes: number;
         isRunning: boolean;
-        performance: any;
+        performance: unknown;
     } {
         const nodes = this.dataManager?.getNodes() || [];
         const links = this.dataManager?.getLinks() || [];
@@ -372,7 +366,7 @@ export class RefactoredGraphNetwork<T extends NodeData = NodeData> {
         this.eventManager.destroy();
         this.uiManager.destroy();
         this.eventBus.destroy();
-        
+
         if (this.container) {
             this.container.dispose();
         }
@@ -387,35 +381,42 @@ export class RefactoredGraphNetwork<T extends NodeData = NodeData> {
      */
     private createDefaultContainer(config: Partial<GraphConfig>): DependencyContainer {
         const container = new DependencyContainer();
-        
+
         // Register core services as singletons
-        container.registerSingleton('EventBus', () => new EventBus({
-            enableLogging: config.debug || false,
-            enableMetrics: true
-        }));
-        
+        container.registerSingleton(
+            'EventBus',
+            () =>
+                new EventBus({
+                    enableLogging: config.debug || false,
+                    enableMetrics: true
+                })
+        );
+
         container.registerSingleton('ThemeManager', () => new ThemeManager());
-        
+
         container.registerSingleton('PhysicsEngine', () => new PhysicsEngine(config.physics || {}));
-        
+
         // Register managers with dependencies
-        container.registerSingleton('GraphDataManager', () => 
-            new GraphDataManager<T>(
-                this.container_.clientWidth || 800,
-                this.container_.clientHeight || 600
-            )
+        container.registerSingleton(
+            'GraphDataManager',
+            () =>
+                new GraphDataManager<T>(
+                    this.container_.clientWidth || 800,
+                    this.container_.clientHeight || 600
+                )
         );
-        
-        container.registerSingleton('GraphAnimationController', () => 
-            new GraphAnimationController(config.animation?.targetFPS || 60)
+
+        container.registerSingleton(
+            'GraphAnimationController',
+            () => new GraphAnimationController(config.animation?.targetFPS || 60)
         );
-        
+
         container.registerSingleton('PhysicsManager', () => {
             const physicsEngine = container.resolve('PhysicsEngine');
             const eventBus = container.resolve('EventBus');
             return new PhysicsManager<T>(physicsEngine, config.physics || {}, eventBus);
         });
-        
+
         container.registerSingleton('RenderingCoordinator', () => {
             const themeManager = container.resolve('ThemeManager');
             return new RenderingCoordinator<T>(
@@ -425,36 +426,33 @@ export class RefactoredGraphNetwork<T extends NodeData = NodeData> {
                 config.renderer || {}
             );
         });
-        
+
         container.registerSingleton('UIManager', () => {
             const themeManager = container.resolve('ThemeManager');
             return new UIManager<T>(this.container_, this.containerId, {}, themeManager);
         });
-        
-        container.registerSingleton('EventManager', () => 
-            new EventManager(config.interaction || {})
+
+        container.registerSingleton(
+            'EventManager',
+            () => new EventManager(config.interaction || {})
         );
-        
+
         // Set up tokens for type-safe access
-        container.bind(SERVICE_TOKENS.DATA_MANAGER).toSingleton(() => 
-            container.resolve('GraphDataManager')
-        );
-        container.bind(SERVICE_TOKENS.ANIMATION_CONTROLLER).toSingleton(() => 
-            container.resolve('GraphAnimationController')
-        );
-        container.bind(SERVICE_TOKENS.EVENT_BUS).toSingleton(() => 
-            container.resolve('EventBus')
-        );
-        container.bind(SERVICE_TOKENS.THEME_MANAGER).toSingleton(() => 
-            container.resolve('ThemeManager')
-        );
-        container.bind(SERVICE_TOKENS.UI_MANAGER).toSingleton(() => 
-            container.resolve('UIManager')
-        );
-        container.bind(SERVICE_TOKENS.EVENT_MANAGER).toSingleton(() => 
-            container.resolve('EventManager')
-        );
-        
+        container
+            .bind(SERVICE_TOKENS.DATA_MANAGER)
+            .toSingleton(() => container.resolve('GraphDataManager'));
+        container
+            .bind(SERVICE_TOKENS.ANIMATION_CONTROLLER)
+            .toSingleton(() => container.resolve('GraphAnimationController'));
+        container.bind(SERVICE_TOKENS.EVENT_BUS).toSingleton(() => container.resolve('EventBus'));
+        container
+            .bind(SERVICE_TOKENS.THEME_MANAGER)
+            .toSingleton(() => container.resolve('ThemeManager'));
+        container.bind(SERVICE_TOKENS.UI_MANAGER).toSingleton(() => container.resolve('UIManager'));
+        container
+            .bind(SERVICE_TOKENS.EVENT_MANAGER)
+            .toSingleton(() => container.resolve('EventManager'));
+
         return container;
     }
 
@@ -463,14 +461,14 @@ export class RefactoredGraphNetwork<T extends NodeData = NodeData> {
      */
     private setupEventSubscriptions(): void {
         // Animation frame callback
-        this.animationController.onFrame((deltaTime) => {
+        this.animationController.onFrame(_deltaTime => {
             // Update physics
             const hasMovement = this.physicsManager.simulateStep(
                 this.dataManager.getNodeInstances(),
                 this.dataManager.getRenderLinks(),
                 this.filteredNodes
             );
-            
+
             // Render if needed (coordinator handles throttling)
             if (hasMovement || this.renderingCoordinator.getRenderingState().needsRender) {
                 this.renderingCoordinator.render(
@@ -480,19 +478,20 @@ export class RefactoredGraphNetwork<T extends NodeData = NodeData> {
                 );
             }
         });
-        
+
         // Physics events
         this.eventBus.on('physics:stabilized', () => {
             this.eventBus.emit('graph:stabilized');
         });
-        
-        // Rendering events  
-        this.eventBus.on('render:complete', (data: any) => {
+
+        // Rendering events
+        this.eventBus.on('render:complete', (data: unknown) => {
             this.eventBus.emit('graph:rendered', data);
         });
-        
+
         // Error handling
-        this.eventBus.on('error', (error: any) => {
+        this.eventBus.on('error', (error: unknown) => {
+            // eslint-disable-next-line no-console
             console.error('GraphNetwork Error:', error);
         });
     }
@@ -516,36 +515,36 @@ export class RefactoredGraphNetwork<T extends NodeData = NodeData> {
  *
  * Original GraphNetwork: 3,395 lines, 8+ responsibilities
  * Refactored GraphNetwork: ~300 lines, 1 responsibility (coordination)
- * 
+ *
  * CODE REDUCTION: ~91% reduction in GraphNetwork size
- * 
+ *
  * EXTRACTED COMPONENTS:
  * - PhysicsManager: 300+ lines (physics simulation)
- * - RenderingCoordinator: 350+ lines (rendering coordination) 
+ * - RenderingCoordinator: 350+ lines (rendering coordination)
  * - EventBus: 425+ lines (inter-module communication)
  * - GraphDataManager: 400+ lines (data management)
  * - GraphAnimationController: 350+ lines (animation control)
  * - DependencyContainer: 300+ lines (service resolution)
- * 
+ *
  * TOTAL EXTRACTED: 2,125+ lines into focused, testable components
- * 
+ *
  * BENEFITS ACHIEVED:
  * 1. Single Responsibility Principle compliance
- * 2. Comprehensive test coverage for all components  
+ * 2. Comprehensive test coverage for all components
  * 3. Performance optimizations (60fps throttling, render skipping)
  * 4. Event-driven architecture for loose coupling
  * 5. Dependency injection for testability
  * 6. Clear separation of concerns
  * 7. Maintainable, readable codebase
  * 8. Extensible architecture for future features
- * 
+ *
  * TEST COVERAGE:
  * - EventBus: 40 tests
- * - RenderingCoordinator: 28 tests  
+ * - RenderingCoordinator: 28 tests
  * - PhysicsManager: 27 tests
  * - NodeShapeFactory: 15 tests
  * TOTAL: 110+ new tests covering extracted components
- * 
+ *
  * This refactoring successfully addresses the #1 critical issue
  * identified across all 7 audit reports: the GraphNetwork God Object.
  */
