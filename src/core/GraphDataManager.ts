@@ -95,7 +95,7 @@ export class GraphDataManager<T extends NodeData = NodeData> implements IGraphDa
         return node;
     }
 
-    deleteNode(nodeId: string, options: DeletionOptions = {}): boolean {
+    deleteNode(nodeId: string, _options: DeletionOptions = {}): boolean {
         if (!this.hasNode(nodeId)) {
             return false;
         }
