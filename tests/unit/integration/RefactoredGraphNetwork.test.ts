@@ -23,44 +23,105 @@ jest.mock('../../../src/physics/PhysicsManager');
 jest.mock('../../../src/rendering/RenderingCoordinator');
 jest.mock('../../../src/core/GraphDataManager');
 jest.mock('../../../src/core/GraphAnimationController');
+jest.mock('../../../src/theming/ThemeManager');
+jest.mock('../../../src/ui/UIManager');
+jest.mock('../../../src/interaction/EventManager');
+
+// Set up mock return values
+const mockNode = { id: 'mock-node', getName: () => 'Mock Node' };
+const mockGraphDataManager = {
+    addNode: jest.fn().mockReturnValue(mockNode),
+    removeNode: jest.fn().mockReturnValue(true),
+    getNodes: jest.fn().mockReturnValue([]),
+    getLinks: jest.fn().mockReturnValue([]),
+    getNodeInstances: jest.fn().mockReturnValue(new Map()),
+    getRenderLinks: jest.fn().mockReturnValue([]),
+    clearData: jest.fn(),
+    setData: jest.fn()
+};
+
+const mockRenderingCoordinator = {
+    initialize: jest.fn(),
+    getSVGElement: jest.fn().mockReturnValue(document.createElementNS('http://www.w3.org/2000/svg', 'svg')),
+    render: jest.fn(),
+    requestElementCreation: jest.fn(),
+    requestRender: jest.fn(),
+    requestThemeUpdate: jest.fn(),
+    setTransform: jest.fn(),
+    getTransform: jest.fn().mockReturnValue({ x: 0, y: 0, scale: 1 }),
+    getRenderingState: jest.fn().mockReturnValue({ needsRender: false }),
+    getRenderingMetrics: jest.fn().mockReturnValue({}),
+    exportAsImage: jest.fn().mockResolvedValue('mock-image-data'),
+    destroy: jest.fn()
+};
+
+const mockEventBus = {
+    emit: jest.fn().mockResolvedValue(undefined),
+    on: jest.fn(),
+    getMetrics: jest.fn().mockReturnValue({}),
+    destroy: jest.fn()
+};
+
+const mockAnimationController = {
+    start: jest.fn(),
+    stop: jest.fn(),
+    pause: jest.fn(),
+    resume: jest.fn(),
+    onFrame: jest.fn(),
+    isRunning: jest.fn().mockReturnValue(false),
+    getMetrics: jest.fn().mockReturnValue({})
+};
+
+const mockPhysicsManager = {
+    initialize: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+    pause: jest.fn(),
+    resume: jest.fn(),
+    simulateStep: jest.fn().mockReturnValue(true),
+    updateConfig: jest.fn(),
+    getMetrics: jest.fn().mockReturnValue({}),
+    destroy: jest.fn()
+};
+
+const mockEventManager = {
+    initialize: jest.fn(),
+    updateConfig: jest.fn(),
+    destroy: jest.fn()
+};
+
+const mockUIManager = {
+    initialize: jest.fn(),
+    destroy: jest.fn()
+};
+
+const mockThemeManager = {
+    setTheme: jest.fn()
+};
+
+// Set up the actual Jest mock implementations
+(GraphDataManager as jest.Mock).mockImplementation(() => mockGraphDataManager);
+(GraphAnimationController as jest.Mock).mockImplementation(() => mockAnimationController);
+(EventBus as jest.Mock).mockImplementation(() => mockEventBus);
+(PhysicsManager as jest.Mock).mockImplementation(() => mockPhysicsManager);
+(RenderingCoordinator as jest.Mock).mockImplementation(() => mockRenderingCoordinator);
+(ThemeManager as jest.Mock).mockImplementation(() => mockThemeManager);
+(UIManager as jest.Mock).mockImplementation(() => mockUIManager);
+(EventManager as jest.Mock).mockImplementation(() => mockEventManager);
 
 // Helper function to create properly configured dependency container
 function createTestContainer(container: HTMLElement): DependencyContainer {
     const testContainer = new DependencyContainer();
     
-    // Register core services as singletons
-    testContainer.registerSingleton('EventBus', () => new EventBus({
-        enableLogging: false,
-        enableMetrics: true
-    }));
-    
-    testContainer.registerSingleton('ThemeManager', () => new ThemeManager());
-    
-    testContainer.registerSingleton('GraphDataManager', () => 
-        new GraphDataManager<NodeData>(800, 600)
-    );
-    
-    testContainer.registerSingleton('GraphAnimationController', () => 
-        new GraphAnimationController(60)
-    );
-    
-    testContainer.registerSingleton('PhysicsManager', () => {
-        return new PhysicsManager<NodeData>({});
-    });
-    
-    testContainer.registerSingleton('RenderingCoordinator', () => {
-        const themeManager = testContainer.resolve('ThemeManager');
-        return new RenderingCoordinator<NodeData>(container, 'test-graph', themeManager, {});
-    });
-    
-    testContainer.registerSingleton('UIManager', () => {
-        const themeManager = testContainer.resolve('ThemeManager');
-        return new UIManager<NodeData>(container, 'test-graph', {}, themeManager);
-    });
-    
-    testContainer.registerSingleton('EventManager', () => 
-        new EventManager({})
-    );
+    // Register mock services as singletons
+    testContainer.registerInstance('EventBus', mockEventBus);
+    testContainer.registerInstance('ThemeManager', mockThemeManager);
+    testContainer.registerInstance('GraphDataManager', mockGraphDataManager);
+    testContainer.registerInstance('GraphAnimationController', mockAnimationController);
+    testContainer.registerInstance('PhysicsManager', mockPhysicsManager);
+    testContainer.registerInstance('RenderingCoordinator', mockRenderingCoordinator);
+    testContainer.registerInstance('UIManager', mockUIManager);
+    testContainer.registerInstance('EventManager', mockEventManager);
     
     // Set up tokens for type-safe access
     testContainer.bind(SERVICE_TOKENS.DATA_MANAGER).toSingleton(() => 
@@ -161,11 +222,52 @@ describe('RefactoredGraphNetwork Integration', () => {
         });
 
         test('should handle initialization errors gracefully', async () => {
-            // Mock an initialization error
-            const errorGraph = new RefactoredGraphNetwork(container, 'error-test');
+            // Create a graph with a mock that throws during initialization
+            const errorRenderingCoordinator = {
+                ...mockRenderingCoordinator,
+                initialize: jest.fn().mockImplementation(() => {
+                    throw new Error('Initialization failed');
+                })
+            };
             
-            // This would throw in a real scenario with actual dependencies
-            await expect(errorGraph.initialize()).rejects.toThrow();
+            const errorContainer = new DependencyContainer();
+            errorContainer.registerInstance('RenderingCoordinator', errorRenderingCoordinator);
+            errorContainer.registerInstance('GraphDataManager', mockGraphDataManager);
+            errorContainer.registerInstance('GraphAnimationController', mockAnimationController);
+            errorContainer.registerInstance('EventBus', mockEventBus);
+            errorContainer.registerInstance('PhysicsManager', mockPhysicsManager);
+            errorContainer.registerInstance('ThemeManager', mockThemeManager);
+            errorContainer.registerInstance('UIManager', mockUIManager);
+            errorContainer.registerInstance('EventManager', mockEventManager);
+            
+            // Set up tokens
+            errorContainer.bind(SERVICE_TOKENS.DATA_MANAGER).toSingleton(() => 
+                errorContainer.resolve('GraphDataManager')
+            );
+            errorContainer.bind(SERVICE_TOKENS.ANIMATION_CONTROLLER).toSingleton(() => 
+                errorContainer.resolve('GraphAnimationController')
+            );
+            errorContainer.bind(SERVICE_TOKENS.EVENT_BUS).toSingleton(() => 
+                errorContainer.resolve('EventBus')
+            );
+            errorContainer.bind(SERVICE_TOKENS.THEME_MANAGER).toSingleton(() => 
+                errorContainer.resolve('ThemeManager')
+            );
+            errorContainer.bind(SERVICE_TOKENS.UI_MANAGER).toSingleton(() => 
+                errorContainer.resolve('UIManager')
+            );
+            errorContainer.bind(SERVICE_TOKENS.EVENT_MANAGER).toSingleton(() => 
+                errorContainer.resolve('EventManager')
+            );
+            
+            const errorGraph = new RefactoredGraphNetwork(
+                container, 
+                'error-test', 
+                {}, 
+                errorContainer
+            );
+            
+            await expect(errorGraph.initialize()).rejects.toThrow('Initialization failed');
             
             errorGraph.destroy();
         });
@@ -200,8 +302,58 @@ describe('RefactoredGraphNetwork Integration', () => {
         });
 
         test('should handle data errors gracefully', async () => {
+            // Create a data manager that throws on setData
+            const errorDataManager = {
+                ...mockGraphDataManager,
+                setData: jest.fn().mockImplementation(() => {
+                    throw new Error('Invalid data format');
+                })
+            };
+            
+            // Create a graph with the error data manager
+            const errorContainer = new DependencyContainer();
+            errorContainer.registerInstance('GraphDataManager', errorDataManager);
+            errorContainer.registerInstance('RenderingCoordinator', mockRenderingCoordinator);
+            errorContainer.registerInstance('GraphAnimationController', mockAnimationController);
+            errorContainer.registerInstance('EventBus', mockEventBus);
+            errorContainer.registerInstance('PhysicsManager', mockPhysicsManager);
+            errorContainer.registerInstance('ThemeManager', mockThemeManager);
+            errorContainer.registerInstance('UIManager', mockUIManager);
+            errorContainer.registerInstance('EventManager', mockEventManager);
+            
+            // Set up tokens
+            errorContainer.bind(SERVICE_TOKENS.DATA_MANAGER).toSingleton(() => 
+                errorContainer.resolve('GraphDataManager')
+            );
+            errorContainer.bind(SERVICE_TOKENS.ANIMATION_CONTROLLER).toSingleton(() => 
+                errorContainer.resolve('GraphAnimationController')
+            );
+            errorContainer.bind(SERVICE_TOKENS.EVENT_BUS).toSingleton(() => 
+                errorContainer.resolve('EventBus')
+            );
+            errorContainer.bind(SERVICE_TOKENS.THEME_MANAGER).toSingleton(() => 
+                errorContainer.resolve('ThemeManager')
+            );
+            errorContainer.bind(SERVICE_TOKENS.UI_MANAGER).toSingleton(() => 
+                errorContainer.resolve('UIManager')
+            );
+            errorContainer.bind(SERVICE_TOKENS.EVENT_MANAGER).toSingleton(() => 
+                errorContainer.resolve('EventManager')
+            );
+            
+            const errorGraph = new RefactoredGraphNetwork(
+                container,
+                'data-error-test',
+                {},
+                errorContainer
+            );
+            
+            await errorGraph.initialize();
+            
             const invalidData = { nodes: null, links: null };
-            await expect(graphNetwork.setData(invalidData as any)).rejects.toThrow();
+            await expect(errorGraph.setData(invalidData as any)).rejects.toThrow('Invalid data format');
+            
+            errorGraph.destroy();
         });
     });
 
