@@ -1,18 +1,18 @@
 /**
  * SelectionManager - Handles multi-selection state and operations
- * 
+ *
  * Provides centralized selection management with support for:
  * - Single and multi-selection modes
- * - Selection persistence during data updates  
+ * - Selection persistence during data updates
  * - Event emission for selection changes
  * - Visual feedback coordination
  */
 
-import { 
-    ISelectionManager, 
-    SelectionOptions, 
-    SelectionState, 
-    SelectionEvent 
+import {
+    ISelectionManager,
+    SelectionOptions,
+    SelectionState,
+    SelectionEvent
 } from '../types/styling';
 
 /**
@@ -53,7 +53,7 @@ export class SelectionManager implements ISelectionManager {
             selectedEdges: new Set<string>(),
             mode: 'multi'
         };
-        
+
         this.onSelectionChange = onSelectionChange;
         this.options = { ...DEFAULT_SELECTION_OPTIONS, ...defaultOptions };
     }
@@ -63,22 +63,22 @@ export class SelectionManager implements ISelectionManager {
      */
     selectNode(nodeId: string, options?: SelectionOptions): boolean {
         if (!nodeId) return false;
-        
+
         const opts = { ...this.options, ...options };
         const wasSelected = this.state.selectedNodes.has(nodeId);
-        
+
         if (!opts.additive && this.state.mode === 'single') {
             this.state.selectedNodes.clear();
         }
-        
+
         this.state.selectedNodes.add(nodeId);
         this.state.lastSelected = nodeId;
-        
+
         if (!wasSelected) {
             this.emitSelectionChange(opts, [nodeId], [], [], []);
             return true;
         }
-        
+
         return false;
     }
 
@@ -88,23 +88,23 @@ export class SelectionManager implements ISelectionManager {
     selectNodes(nodeIds: string[], options?: SelectionOptions): string[] {
         const opts = { ...this.options, ...options };
         const newSelections: string[] = [];
-        
+
         if (!opts.additive) {
             this.state.selectedNodes.clear();
         }
-        
+
         for (const nodeId of nodeIds) {
             if (!this.state.selectedNodes.has(nodeId)) {
                 this.state.selectedNodes.add(nodeId);
                 newSelections.push(nodeId);
             }
         }
-        
+
         if (newSelections.length > 0) {
             this.state.lastSelected = newSelections[newSelections.length - 1];
             this.emitSelectionChange(opts, newSelections, [], [], []);
         }
-        
+
         return newSelections;
     }
 
@@ -114,18 +114,18 @@ export class SelectionManager implements ISelectionManager {
     selectEdge(edgeId: string, options?: SelectionOptions): boolean {
         const opts = { ...this.options, ...options };
         const wasSelected = this.state.selectedEdges.has(edgeId);
-        
+
         if (!opts.additive && this.state.mode === 'single') {
             this.state.selectedEdges.clear();
         }
-        
+
         this.state.selectedEdges.add(edgeId);
-        
+
         if (!wasSelected) {
             this.emitSelectionChange(opts, [], [], [edgeId], []);
             return true;
         }
-        
+
         return false;
     }
 
@@ -135,22 +135,22 @@ export class SelectionManager implements ISelectionManager {
     selectEdges(edgeIds: string[], options?: SelectionOptions): string[] {
         const opts = { ...this.options, ...options };
         const newSelections: string[] = [];
-        
+
         if (!opts.additive) {
             this.state.selectedEdges.clear();
         }
-        
+
         for (const edgeId of edgeIds) {
             if (!this.state.selectedEdges.has(edgeId)) {
                 this.state.selectedEdges.add(edgeId);
                 newSelections.push(edgeId);
             }
         }
-        
+
         if (newSelections.length > 0) {
             this.emitSelectionChange(opts, [], [], newSelections, []);
         }
-        
+
         return newSelections;
     }
 
@@ -184,11 +184,11 @@ export class SelectionManager implements ISelectionManager {
     deselectAll(): void {
         const removedNodes = Array.from(this.state.selectedNodes);
         const removedEdges = Array.from(this.state.selectedEdges);
-        
+
         this.state.selectedNodes.clear();
         this.state.selectedEdges.clear();
         this.state.lastSelected = undefined;
-        
+
         if (removedNodes.length > 0 || removedEdges.length > 0) {
             this.emitSelectionChange(this.options, [], removedNodes, [], removedEdges);
         }
@@ -268,24 +268,26 @@ export class SelectionManager implements ISelectionManager {
      */
     setSelectionMode(mode: 'single' | 'multi' | 'box'): void {
         this.state.mode = mode;
-        
+
         // If switching to single mode and multiple items are selected,
         // keep only the last selected item
         if (mode === 'single') {
             if (this.state.selectedNodes.size > 1) {
                 const lastNode = this.state.lastSelected;
-                const removedNodes = Array.from(this.state.selectedNodes).filter(id => id !== lastNode);
-                
+                const removedNodes = Array.from(this.state.selectedNodes).filter(
+                    id => id !== lastNode
+                );
+
                 this.state.selectedNodes.clear();
                 if (lastNode) {
                     this.state.selectedNodes.add(lastNode);
                 }
-                
+
                 if (removedNodes.length > 0) {
                     this.emitSelectionChange(this.options, [], removedNodes, [], []);
                 }
             }
-            
+
             // Also clear edge selections in single mode (for simplicity)
             if (this.state.selectedEdges.size > 0) {
                 const removedEdges = Array.from(this.state.selectedEdges);
@@ -324,7 +326,7 @@ export class SelectionManager implements ISelectionManager {
     updateAfterDataChange(existingNodeIds: Set<string>, existingEdgeIds: Set<string>): void {
         const removedNodes: string[] = [];
         const removedEdges: string[] = [];
-        
+
         // Remove selected nodes that no longer exist
         for (const nodeId of this.state.selectedNodes) {
             if (!existingNodeIds.has(nodeId)) {
@@ -332,7 +334,7 @@ export class SelectionManager implements ISelectionManager {
                 removedNodes.push(nodeId);
             }
         }
-        
+
         // Remove selected edges that no longer exist
         for (const edgeId of this.state.selectedEdges) {
             if (!existingEdgeIds.has(edgeId)) {
@@ -340,12 +342,12 @@ export class SelectionManager implements ISelectionManager {
                 removedEdges.push(edgeId);
             }
         }
-        
+
         // Update last selected if it was removed
         if (this.state.lastSelected && !existingNodeIds.has(this.state.lastSelected)) {
             this.state.lastSelected = undefined;
         }
-        
+
         // Emit change event if selections were cleaned up
         if (removedNodes.length > 0 || removedEdges.length > 0) {
             this.emitSelectionChange(this.options, [], removedNodes, [], removedEdges);

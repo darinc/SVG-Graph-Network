@@ -16,18 +16,18 @@ export type {
     LinkData,
     GraphData,
     EdgeData,
-    
+
     // Configuration types
     GraphConfig,
     PhysicsConfig,
     UIConfig,
     InteractionConfig,
-    
+
     // Runtime types
     Position,
     TransformState,
     Bounds,
-    
+
     // Event types
     BaseEvent,
     NodeEvent,
@@ -37,12 +37,12 @@ export type {
     DataEvent,
     ThemeEvent,
     GraphEvent,
-    
+
     // Callback types
     EventCallback,
     Callback,
     ParameterCallback,
-    
+
     // Operation types
     NodeCreationOptions,
     EdgeCreationOptions,
@@ -50,15 +50,15 @@ export type {
     BulkUpdateOptions,
     DataReplacementOptions,
     DataMergeOptions,
-    
+
     // Update types
     ConfigUpdate,
     NodeUpdate,
     LinkUpdate,
-    
+
     // Utility types
     EventType,
-    
+
     // Module-specific types
     SVGElements,
     UIElements

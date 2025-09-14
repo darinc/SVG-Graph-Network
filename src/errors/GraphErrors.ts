@@ -14,7 +14,7 @@ export abstract class GraphError extends Error {
         this.name = this.constructor.name;
         this.code = code;
         this.details = details;
-        
+
         // Maintains proper stack trace for where our error was thrown (only available on V8)
         if (Error.captureStackTrace) {
             Error.captureStackTrace(this, this.constructor);
@@ -82,8 +82,8 @@ export class EdgeNotFoundError extends GraphError {
 export class InvalidEdgeReferencesError extends GraphError {
     constructor(sourceId: string, targetId: string, missingNodeIds: string[]) {
         super(
-            `Edge references non-existent nodes: ${missingNodeIds.join(', ')}`, 
-            'INVALID_EDGE_REFERENCES_ERROR', 
+            `Edge references non-existent nodes: ${missingNodeIds.join(', ')}`,
+            'INVALID_EDGE_REFERENCES_ERROR',
             { sourceId, targetId, missingNodeIds }
         );
     }
@@ -121,7 +121,7 @@ export class GraphErrorUtils {
                 details: error.details
             };
         }
-        
+
         if (error instanceof Error) {
             return {
                 name: error.name,
@@ -153,7 +153,7 @@ export class GraphErrorUtils {
                     return error.message;
             }
         }
-        
+
         return 'An unexpected error occurred.';
     }
 }

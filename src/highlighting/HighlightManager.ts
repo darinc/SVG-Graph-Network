@@ -1,6 +1,6 @@
 /**
  * HighlightManager - Handles element highlighting with path finding
- * 
+ *
  * Provides advanced highlighting capabilities with support for:
  * - Individual element highlighting with custom styles
  * - Path highlighting between nodes with pathfinding
@@ -9,12 +9,12 @@
  * - Animated highlight effects and transitions
  */
 
-import { 
-    IHighlightManager, 
-    HighlightStyle, 
-    PathHighlightOptions, 
+import {
+    IHighlightManager,
+    HighlightStyle,
+    PathHighlightOptions,
     NeighborHighlightOptions,
-    HighlightEvent 
+    HighlightEvent
 } from '../types/styling';
 
 /**
@@ -79,12 +79,12 @@ export class HighlightManager implements IHighlightManager {
      */
     highlightNodes(nodeIds: string[], style: HighlightStyle = {}): void {
         const highlightStyle = this.mergeWithDefaults(style);
-        
+
         for (const nodeId of nodeIds) {
             this.state.nodes.set(nodeId, highlightStyle);
             this.applyHighlightToElement(nodeId, 'node', highlightStyle);
         }
-        
+
         this.emitHighlightChange();
     }
 
@@ -103,21 +103,27 @@ export class HighlightManager implements IHighlightManager {
      */
     highlightEdges(edgeIds: string[], style: HighlightStyle = {}): void {
         const highlightStyle = this.mergeWithDefaults(style);
-        
+
         for (const edgeId of edgeIds) {
             this.state.edges.set(edgeId, highlightStyle);
             this.applyHighlightToElement(edgeId, 'edge', highlightStyle);
         }
-        
+
         this.emitHighlightChange();
     }
 
     /**
      * Highlight shortest path between two nodes
      */
-    highlightPath(sourceId: string, targetId: string, options: PathHighlightOptions = {}): string[] | null {
+    highlightPath(
+        sourceId: string,
+        targetId: string,
+        options: PathHighlightOptions = {}
+    ): string[] | null {
         if (!this.graphAdjacency) {
-            console.warn('HighlightManager: Graph adjacency not initialized. Call updateGraphStructure() first.');
+            console.warn(
+                'HighlightManager: Graph adjacency not initialized. Call updateGraphStructure() first.'
+            );
             return null;
         }
 
@@ -155,7 +161,7 @@ export class HighlightManager implements IHighlightManager {
                         duration: options.duration || 1000,
                         zIndex: options.zIndex || 100
                     });
-                    
+
                     this.state.edges.set(edgeId, edgeStyle);
                     this.applyHighlightToElement(edgeId, 'edge', edgeStyle);
                     highlightedElements.push(edgeId);
@@ -180,14 +186,18 @@ export class HighlightManager implements IHighlightManager {
      */
     highlightNeighbors(nodeId: string, options: NeighborHighlightOptions = {}): string[] {
         if (!this.graphAdjacency) {
-            console.warn('HighlightManager: Graph adjacency not initialized. Call updateGraphStructure() first.');
+            console.warn(
+                'HighlightManager: Graph adjacency not initialized. Call updateGraphStructure() first.'
+            );
             return [];
         }
 
         const depth = options.depth || 1;
         const highlightedElements: string[] = [];
         const visited = new Set<string>();
-        const queue: Array<{ nodeId: string; currentDepth: number }> = [{ nodeId, currentDepth: 0 }];
+        const queue: Array<{ nodeId: string; currentDepth: number }> = [
+            { nodeId, currentDepth: 0 }
+        ];
 
         // Highlight the source node
         const sourceStyle = this.mergeWithDefaults({
@@ -196,7 +206,7 @@ export class HighlightManager implements IHighlightManager {
             opacity: options.opacity || 0.8,
             zIndex: options.zIndex || 50
         });
-        
+
         this.state.nodes.set(nodeId, sourceStyle);
         this.applyHighlightToElement(nodeId, 'node', sourceStyle);
         highlightedElements.push(nodeId);
@@ -205,20 +215,24 @@ export class HighlightManager implements IHighlightManager {
         // BFS to find neighbors at different depths
         while (queue.length > 0) {
             const { nodeId: currentNode, currentDepth } = queue.shift()!;
-            
+
             if (currentDepth >= depth) continue;
 
             const neighbors = this.graphAdjacency.adjacency.get(currentNode) || new Set();
-            
+
             for (const neighborId of neighbors) {
                 if (visited.has(neighborId)) continue;
-                
+
                 visited.add(neighborId);
-                
+
                 // Calculate style based on depth
                 const depthRatio = (currentDepth + 1) / depth;
-                const neighborStyle = this.getDepthBasedStyle(options, currentDepth + 1, depthRatio);
-                
+                const neighborStyle = this.getDepthBasedStyle(
+                    options,
+                    currentDepth + 1,
+                    depthRatio
+                );
+
                 this.state.nodes.set(neighborId, neighborStyle);
                 this.applyHighlightToElement(neighborId, 'node', neighborStyle);
                 highlightedElements.push(neighborId);
@@ -233,7 +247,7 @@ export class HighlightManager implements IHighlightManager {
                             opacity: (neighborStyle.opacity || 0.8) * 0.7,
                             zIndex: (neighborStyle.zIndex || 50) - 10
                         });
-                        
+
                         this.state.edges.set(edgeId, edgeStyle);
                         this.applyHighlightToElement(edgeId, 'edge', edgeStyle);
                         highlightedElements.push(edgeId);
@@ -253,13 +267,15 @@ export class HighlightManager implements IHighlightManager {
      */
     highlightConnections(nodeId: string, style: HighlightStyle = {}): string[] {
         if (!this.graphAdjacency) {
-            console.warn('HighlightManager: Graph adjacency not initialized. Call updateGraphStructure() first.');
+            console.warn(
+                'HighlightManager: Graph adjacency not initialized. Call updateGraphStructure() first.'
+            );
             return [];
         }
 
         const connectedEdges = this.graphAdjacency.nodeToEdges.get(nodeId) || [];
         const highlightStyle = this.mergeWithDefaults(style);
-        
+
         // Highlight the node itself
         this.state.nodes.set(nodeId, highlightStyle);
         this.applyHighlightToElement(nodeId, 'node', highlightStyle);
@@ -355,7 +371,10 @@ export class HighlightManager implements IHighlightManager {
     /**
      * Update graph structure for pathfinding
      */
-    updateGraphStructure(nodes: string[], edges: Array<{id: string, source: string, target: string}>): void {
+    updateGraphStructure(
+        nodes: string[],
+        edges: Array<{ id: string; source: string; target: string }>
+    ): void {
         this.graphAdjacency = {
             nodeToEdges: new Map(),
             edgeToNodes: new Map(),
@@ -371,14 +390,14 @@ export class HighlightManager implements IHighlightManager {
         // Build adjacency structure
         for (const edge of edges) {
             const { id: edgeId, source, target } = edge;
-            
+
             // Map edge to nodes
             this.graphAdjacency.edgeToNodes.set(edgeId, [source, target]);
-            
+
             // Add edge to node mappings
             this.graphAdjacency.nodeToEdges.get(source)?.push(edgeId);
             this.graphAdjacency.nodeToEdges.get(target)?.push(edgeId);
-            
+
             // Add to adjacency list (undirected graph)
             this.graphAdjacency.adjacency.get(source)?.add(target);
             this.graphAdjacency.adjacency.get(target)?.add(source);
@@ -396,27 +415,27 @@ export class HighlightManager implements IHighlightManager {
         const visited = new Set<string>();
         const queue: string[] = [sourceId];
         const parent = new Map<string, string>();
-        
+
         visited.add(sourceId);
 
         while (queue.length > 0) {
             const current = queue.shift()!;
-            
+
             if (current === targetId) {
                 // Reconstruct path
                 const path: string[] = [];
                 let node = targetId;
-                
+
                 while (node !== undefined) {
                     path.unshift(node);
                     node = parent.get(node)!;
                 }
-                
+
                 return path;
             }
 
             const neighbors = this.graphAdjacency.adjacency.get(current) || new Set();
-            
+
             for (const neighbor of neighbors) {
                 if (!visited.has(neighbor)) {
                     visited.add(neighbor);
@@ -436,25 +455,32 @@ export class HighlightManager implements IHighlightManager {
         if (!this.graphAdjacency) return null;
 
         const edgesA = this.graphAdjacency.nodeToEdges.get(nodeA) || [];
-        
+
         for (const edgeId of edgesA) {
             const nodes = this.graphAdjacency.edgeToNodes.get(edgeId);
-            if (nodes && ((nodes[0] === nodeA && nodes[1] === nodeB) || 
-                         (nodes[0] === nodeB && nodes[1] === nodeA))) {
+            if (
+                nodes &&
+                ((nodes[0] === nodeA && nodes[1] === nodeB) ||
+                    (nodes[0] === nodeB && nodes[1] === nodeA))
+            ) {
                 return edgeId;
             }
         }
-        
+
         return null;
     }
 
     /**
      * Get depth-based style for neighbor highlighting
      */
-    private getDepthBasedStyle(options: NeighborHighlightOptions, depth: number, ratio: number): HighlightStyle {
+    private getDepthBasedStyle(
+        options: NeighborHighlightOptions,
+        depth: number,
+        ratio: number
+    ): HighlightStyle {
         const baseColor = options.color || '#3b82f6';
         const depthColors = options.depthColors || [];
-        
+
         let color = baseColor;
         if (depthColors.length > 0 && depth - 1 < depthColors.length) {
             color = depthColors[depth - 1];
@@ -462,7 +488,7 @@ export class HighlightManager implements IHighlightManager {
 
         let opacity = options.opacity || 0.8;
         if (options.fadeByDistance) {
-            opacity *= (1 - ratio * 0.5); // Fade to 50% at max depth
+            opacity *= 1 - ratio * 0.5; // Fade to 50% at max depth
         }
 
         return this.mergeWithDefaults({
@@ -479,16 +505,16 @@ export class HighlightManager implements IHighlightManager {
     private animatePathFlow(elements: string[], options: PathHighlightOptions): void {
         const duration = options.duration || 1000;
         const speed = options.flowSpeed || 1;
-        
+
         // Create flowing animation along the path
         const animate = () => {
             const animationId = this.animationCounter++;
-            
+
             const startTime = Date.now();
             const animateFrame = () => {
                 const elapsed = Date.now() - startTime;
                 const progress = (elapsed / duration) % 1;
-                
+
                 // Apply animated dash offset to edges in path
                 elements.forEach((elementId, index) => {
                     if (this.state.edges.has(elementId)) {
@@ -501,10 +527,13 @@ export class HighlightManager implements IHighlightManager {
                 });
 
                 if (elapsed < duration) {
-                    this.state.animations.set(`flow_${animationId}`, requestAnimationFrame(animateFrame));
+                    this.state.animations.set(
+                        `flow_${animationId}`,
+                        requestAnimationFrame(animateFrame)
+                    );
                 }
             };
-            
+
             requestAnimationFrame(animateFrame);
         };
 
@@ -514,7 +543,11 @@ export class HighlightManager implements IHighlightManager {
     /**
      * Apply highlight style to DOM element
      */
-    private applyHighlightToElement(elementId: string, type: 'node' | 'edge', style: HighlightStyle): void {
+    private applyHighlightToElement(
+        elementId: string,
+        type: 'node' | 'edge',
+        style: HighlightStyle
+    ): void {
         const element = document.getElementById(`${type}-${elementId}`);
         if (!element) return;
 
@@ -525,11 +558,11 @@ export class HighlightManager implements IHighlightManager {
             }
             element.setAttribute('stroke', style.color);
         }
-        
+
         if (style.strokeWidth) {
             element.setAttribute('stroke-width', String(style.strokeWidth));
         }
-        
+
         if (style.opacity !== undefined) {
             element.setAttribute('opacity', String(style.opacity));
         }
@@ -538,11 +571,11 @@ export class HighlightManager implements IHighlightManager {
         if (style.animated) {
             element.classList.add('graph-highlight-animated');
         }
-        
+
         if (style.glow) {
             element.classList.add('graph-highlight-glow');
         }
-        
+
         if (style.pulse) {
             element.classList.add('graph-highlight-pulse');
         }
@@ -561,12 +594,16 @@ export class HighlightManager implements IHighlightManager {
         if (!element) return;
 
         // Remove highlight classes
-        element.classList.remove('graph-highlight-animated', 'graph-highlight-glow', 'graph-highlight-pulse');
-        
+        element.classList.remove(
+            'graph-highlight-animated',
+            'graph-highlight-glow',
+            'graph-highlight-pulse'
+        );
+
         // Remove custom styles
         element.style.removeProperty('--highlight-z-index');
         element.style.strokeDashoffset = '';
-        
+
         // Reset to default appearance would need integration with StyleManager
     }
 

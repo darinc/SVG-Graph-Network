@@ -1,6 +1,6 @@
 /**
  * StyleManager - Handles dynamic styling and visual state management
- * 
+ *
  * Provides centralized style management with support for:
  * - Dynamic style application and updates
  * - Visual state management (normal, hover, active, etc.)
@@ -9,14 +9,14 @@
  * - Performance-optimized DOM updates
  */
 
-import { 
-    IStyleManager, 
-    NodeStyles, 
-    EdgeStyles, 
-    StyleObject, 
+import {
+    IStyleManager,
+    NodeStyles,
+    EdgeStyles,
+    StyleObject,
     VisualState,
     ElementSelector,
-    StyleEvent 
+    StyleEvent
 } from '../types/styling';
 
 /**
@@ -139,7 +139,7 @@ export class StyleManager implements IStyleManager {
         }
 
         const targets = this.resolveElementSelector(elements);
-        
+
         for (const { id, type } of targets) {
             if (type === 'node') {
                 this.nodeStyles.delete(id);
@@ -157,7 +157,7 @@ export class StyleManager implements IStyleManager {
      */
     getNodeStyle(nodeId: string): NodeStyles | null {
         const stored = this.nodeStyles.get(nodeId);
-        return stored ? { ...stored.computed } as NodeStyles : null;
+        return stored ? ({ ...stored.computed } as NodeStyles) : null;
     }
 
     /**
@@ -165,7 +165,7 @@ export class StyleManager implements IStyleManager {
      */
     getEdgeStyle(edgeId: string): EdgeStyles | null {
         const stored = this.edgeStyles.get(edgeId);
-        return stored ? { ...stored.computed } as EdgeStyles : null;
+        return stored ? ({ ...stored.computed } as EdgeStyles) : null;
     }
 
     /**
@@ -224,7 +224,7 @@ export class StyleManager implements IStyleManager {
      */
     applyTheme(theme: 'light' | 'dark'): void {
         const themeStyles = this.getThemeStyles(theme);
-        
+
         // Apply theme to all registered elements
         this.nodeStyles.forEach((stored, nodeId) => {
             if (stored.element) {
@@ -275,15 +275,13 @@ export class StyleManager implements IStyleManager {
      * Update computed style based on base style and current state
      */
     private updateComputedStyle(elementId: string, type: 'node' | 'edge'): void {
-        const stored = type === 'node' 
-            ? this.nodeStyles.get(elementId)
-            : this.edgeStyles.get(elementId);
-        
+        const stored =
+            type === 'node' ? this.nodeStyles.get(elementId) : this.edgeStyles.get(elementId);
+
         if (!stored) return;
 
-        const currentState = type === 'node' 
-            ? this.getNodeState(elementId)
-            : this.getEdgeState(elementId);
+        const currentState =
+            type === 'node' ? this.getNodeState(elementId) : this.getEdgeState(elementId);
 
         // Combine base styles with state-specific styles
         stored.computed = {
@@ -296,10 +294,9 @@ export class StyleManager implements IStyleManager {
      * Apply computed style to DOM element
      */
     private applyStyleToElement(elementId: string, type: 'node' | 'edge'): void {
-        const stored = type === 'node' 
-            ? this.nodeStyles.get(elementId)
-            : this.edgeStyles.get(elementId);
-        
+        const stored =
+            type === 'node' ? this.nodeStyles.get(elementId) : this.edgeStyles.get(elementId);
+
         if (!stored?.element) return;
 
         const element = stored.element;
@@ -308,9 +305,11 @@ export class StyleManager implements IStyleManager {
         // Apply common styles
         if (styles.fill) element.setAttribute('fill', styles.fill);
         if (styles.stroke) element.setAttribute('stroke', styles.stroke);
-        if (styles.strokeWidth !== undefined) element.setAttribute('stroke-width', String(styles.strokeWidth));
+        if (styles.strokeWidth !== undefined)
+            element.setAttribute('stroke-width', String(styles.strokeWidth));
         if (styles.opacity !== undefined) element.setAttribute('opacity', String(styles.opacity));
-        if (styles.strokeDasharray) element.setAttribute('stroke-dasharray', styles.strokeDasharray);
+        if (styles.strokeDasharray)
+            element.setAttribute('stroke-dasharray', styles.strokeDasharray);
         if (styles.filter) element.setAttribute('filter', styles.filter);
 
         // Apply node-specific styles
@@ -340,23 +339,22 @@ export class StyleManager implements IStyleManager {
      * Update element CSS class for state
      */
     private updateElementClass(elementId: string, type: 'node' | 'edge', state: VisualState): void {
-        const stored = type === 'node' 
-            ? this.nodeStyles.get(elementId)
-            : this.edgeStyles.get(elementId);
-        
+        const stored =
+            type === 'node' ? this.nodeStyles.get(elementId) : this.edgeStyles.get(elementId);
+
         if (!stored?.element) return;
 
         const element = stored.element;
         const baseClass = type === 'node' ? 'graph-node' : 'graph-edge';
         const stateClass = `${baseClass}--${state}`;
-        
+
         // Remove all state classes and add current one
         element.className.baseVal = element.className.baseVal
             .replace(/\bgraph-(node|edge)--\w+\b/g, '')
             .trim();
-            
+
         element.classList.add(baseClass, stateClass);
-        
+
         // Add custom class if specified
         if (stored.computed.className) {
             element.classList.add(stored.computed.className);
@@ -366,37 +364,39 @@ export class StyleManager implements IStyleManager {
     /**
      * Resolve element selector to specific elements
      */
-    private resolveElementSelector(selector: ElementSelector): Array<{id: string, type: 'node' | 'edge'}> {
-        const results: Array<{id: string, type: 'node' | 'edge'}> = [];
+    private resolveElementSelector(
+        selector: ElementSelector
+    ): Array<{ id: string; type: 'node' | 'edge' }> {
+        const results: Array<{ id: string; type: 'node' | 'edge' }> = [];
 
         if (typeof selector === 'string') {
             if (selector === 'all') {
                 // All nodes and edges
-                this.nodeStyles.forEach((_, id) => results.push({id, type: 'node'}));
-                this.edgeStyles.forEach((_, id) => results.push({id, type: 'edge'}));
+                this.nodeStyles.forEach((_, id) => results.push({ id, type: 'node' }));
+                this.edgeStyles.forEach((_, id) => results.push({ id, type: 'edge' }));
             } else if (selector === 'selected') {
                 // This would need integration with SelectionManager
                 // For now, return empty array
             } else if (selector === 'highlighted') {
-                // This would need integration with HighlightManager  
+                // This would need integration with HighlightManager
                 // For now, return empty array
             } else {
                 // Single element ID - check if it's node or edge
                 if (this.nodeStyles.has(selector)) {
-                    results.push({id: selector, type: 'node'});
+                    results.push({ id: selector, type: 'node' });
                 }
                 if (this.edgeStyles.has(selector)) {
-                    results.push({id: selector, type: 'edge'});
+                    results.push({ id: selector, type: 'edge' });
                 }
             }
         } else if (Array.isArray(selector)) {
             // Array of IDs
             for (const id of selector) {
                 if (this.nodeStyles.has(id)) {
-                    results.push({id, type: 'node'});
+                    results.push({ id, type: 'node' });
                 }
                 if (this.edgeStyles.has(id)) {
-                    results.push({id, type: 'edge'});
+                    results.push({ id, type: 'edge' });
                 }
             }
         }
@@ -432,19 +432,26 @@ export class StyleManager implements IStyleManager {
      * Clear style for specific element
      */
     private clearElementStyle(elementId: string, type: 'node' | 'edge'): void {
-        const stored = type === 'node' 
-            ? this.nodeStyles.get(elementId)
-            : this.edgeStyles.get(elementId);
-        
+        const stored =
+            type === 'node' ? this.nodeStyles.get(elementId) : this.edgeStyles.get(elementId);
+
         if (!stored?.element) return;
 
         const element = stored.element;
-        
+
         // Remove all custom attributes
-        ['fill', 'stroke', 'stroke-width', 'opacity', 'stroke-dasharray', 'filter', 'marker-end'].forEach(attr => {
+        [
+            'fill',
+            'stroke',
+            'stroke-width',
+            'opacity',
+            'stroke-dasharray',
+            'filter',
+            'marker-end'
+        ].forEach(attr => {
             element.removeAttribute(attr);
         });
-        
+
         // Reset classes
         const baseClass = type === 'node' ? 'graph-node' : 'graph-edge';
         element.className.baseVal = baseClass;
@@ -453,7 +460,7 @@ export class StyleManager implements IStyleManager {
     /**
      * Get theme-specific default styles
      */
-    private getThemeStyles(theme: 'light' | 'dark'): {node: NodeStyles, edge: EdgeStyles} {
+    private getThemeStyles(theme: 'light' | 'dark'): { node: NodeStyles; edge: EdgeStyles } {
         if (theme === 'dark') {
             return {
                 node: {
@@ -484,7 +491,11 @@ export class StyleManager implements IStyleManager {
     /**
      * Emit style change event
      */
-    private emitStyleChange(elements: string[], elementType: 'node' | 'edge', styles: StyleObject): void {
+    private emitStyleChange(
+        elements: string[],
+        elementType: 'node' | 'edge',
+        styles: StyleObject
+    ): void {
         if (!this.onStyleChange) return;
 
         const event: StyleEvent = {

@@ -1,6 +1,6 @@
 /**
  * CameraController - Handles view focus and smooth camera transitions
- * 
+ *
  * Provides advanced camera control with support for:
  * - Smooth focus animations to specific nodes or groups
  * - Fit-to-view operations with padding
@@ -9,13 +9,13 @@
  * - Animation state tracking and cancellation
  */
 
-import { 
-    ICameraController, 
-    FocusOptions, 
-    ViewBounds, 
-    AnimationState, 
+import {
+    ICameraController,
+    FocusOptions,
+    ViewBounds,
+    AnimationState,
     EasingFunction,
-    FocusEvent 
+    FocusEvent
 } from '../types/styling';
 import { Position, TransformState } from '../types/index';
 
@@ -39,10 +39,10 @@ interface NodePosition {
  */
 const EASING_FUNCTIONS = {
     linear: (t: number) => t,
-    ease: (t: number) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t,
+    ease: (t: number) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t),
     'ease-in': (t: number) => t * t,
     'ease-out': (t: number) => t * (2 - t),
-    'ease-in-out': (t: number) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t,
+    'ease-in-out': (t: number) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t),
     'cubic-bezier': (t: number) => t * t * (3 - 2 * t) // Custom cubic-bezier approximation
 };
 
@@ -95,7 +95,9 @@ export class CameraController implements ICameraController {
             throw new Error('No nodes provided for focus');
         }
 
-        const positions = nodeIds.map(id => this.nodePositions.get(id)).filter(Boolean) as NodePosition[];
+        const positions = nodeIds
+            .map(id => this.nodePositions.get(id))
+            .filter(Boolean) as NodePosition[];
         if (positions.length === 0) {
             throw new Error('None of the provided nodes were found');
         }
@@ -132,10 +134,10 @@ export class CameraController implements ICameraController {
 
         const allPositions = Array.from(this.nodePositions.values());
         const bounds = this.calculateBounds(allPositions);
-        
+
         const centerX = (bounds.minX + bounds.maxX) / 2;
         const centerY = (bounds.minY + bounds.maxY) / 2;
-        
+
         const targetTransform: TransformState = {
             x: this.viewportSize.width / 2 - centerX * this.currentTransform.scale,
             y: this.viewportSize.height / 2 - centerY * this.currentTransform.scale,
@@ -191,7 +193,12 @@ export class CameraController implements ICameraController {
     /**
      * Set transform directly with optional animation
      */
-    async setTransform(x: number, y: number, scale: number, animated: boolean = false): Promise<void> {
+    async setTransform(
+        x: number,
+        y: number,
+        scale: number,
+        animated: boolean = false
+    ): Promise<void> {
         const targetTransform: TransformState = { x, y, scale };
 
         if (animated) {
@@ -207,7 +214,7 @@ export class CameraController implements ICameraController {
      */
     updateNodePositions(positions: Map<string, { x: number; y: number; size?: number }>): void {
         this.nodePositions.clear();
-        
+
         for (const [nodeId, pos] of positions.entries()) {
             this.nodePositions.set(nodeId, {
                 id: nodeId,
@@ -237,8 +244,12 @@ export class CameraController implements ICameraController {
     private calculateBounds(positions: NodePosition[]): ViewBounds {
         if (positions.length === 0) {
             return {
-                minX: 0, maxX: 0, minY: 0, maxY: 0,
-                width: 0, height: 0,
+                minX: 0,
+                maxX: 0,
+                minY: 0,
+                maxY: 0,
+                width: 0,
+                height: 0,
                 center: { x: 0, y: 0 }
             };
         }
@@ -260,8 +271,12 @@ export class CameraController implements ICameraController {
         const height = maxY - minY;
 
         return {
-            minX, maxX, minY, maxY,
-            width, height,
+            minX,
+            maxX,
+            minY,
+            maxY,
+            width,
+            height,
             center: {
                 x: minX + width / 2,
                 y: minY + height / 2
@@ -275,7 +290,7 @@ export class CameraController implements ICameraController {
     private calculateTargetTransform(bounds: ViewBounds, options: FocusOptions): TransformState {
         const padding = options.padding || 50;
         const offset = options.offset || { x: 0, y: 0 };
-        
+
         // Calculate scale to fit bounds with padding
         let targetScale = options.scale;
         if (!targetScale) {
@@ -288,9 +303,9 @@ export class CameraController implements ICameraController {
         // Calculate translation to center bounds in viewport
         const centerX = bounds.center.x;
         const centerY = bounds.center.y;
-        
-        const targetX = (this.viewportSize.width / 2) - (centerX * targetScale) + offset.x;
-        const targetY = (this.viewportSize.height / 2) - (centerY * targetScale) + offset.y;
+
+        const targetX = this.viewportSize.width / 2 - centerX * targetScale + offset.x;
+        const targetY = this.viewportSize.height / 2 - centerY * targetScale + offset.y;
 
         return {
             x: targetX,
@@ -302,7 +317,10 @@ export class CameraController implements ICameraController {
     /**
      * Animate to target transform with easing
      */
-    private async animateToTransform(targetTransform: TransformState, options: FocusOptions): Promise<void> {
+    private async animateToTransform(
+        targetTransform: TransformState,
+        options: FocusOptions
+    ): Promise<void> {
         if (!options.animated) {
             this.applyTransform(targetTransform);
             this.currentTransform = targetTransform;
@@ -317,7 +335,7 @@ export class CameraController implements ICameraController {
         const startTransform = { ...this.currentTransform };
         const startTime = Date.now();
 
-        return new Promise<void>((resolve) => {
+        return new Promise<void>(resolve => {
             this.animationState = {
                 active: true,
                 startTime,
@@ -366,8 +384,7 @@ export class CameraController implements ICameraController {
     private applyTransform(transform: TransformState): void {
         if (this.transformGroup) {
             const { x, y, scale } = transform;
-            this.transformGroup.setAttribute('transform', 
-                `translate(${x}, ${y}) scale(${scale})`);
+            this.transformGroup.setAttribute('transform', `translate(${x}, ${y}) scale(${scale})`);
         }
     }
 
@@ -389,7 +406,11 @@ export class CameraController implements ICameraController {
     /**
      * Emit focus change event
      */
-    private emitFocusChange(nodeIds: string[], transform: TransformState, options: FocusOptions): void {
+    private emitFocusChange(
+        nodeIds: string[],
+        transform: TransformState,
+        options: FocusOptions
+    ): void {
         if (!this.onFocusChange) return;
 
         const event: FocusEvent = {

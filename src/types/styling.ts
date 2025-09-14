@@ -177,11 +177,11 @@ export interface FocusOptions {
 /**
  * Available easing functions for animations
  */
-export type EasingFunction = 
+export type EasingFunction =
     | 'linear'
     | 'ease'
     | 'ease-in'
-    | 'ease-out' 
+    | 'ease-out'
     | 'ease-in-out'
     | 'cubic-bezier';
 
@@ -339,14 +339,18 @@ export interface IStyleManager {
 }
 
 /**
- * Highlight manager interface  
+ * Highlight manager interface
  */
 export interface IHighlightManager {
     highlightNode(nodeId: string, style?: HighlightStyle): void;
     highlightNodes(nodeIds: string[], style?: HighlightStyle): void;
     highlightEdge(edgeId: string, style?: HighlightStyle): void;
     highlightEdges(edgeIds: string[], style?: HighlightStyle): void;
-    highlightPath(sourceId: string, targetId: string, options?: PathHighlightOptions): string[] | null;
+    highlightPath(
+        sourceId: string,
+        targetId: string,
+        options?: PathHighlightOptions
+    ): string[] | null;
     highlightNeighbors(nodeId: string, options?: NeighborHighlightOptions): string[];
     highlightConnections(nodeId: string, style?: HighlightStyle): string[];
     clearHighlights(): void;
