@@ -58,11 +58,11 @@ export class RefactoredUIManager {
     private readonly callbacks: UICallbacks;
 
     // Component managers
-    private titleManager: UITitleManager;
-    private legendManager: UILegendManager;
-    private controlsManager: UIControlsManager;
-    private settingsManager: UISettingsManager;
-    private breadcrumbsManager: UIBreadcrumbsManager;
+    private titleManager!: UITitleManager;
+    private legendManager!: UILegendManager;
+    private controlsManager!: UIControlsManager;
+    private settingsManager!: UISettingsManager;
+    private breadcrumbsManager!: UIBreadcrumbsManager;
 
     constructor(
         container: HTMLElement,
