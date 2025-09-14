@@ -2,6 +2,7 @@ import { Node } from '../Node';
 import { Vector } from '../Vector';
 import { NodeData, LinkData, TransformState, SVGElements, Bounds } from '../types/index';
 import { ThemeManager, VisualState } from '../theming/ThemeManager';
+import { NodeShapeFactory } from './NodeShapeFactory';
 
 /**
  * Link representation for rendering
@@ -58,6 +59,7 @@ export class SVGRenderer {
     private readonly containerId: string;
     private readonly config: RendererConfig;
     private readonly themeManager: ThemeManager;
+    private readonly shapeFactory: NodeShapeFactory;
 
     // SVG elements
     private canvas: HTMLDivElement | null = null;
@@ -98,6 +100,7 @@ export class SVGRenderer {
         this.container = container;
         this.containerId = containerId;
         this.themeManager = themeManager;
+        this.shapeFactory = new NodeShapeFactory();
         this.config = {
             showLabels: true,
             animationDuration: 300,
@@ -333,98 +336,20 @@ export class SVGRenderer {
     }
 
     /**
-     * Create shape element for a node based on its shape type
+     * Create shape element for a node using factory pattern
      * @private
      */
     private createNodeShape<T extends NodeData>(
         node: Node<T>
     ): { shapeElement: SVGElement; hiddenIndicator?: SVGElement } {
-        let shapeElement: SVGElement;
-        let hiddenIndicator: SVGElement | undefined = undefined;
-
-        switch (node.getShape()) {
-            case 'rectangle': {
-                const textWidth = this.measureTextWidth(node.getName());
-                const padding = 20;
-                const minWidth = node.size * 2;
-                const rectWidth = Math.max(minWidth, textWidth + padding);
-                const rectHeight = node.size * 1.4;
-
-                // Store dynamic dimensions on node
-                node.dynamicWidth = rectWidth;
-                node.dynamicHeight = rectHeight;
-
-                // Create hidden connection indicator
-                const indicatorPadding = 4;
-                hiddenIndicator = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                hiddenIndicator.setAttribute('x', (-(rectWidth + indicatorPadding) / 2).toString());
-                hiddenIndicator.setAttribute(
-                    'y',
-                    (-(rectHeight + indicatorPadding) / 2).toString()
-                );
-                hiddenIndicator.setAttribute('width', (rectWidth + indicatorPadding).toString());
-                hiddenIndicator.setAttribute('height', (rectHeight + indicatorPadding).toString());
-                hiddenIndicator.setAttribute('rx', '5');
-                hiddenIndicator.classList.add('hidden-connection-indicator');
-                hiddenIndicator.style.display = 'none';
-
-                shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                shapeElement.setAttribute('x', (-rectWidth / 2).toString());
-                shapeElement.setAttribute('y', (-rectHeight / 2).toString());
-                shapeElement.setAttribute('width', rectWidth.toString());
-                shapeElement.setAttribute('height', rectHeight.toString());
-                shapeElement.setAttribute('rx', '5');
-                break;
-            }
-
-            case 'square': {
-                const squareSize = node.size * 1.4;
-                shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                shapeElement.setAttribute('x', (-squareSize / 2).toString());
-                shapeElement.setAttribute('y', (-squareSize / 2).toString());
-                shapeElement.setAttribute('width', squareSize.toString());
-                shapeElement.setAttribute('height', squareSize.toString());
-                shapeElement.setAttribute('rx', '5');
-                break;
-            }
-
-            case 'triangle': {
-                const triangleSize = node.size * 1.4;
-                const h = (triangleSize * Math.sqrt(3)) / 2;
-                const points = [
-                    [0, -h / 2],
-                    [-triangleSize / 2, h / 2],
-                    [triangleSize / 2, h / 2]
-                ]
-                    .map(point => point.join(','))
-                    .join(' ');
-
-                shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-                shapeElement.setAttribute('points', points);
-                break;
-            }
-
-            default: {
-                // circle
-                shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                shapeElement.setAttribute('r', node.size.toString());
-                break;
-            }
-        }
-
-        // Apply node styling
-        shapeElement.classList.add('node', 'node-shape');
-        shapeElement.setAttribute('data-id', node.getId());
-        const nodeType = node.getType();
-        if (nodeType) {
-            shapeElement.classList.add(`node-${nodeType}`);
-            shapeElement.setAttribute('data-type', nodeType);
-        }
+        // Use factory to create shape - this reduces cyclomatic complexity from 12 to 3
+        const result = this.shapeFactory.createShape(node);
 
         // Apply theme-based styling
-        this.applyNodeStyles(shapeElement, nodeType || 'default', node.getId());
+        const nodeType = node.getType();
+        this.applyNodeStyles(result.shapeElement, nodeType || 'default', node.getId());
 
-        return { shapeElement, hiddenIndicator };
+        return result;
     }
 
     /**
