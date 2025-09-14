@@ -7,19 +7,16 @@ module.exports = {
   
   // Transform files with appropriate loaders
   transform: {
-    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.ts$': ['ts-jest', {
+      useESM: true,
+      tsconfig: 'tsconfig.test.json'
+    }],
     '^.+\\.js$': 'babel-jest',
   },
   
   // TypeScript configuration
   preset: 'ts-jest/presets/default-esm',
   extensionsToTreatAsEsm: ['.ts'],
-  globals: {
-    'ts-jest': {
-      useESM: true,
-      tsconfig: 'tsconfig.test.json'
-    }
-  },
   
   // Setup files to run after the test framework is installed
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
