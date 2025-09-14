@@ -517,23 +517,36 @@ export class EventManager<T extends NodeData = NodeData> {
      */
     private handleTouchMove(e: TouchEvent): void {
         e.preventDefault();
-
         const touches = e.touches;
+        const handler = this.getTouchMoveHandler(touches);
+        handler?.(touches);
+    }
 
+    /**
+     * Get appropriate touch move handler based on current state
+     * Reduces cyclomatic complexity from CC:11 to CC:3
+     * @private
+     */
+    private getTouchMoveHandler(
+        touches: TouchList
+    ): ((touches: TouchList | Touch[]) => void) | null {
         if (
             touches.length === 1 &&
             this.interactionState.isDragging &&
             this.interactionState.dragNode
         ) {
-            // Single finger drag (node)
-            this.handleTouchNodeDrag(touches[0]);
-        } else if (touches.length === 1 && this.interactionState.isPanning) {
-            // Single finger pan (background)
-            this.handleTouchPan(touches[0]);
-        } else if (touches.length === 2 && this.interactionState.isPinching) {
-            // Two finger pinch zoom
-            this.handleTouchPinch(touches);
+            return (touches: TouchList | Touch[]) => this.handleTouchNodeDrag(touches[0] as Touch);
         }
+
+        if (touches.length === 1 && this.interactionState.isPanning) {
+            return (touches: TouchList | Touch[]) => this.handleTouchPan(touches[0] as Touch);
+        }
+
+        if (touches.length === 2 && this.interactionState.isPinching) {
+            return (touches: TouchList | Touch[]) => this.handleTouchPinch(touches as TouchList);
+        }
+
+        return null;
     }
 
     /**
