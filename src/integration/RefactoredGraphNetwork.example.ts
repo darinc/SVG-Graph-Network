@@ -51,7 +51,7 @@ export class RefactoredGraphNetwork<T extends NodeData = NodeData> {
     private physicsManager: PhysicsManager<T>;
     private renderingCoordinator: RenderingCoordinator<T>;
     private themeManager: ThemeManager;
-    private uiManager: UIManager<T>;
+    private uiManager: UIManager;
     private eventManager: EventManager;
 
     // State tracking (significantly reduced from original)
@@ -414,11 +414,11 @@ export class RefactoredGraphNetwork<T extends NodeData = NodeData> {
         container.registerSingleton('PhysicsManager', () => {
             const physicsEngine = container.resolve('PhysicsEngine');
             const eventBus = container.resolve('EventBus');
-            return new PhysicsManager<T>(physicsEngine, config.physics || {}, eventBus);
+            return new PhysicsManager<T>(config.physics || {});
         });
 
         container.registerSingleton('RenderingCoordinator', () => {
-            const themeManager = container.resolve('ThemeManager');
+            const themeManager = container.resolve('ThemeManager') as ThemeManager;
             return new RenderingCoordinator<T>(
                 this.container_,
                 this.containerId,
@@ -429,7 +429,7 @@ export class RefactoredGraphNetwork<T extends NodeData = NodeData> {
 
         container.registerSingleton('UIManager', () => {
             const themeManager = container.resolve('ThemeManager');
-            return new UIManager<T>(this.container_, this.containerId, {}, themeManager);
+            return new UIManager(this.container_, {}, {}, themeManager as ThemeManager);
         });
 
         container.registerSingleton(
@@ -481,7 +481,7 @@ export class RefactoredGraphNetwork<T extends NodeData = NodeData> {
 
         // Physics events
         this.eventBus.on('physics:stabilized', () => {
-            this.eventBus.emit('graph:stabilized');
+            this.eventBus.emit('graph:stabilized', {});
         });
 
         // Rendering events
