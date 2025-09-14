@@ -71,9 +71,7 @@ describe('UIManager', () => {
             showTitle: true,
             showBreadcrumbs: true,
             showLegend: true,
-            showZoomControls: true,
-            showPhysicsControls: false,
-            showThemeToggle: true
+            showControls: true
         };
 
         uiManager = new UIManager(container, config, callbacks, themeManager);
@@ -94,11 +92,10 @@ describe('UIManager', () => {
 
             const elements = uiManager.getUIElements();
             expect(elements).not.toBeNull();
-            expect(elements?.title).toBeDefined();
-            expect(elements?.breadcrumbs).toBeDefined();
-            expect(elements?.legend).toBeDefined();
-            expect(elements?.zoomControls).toBeDefined();
-            expect(elements?.themeToggle).toBeDefined();
+            expect(elements?.titleElement).toBeDefined();
+            expect(elements?.legendElement).toBeDefined();
+            expect(elements?.controls).toBeDefined();
+            expect(elements?.settingsPanel).toBeDefined();
         });
 
         test('should respect config settings during initialization', () => {
@@ -331,29 +328,33 @@ describe('UIManager', () => {
     describe('Physics Controls', () => {
         test('should create physics controls when enabled', () => {
             const physicsConfig: Partial<UIConfig> = {
-                showPhysicsControls: true
+                showControls: true
             };
 
             const physicsManager = new UIManager(container, physicsConfig, callbacks, themeManager);
             physicsManager.initialize();
 
-            const physicsPanel = container.querySelector('.graph-network-physics-controls-panel');
+            const physicsPanel = container.querySelector('.graph-network-settings');
             expect(physicsPanel).not.toBeNull();
 
             physicsManager.destroy();
         });
 
         test('should not create physics controls when disabled', () => {
-            // Default config has showPhysicsControls: false
-            uiManager.initialize();
+            // Test with showControls: false
+            const disabledConfig: Partial<UIConfig> = { showControls: false };
+            const disabledManager = new UIManager(container, disabledConfig, callbacks, themeManager);
+            disabledManager.initialize();
 
-            const physicsPanel = container.querySelector('.graph-network-physics-controls-panel');
+            const physicsPanel = container.querySelector('.graph-network-settings');
             expect(physicsPanel).toBeNull();
+            
+            disabledManager.destroy();
         });
 
         test('should handle physics control changes', () => {
             const physicsConfig: Partial<UIConfig> = {
-                showPhysicsControls: true
+                showControls: true
             };
 
             const physicsManager = new UIManager(container, physicsConfig, callbacks, themeManager);
