@@ -6,7 +6,15 @@
  */
 
 import { RefactoredGraphNetwork } from '../../../src/integration/RefactoredGraphNetwork.example';
-import { DependencyContainer } from '../../../src/core/DependencyContainer';
+import { DependencyContainer, SERVICE_TOKENS } from '../../../src/core/DependencyContainer';
+import { GraphDataManager } from '../../../src/core/GraphDataManager';
+import { GraphAnimationController } from '../../../src/core/GraphAnimationController';
+import { EventBus } from '../../../src/events/EventBus';
+import { ThemeManager } from '../../../src/theming/ThemeManager';
+import { UIManager } from '../../../src/ui/UIManager';
+import { EventManager } from '../../../src/interaction/EventManager';
+import { PhysicsManager } from '../../../src/physics/PhysicsManager';
+import { RenderingCoordinator } from '../../../src/rendering/RenderingCoordinator';
 import { NodeData, GraphData } from '../../../src/types/index';
 
 // Mock implementations for dependencies
@@ -15,6 +23,67 @@ jest.mock('../../../src/physics/PhysicsManager');
 jest.mock('../../../src/rendering/RenderingCoordinator');
 jest.mock('../../../src/core/GraphDataManager');
 jest.mock('../../../src/core/GraphAnimationController');
+
+// Helper function to create properly configured dependency container
+function createTestContainer(container: HTMLElement): DependencyContainer {
+    const testContainer = new DependencyContainer();
+    
+    // Register core services as singletons
+    testContainer.registerSingleton('EventBus', () => new EventBus({
+        enableLogging: false,
+        enableMetrics: true
+    }));
+    
+    testContainer.registerSingleton('ThemeManager', () => new ThemeManager());
+    
+    testContainer.registerSingleton('GraphDataManager', () => 
+        new GraphDataManager<NodeData>(800, 600)
+    );
+    
+    testContainer.registerSingleton('GraphAnimationController', () => 
+        new GraphAnimationController(60)
+    );
+    
+    testContainer.registerSingleton('PhysicsManager', () => {
+        return new PhysicsManager<NodeData>({});
+    });
+    
+    testContainer.registerSingleton('RenderingCoordinator', () => {
+        const themeManager = testContainer.resolve('ThemeManager');
+        return new RenderingCoordinator<NodeData>(container, 'test-graph', themeManager, {});
+    });
+    
+    testContainer.registerSingleton('UIManager', () => {
+        const themeManager = testContainer.resolve('ThemeManager');
+        return new UIManager<NodeData>(container, 'test-graph', {}, themeManager);
+    });
+    
+    testContainer.registerSingleton('EventManager', () => 
+        new EventManager({})
+    );
+    
+    // Set up tokens for type-safe access
+    testContainer.bind(SERVICE_TOKENS.DATA_MANAGER).toSingleton(() => 
+        testContainer.resolve('GraphDataManager')
+    );
+    testContainer.bind(SERVICE_TOKENS.ANIMATION_CONTROLLER).toSingleton(() => 
+        testContainer.resolve('GraphAnimationController')
+    );
+    testContainer.bind(SERVICE_TOKENS.EVENT_BUS).toSingleton(() => 
+        testContainer.resolve('EventBus')
+    );
+    testContainer.bind(SERVICE_TOKENS.THEME_MANAGER).toSingleton(() => 
+        testContainer.resolve('ThemeManager')
+    );
+    testContainer.bind(SERVICE_TOKENS.UI_MANAGER).toSingleton(() => 
+        testContainer.resolve('UIManager')
+    );
+    testContainer.bind(SERVICE_TOKENS.EVENT_MANAGER).toSingleton(() => 
+        testContainer.resolve('EventManager')
+    );
+    
+    return testContainer;
+}
 
 describe('RefactoredGraphNetwork Integration', () => {
     let container: HTMLElement;
@@ -75,7 +144,7 @@ describe('RefactoredGraphNetwork Integration', () => {
         });
 
         test('should initialize with custom container', () => {
-            const customContainer = new DependencyContainer();
+            const customContainer = createTestContainer(container);
             const customGraph = new RefactoredGraphNetwork(
                 container,
                 'custom-test',

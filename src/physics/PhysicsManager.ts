@@ -47,6 +47,14 @@ export class PhysicsManager<T extends NodeData = NodeData> {
     }
 
     /**
+     * Initialize the physics manager (lifecycle method)
+     */
+    initialize(): void {
+        // Physics manager initializes itself in constructor
+        // This method exists for API consistency with other managers
+    }
+
+    /**
      * Start physics simulation
      */
     start(): void {

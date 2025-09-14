@@ -117,9 +117,11 @@ export class RefactoredGraphNetwork<T extends NodeData = NodeData> {
             this.isInitialized = true;
             
             // Emit initialization event
+            const nodes = this.dataManager.getNodes() || [];
+            const links = this.dataManager.getLinks() || [];
             await this.eventBus.emit('graph:initialized', {
-                nodeCount: this.dataManager.getNodes().length,
-                linkCount: this.dataManager.getLinks().length
+                nodeCount: nodes.length,
+                linkCount: links.length
             });
             
         } catch (error) {
@@ -147,7 +149,8 @@ export class RefactoredGraphNetwork<T extends NodeData = NodeData> {
             this.dataManager.setData(data);
             
             // Update filtered nodes (all visible by default)
-            this.filteredNodes = new Set(this.dataManager.getNodes().map(n => n.id));
+            const nodes = this.dataManager.getNodes() || [];
+            this.filteredNodes = new Set(nodes.map(n => n.id));
             
             // Request element recreation and render
             this.renderingCoordinator.requestElementCreation();
@@ -337,11 +340,13 @@ export class RefactoredGraphNetwork<T extends NodeData = NodeData> {
         isRunning: boolean;
         performance: any;
     } {
+        const nodes = this.dataManager?.getNodes() || [];
+        const links = this.dataManager?.getLinks() || [];
         return {
-            nodeCount: this.dataManager.getNodes().length,
-            linkCount: this.dataManager.getLinks().length,
+            nodeCount: nodes.length,
+            linkCount: links.length,
             visibleNodes: this.filteredNodes.size,
-            isRunning: this.animationController.isRunning(),
+            isRunning: this.animationController?.isRunning() || false,
             performance: this.getPerformanceMetrics()
         };
     }
