@@ -125,10 +125,116 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Testing visual states...');
     };
     
+    // Add random node functionality
+    window.addRandomNode = function() {
+        const nodeTypes = ['primary', 'secondary', 'tertiary', 'auxiliary'];
+        const shapes = ['rectangle', 'circle', 'square'];
+        const currentData = graph.getData();
+        
+        // Generate a new unique node ID
+        const existingIds = currentData.nodes.map(n => n.id);
+        let newId;
+        let counter = 1;
+        do {
+            newId = `Node_${counter}`;
+            counter++;
+        } while (existingIds.includes(newId));
+        
+        // Create new node with random properties
+        const randomType = nodeTypes[Math.floor(Math.random() * nodeTypes.length)];
+        const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
+        const randomSize = Math.floor(Math.random() * 15) + 15; // Size between 15-30
+        
+        const newNode = {
+            id: newId,
+            name: newId.replace('_', ' '),
+            type: randomType,
+            shape: randomShape,
+            size: randomSize
+        };
+        
+        // Add the node to the graph
+        graph.addNode(newNode);
+        
+        // Connect to 1-3 random existing nodes
+        const numConnections = Math.floor(Math.random() * 3) + 1;
+        const connectionLabels = ['connected to', 'linked with', 'related to', 'influences', 'manages'];
+        const lineTypes = ['solid', 'dotted', 'dashed'];
+        
+        for (let i = 0; i < numConnections; i++) {
+            const randomExistingNode = existingIds[Math.floor(Math.random() * existingIds.length)];
+            const randomLabel = connectionLabels[Math.floor(Math.random() * connectionLabels.length)];
+            const randomLineType = lineTypes[Math.floor(Math.random() * lineTypes.length)];
+            const randomWeight = Math.floor(Math.random() * 3) + 1;
+            
+            // Avoid duplicate connections
+            const existingLinks = graph.getData().links;
+            const linkExists = existingLinks.some(link => 
+                (link.source === newId && link.target === randomExistingNode) ||
+                (link.source === randomExistingNode && link.target === newId)
+            );
+            
+            if (!linkExists) {
+                graph.addLink({
+                    source: newId,
+                    target: randomExistingNode,
+                    label: randomLabel,
+                    weight: randomWeight,
+                    line_type: randomLineType
+                });
+            }
+        }
+        
+        console.log(`Added node: ${newId} with ${numConnections} connections`);
+    };
+    
+    // Delete random node functionality
+    window.deleteRandomNode = function() {
+        const currentData = graph.getData();
+        
+        if (currentData.nodes.length <= 2) {
+            console.log('Cannot delete more nodes - minimum of 2 nodes required');
+            return;
+        }
+        
+        // Pick a random node to delete (excluding first two to keep some base structure)
+        const deletableNodes = currentData.nodes.slice(2); // Keep at least first 2 nodes
+        if (deletableNodes.length === 0) {
+            console.log('No deletable nodes available');
+            return;
+        }
+        
+        const randomNode = deletableNodes[Math.floor(Math.random() * deletableNodes.length)];
+        
+        // Find all connected edges
+        const connectedEdges = currentData.links.filter(link => 
+            link.source === randomNode.id || link.target === randomNode.id
+        );
+        
+        // Remove all connected edges first
+        connectedEdges.forEach(edge => {
+            // Create a unique edge ID for removal
+            const edgeId = `${edge.source}-${edge.target}`;
+            try {
+                graph.removeLink(edgeId);
+            } catch (e) {
+                // Edge might already be removed, continue
+                console.log(`Edge ${edgeId} already removed or not found`);
+            }
+        });
+        
+        // Remove the node
+        graph.removeNode(randomNode.id);
+        
+        console.log(`Deleted node: ${randomNode.id} and ${connectedEdges.length} connected edges`);
+    };
+
     console.log('Graph initialized successfully!');
     console.log('Try these functions in the browser console:');
     console.log('- testThemes() - Test switching between themes');
     console.log('- testCustomStyling() - Test custom node styling');
     console.log('- testStates() - Test visual states');
     console.log('- graph.getCurrentTheme() - Get current theme info');
+    console.log('- addRandomNode() - Add a random node with connections');
+    console.log('- deleteRandomNode() - Delete a random node and its edges');
 });

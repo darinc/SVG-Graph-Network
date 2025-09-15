@@ -972,6 +972,14 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             if (!options.skipRedraw) {
                 this.renderer?.createElements(this.nodes, this.links);
                 this.ui?.createLegend(Array.from(this.nodes.values()));
+                // Re-initialize events after recreating elements
+                if (this.events && this.renderer) {
+                    this.events.initialize(
+                        this.renderer.getSVGElement()!,
+                        this.nodes,
+                        this.eventCallbacks
+                    );
+                }
             }
 
             if (this.debug) {
@@ -1212,6 +1220,14 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             // Redraw if not skipped
             if (!options.skipRedraw) {
                 this.renderer?.createElements(this.nodes, this.links);
+                // Re-initialize events after recreating elements
+                if (this.events && this.renderer) {
+                    this.events.initialize(
+                        this.renderer.getSVGElement()!,
+                        this.nodes,
+                        this.eventCallbacks
+                    );
+                }
             }
 
             if (this.debug) {
