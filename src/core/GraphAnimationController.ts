@@ -9,6 +9,8 @@
  * - Performance monitoring and frame timing
  */
 
+import { createLogger } from '../utils/Logger';
+
 export interface AnimationMetrics {
     fps: number;
     frameTime: number;
@@ -37,6 +39,7 @@ export class GraphAnimationController implements IGraphAnimationController {
     private paused = false;
     private lastFrameTime = 0;
     private frameCallbacks: Array<(deltaTime: number) => void> = [];
+    private readonly logger = createLogger('GraphAnimationController');
     private targetFPS = 60;
     private frameInterval: number;
 
@@ -151,7 +154,7 @@ export class GraphAnimationController implements IGraphAnimationController {
                 callback(deltaTime);
             }
         } catch (error) {
-            console.error('Error in animation frame callback:', error);
+            this.logger.error('Error in animation frame callback:', error);
         }
 
         this.lastFrameTime = currentTime;
@@ -330,14 +333,16 @@ export class GraphAnimationController implements IGraphAnimationController {
                 );
                 if (newTargetFPS !== this.targetFPS) {
                     this.setTargetFPS(newTargetFPS);
-                    console.log(`Adaptive performance: Reduced target FPS to ${newTargetFPS}`);
+                    this.logger.info(`Adaptive performance: Reduced target FPS to ${newTargetFPS}`);
                 }
             } else if (metrics.fps > this.targetFPS * 1.1 && this.targetFPS < maxFPS) {
                 // Performance is good, try increasing target FPS
                 const newTargetFPS = Math.min(maxFPS, this.targetFPS + 5);
                 if (newTargetFPS !== this.targetFPS) {
                     this.setTargetFPS(newTargetFPS);
-                    console.log(`Adaptive performance: Increased target FPS to ${newTargetFPS}`);
+                    this.logger.info(
+                        `Adaptive performance: Increased target FPS to ${newTargetFPS}`
+                    );
                 }
             }
         };

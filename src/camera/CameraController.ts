@@ -17,7 +17,7 @@ import {
     EasingFunction,
     FocusEvent
 } from '../types/styling';
-import { Position, TransformState } from '../types/index';
+import { TransformState } from '../types/index';
 
 /**
  * Focus change callback type

@@ -17,7 +17,10 @@ import {
     InteractionConfig,
     GraphConfig,
     TooltipConfig,
-    GraphStats
+    GraphStats,
+    NodeCreationOptions,
+    EdgeCreationOptions,
+    DeletionOptions
 } from '../types/index';
 import { RenderLink } from '../rendering/SVGRenderer';
 import { AnimationMetrics } from './GraphAnimationController';
@@ -25,16 +28,16 @@ import { AnimationMetrics } from './GraphAnimationController';
 // ==================== CORE INTERFACES ====================
 
 export interface IGraphDataManager<T extends NodeData = NodeData> {
-    addNode(nodeData: T, options?: any): Node<T>;
-    deleteNode(nodeId: string, options?: any): boolean;
+    addNode(nodeData: T, options?: NodeCreationOptions): Node<T>;
+    deleteNode(nodeId: string, options?: DeletionOptions): boolean;
     getNode(nodeId: string): T | null;
     getNodeInstance(nodeId: string): Node<T> | null;
     hasNode(nodeId: string): boolean;
     getNodes(): T[];
     getNodeInstances(): Map<string, Node<T>>;
 
-    addEdge(edgeData: EdgeData, options?: any): RenderLink<T>;
-    deleteEdge(edgeId: string, options?: any): boolean;
+    addEdge(edgeData: EdgeData, options?: EdgeCreationOptions): RenderLink<T>;
+    deleteEdge(edgeId: string, options?: DeletionOptions): boolean;
     getEdge(edgeId: string): LinkData | null;
     hasEdge(edgeId: string): boolean;
     getLinks(): LinkData[];
@@ -70,10 +73,10 @@ export interface IPhysicsEngine {
         nodes: Map<string, Node>,
         links: RenderLink[],
         filteredNodes?: Set<string> | null
-    ): any;
+    ): void;
     updatePositions(nodes: Map<string, Node>, filteredNodes?: Set<string> | null): void;
-    getConfig(): any;
-    updateConfig(config: any): void;
+    getConfig(): GraphConfig;
+    updateConfig(config: Partial<GraphConfig>): void;
 }
 
 export interface IRenderer<T extends NodeData = NodeData> {
@@ -93,18 +96,22 @@ export interface IUIManager {
     hideTooltip(): void;
     configureTooltip(config: Partial<TooltipConfig>): void;
     setDebugMode(enabled: boolean): void;
-    updateDebugInfo(info: any): void;
+    updateDebugInfo(info: Record<string, unknown>): void;
     destroy(): void;
 }
 
 export interface IEventManager<T extends NodeData = NodeData> {
-    initialize(svg: SVGSVGElement, nodes: Map<string, Node<T>>, callbacks?: any): void;
+    initialize(
+        svg: SVGSVGElement,
+        nodes: Map<string, Node<T>>,
+        callbacks?: Record<string, unknown>
+    ): void;
     setTransform(x: number, y: number, scale: number): void;
     getTransform(): TransformState;
     updateConfig(config: Partial<InteractionConfig>): void;
     on(event: string, callback: (...args: unknown[]) => void): void;
     off(event: string, callback: (...args: unknown[]) => void): void;
-    emit(event: string, data?: any): void;
+    emit(event: string, data?: unknown): void;
     isDragging(): boolean;
     isPanning(): boolean;
     destroy(): void;
@@ -114,12 +121,12 @@ export interface IThemeManager {
     getCurrentTheme(): string;
     setTheme(theme: string): void;
     toggleTheme(): string;
-    getThemeConfig(): any;
+    getThemeConfig(): Record<string, unknown>;
     updateCanvasTheming(): void;
     applyNodeStyles(node: Node, element: SVGElement): void;
     applyEdgeStyles(edge: RenderLink, element: SVGElement): void;
-    getNodeStyle(node: Node): any;
-    getEdgeStyle(edge: RenderLink): any;
+    getNodeStyle(node: Node): Record<string, unknown>;
+    getEdgeStyle(edge: RenderLink): Record<string, unknown>;
 }
 
 // ==================== EVENT SYSTEM INTERFACES ====================
@@ -133,7 +140,7 @@ export interface IEventBus {
     getRegisteredEvents(): string[];
 }
 
-export type EventHandler<T = any> = (data: T) => void;
+export type EventHandler<T = unknown> = (data: T) => void;
 
 // ==================== FACTORY INTERFACES ====================
 
@@ -162,7 +169,7 @@ export interface IGraphConfiguration {
 
 // ==================== SERVICE INTERFACES ====================
 
-export interface IGraphService<T extends NodeData = NodeData> {
+export interface IGraphService {
     // Data operations
     loadData(data: GraphData): Promise<void>;
     exportData(format: 'json' | 'csv' | 'png' | 'svg'): Promise<string | Blob>;
@@ -206,10 +213,10 @@ export interface ITransactionManager {
 
 // ==================== PLUGIN INTERFACES ====================
 
-export interface IGraphPlugin<T extends NodeData = NodeData> {
+export interface IGraphPlugin<_T extends NodeData = NodeData> {
     name: string;
     version: string;
-    initialize(graph: IGraphService<T>): void;
+    initialize(graph: IGraphService): void;
     destroy(): void;
 }
 
@@ -218,7 +225,7 @@ export interface IPluginManager<T extends NodeData = NodeData> {
     unregister(pluginName: string): void;
     getPlugin(name: string): IGraphPlugin<T> | null;
     getRegisteredPlugins(): string[];
-    initializeAll(graph: IGraphService<T>): void;
+    initializeAll(graph: IGraphService): void;
     destroyAll(): void;
 }
 
@@ -238,6 +245,7 @@ export interface IDependencyContainer {
 }
 
 export class Token<T> {
+    private readonly _phantom?: T;
     constructor(public readonly name: string) {}
 }
 
@@ -251,7 +259,7 @@ export interface BindingBuilder<T> {
 
 export type ServiceLifecycle = 'transient' | 'singleton' | 'scoped';
 
-export interface ServiceDescriptor<T = any> {
+export interface ServiceDescriptor<T = unknown> {
     token: Token<T>;
     factory: () => T;
     lifecycle: ServiceLifecycle;

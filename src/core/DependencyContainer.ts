@@ -54,7 +54,7 @@ export class DependencyContainer implements IDependencyContainer {
             throw new Error(`Service '${key}' is not registered`);
         }
 
-        return this.getInstance(service);
+        return this.getInstance(service) as T;
     }
 
     has(key: string): boolean {

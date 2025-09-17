@@ -26,6 +26,10 @@ export default [
         navigator: 'readonly',
         requestAnimationFrame: 'readonly',
         cancelAnimationFrame: 'readonly',
+        setTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearTimeout: 'readonly',
+        clearInterval: 'readonly',
         URL: 'readonly',
         performance: 'readonly'
       }

@@ -5,6 +5,8 @@
  * Provides clean decoupling between modules through event-driven architecture.
  */
 
+import { createLogger } from '../utils/Logger';
+
 /**
  * Event handler function signature
  */
@@ -71,6 +73,7 @@ export class EventBus {
     private config: EventBusConfig;
     private metrics: EventBusMetrics;
     private handlerTimes: number[] = [];
+    private readonly logger = createLogger('EventBus');
     private maxHandlerTimeHistory = 100;
 
     constructor(config: EventBusConfig = {}) {
@@ -107,8 +110,8 @@ export class EventBus {
 
         // Check listener limits
         if (this.getTotalListeners() >= (this.config.maxListeners || 100)) {
-            console.warn(
-                `EventBus: Maximum listeners (${this.config.maxListeners}) reached for event type: ${eventType}`
+            this.logger.warn(
+                `Maximum listeners (${this.config.maxListeners}) reached for event type: ${eventType}`
             );
         }
 
@@ -124,7 +127,7 @@ export class EventBus {
         this.metrics.activeSubscriptions++;
 
         if (this.config.enableLogging) {
-            console.log(`EventBus: Subscribed to '${eventType}' (${once ? 'once' : 'persistent'})`);
+            this.logger.debug(`Subscribed to '${eventType}' (${once ? 'once' : 'persistent'})`);
         }
 
         // Return unsubscribe function
@@ -140,7 +143,7 @@ export class EventBus {
                 }
 
                 if (this.config.enableLogging && wasDeleted) {
-                    console.log(`EventBus: Unsubscribed from '${eventType}'`);
+                    this.logger.debug(`Unsubscribed from '${eventType}'`);
                 }
             }
         };
@@ -184,7 +187,7 @@ export class EventBus {
         this.metrics.eventsByType.set(eventType, currentCount + 1);
 
         if (this.config.enableLogging) {
-            console.log(`EventBus: Emitting '${eventType}'`, data);
+            this.logger.debug(`Emitting '${eventType}'`, data);
         }
 
         // Collect all handlers
@@ -208,7 +211,7 @@ export class EventBus {
                 this.trackHandlerTime(handlerTime);
             } catch (error) {
                 this.metrics.errorCount++;
-                console.error(`EventBus: Error in handler for '${eventType}':`, error);
+                this.logger.error(`Error in handler for '${eventType}':`, error);
             }
         });
 
@@ -217,14 +220,12 @@ export class EventBus {
         } catch (error) {
             // Individual handler errors are already logged above
             // This catch is for any Promise.all specific errors
-            console.error(`EventBus: Error during event '${eventType}' emission:`, error);
+            this.logger.error(`Error during event '${eventType}' emission:`, error);
         }
 
         const totalTime = performance.now() - startTime;
         if (this.config.enableLogging && totalTime > 10) {
-            console.warn(
-                `EventBus: Event '${eventType}' took ${totalTime.toFixed(2)}ms to process`
-            );
+            this.logger.warn(`Event '${eventType}' took ${totalTime.toFixed(2)}ms to process`);
         }
     }
 
@@ -246,11 +247,11 @@ export class EventBus {
             try {
                 const result = handler(data);
                 if (result instanceof Promise) {
-                    console.warn(`EventBus: Async handler called with emitSync for '${eventType}'`);
+                    this.logger.warn(`Async handler called with emitSync for '${eventType}'`);
                 }
             } catch (error) {
                 this.metrics.errorCount++;
-                console.error(`EventBus: Error in sync handler for '${eventType}':`, error);
+                this.logger.error(`Error in sync handler for '${eventType}':`, error);
             }
         });
 
@@ -272,7 +273,7 @@ export class EventBus {
         this.metrics.activeSubscriptions -= persistentCount + onceCount;
 
         if (this.config.enableLogging) {
-            console.log(`EventBus: Removed all listeners for '${eventType}'`);
+            this.logger.debug(`Removed all listeners for '${eventType}'`);
         }
     }
 
@@ -285,7 +286,7 @@ export class EventBus {
         this.metrics.activeSubscriptions = 0;
 
         if (this.config.enableLogging) {
-            console.log('EventBus: Removed all listeners');
+            this.logger.debug('Removed all listeners');
         }
     }
 

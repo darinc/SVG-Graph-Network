@@ -196,6 +196,7 @@ describe('EventBus', () => {
             eventBus.emitSync('sync-event', 'data');
             
             expect(consoleWarn).toHaveBeenCalledWith(
+                '[EventBus] WARN:',
                 expect.stringContaining('Async handler called with emitSync')
             );
             
@@ -227,6 +228,7 @@ describe('EventBus', () => {
             expect(errorHandler).toHaveBeenCalled();
             expect(mockHandler).toHaveBeenCalledWith('data');
             expect(consoleError).toHaveBeenCalledWith(
+                '[EventBus] ERROR:',
                 expect.stringContaining('Error in handler'),
                 expect.any(Error)
             );
@@ -309,6 +311,7 @@ describe('EventBus', () => {
             limitedBus.on('test', jest.fn()); // Should trigger warning
             
             expect(consoleWarn).toHaveBeenCalledWith(
+                '[EventBus] WARN:',
                 expect.stringContaining('Maximum listeners')
             );
             

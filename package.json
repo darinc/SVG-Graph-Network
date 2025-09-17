@@ -2,6 +2,7 @@
   "name": "svg-graph-network",
   "version": "0.2.0",
   "description": "Modern SVG graph visualization library with advanced theming, mobile-first design, and customizable physics simulation. Features dynamic node/edge styling, touch optimization, and zero dependencies.",
+  "type": "module",
   "main": "dist/svg-graph-network.min.js",
   "module": "dist/svg-graph-network.min.js",
   "types": "dist/index.d.ts",
@@ -30,7 +31,6 @@
     "docs:serve": "npm run docs && npx http-server docs/api -p 8080 -o",
     "docs:watch": "typedoc --watch",
     "size": "size-limit",
-    "size:analyze": "size-limit --why",
     "size:ci": "size-limit"
   },
   "keywords": [

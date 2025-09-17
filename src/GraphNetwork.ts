@@ -49,6 +49,7 @@ import {
     NeighborHighlightOptions,
     FocusOptions
 } from './types/styling';
+import { createLogger, LogLevel } from './utils/Logger';
 
 /**
  * Graph initialization options
@@ -156,6 +157,9 @@ export class GraphNetwork<T extends NodeData = NodeData> {
     private eventCallbacks: EventManagerCallbacks<T> = {};
     private readonly customEventListeners = new Map<string, EventCallback<any>[]>();
 
+    // Logging
+    private readonly logger = createLogger('GraphNetwork');
+
     // Tooltip system
     private tooltip: HTMLElement | null = null;
     private tooltipConfig: TooltipConfig = {
@@ -178,15 +182,18 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         this.container = this.findContainer(containerId);
         this.debug = options.debug || false;
 
+        // Configure logging level based on debug flag
+        if (this.debug) {
+            this.logger.setLevel(LogLevel.DEBUG);
+        }
+
         // Merge configuration with defaults
         this.config = {
             ...DEFAULT_CONFIG,
             ...options.config
         };
 
-        if (this.debug) {
-            console.log('GraphNetwork: Initializing with config:', this.config);
-        }
+        this.logger.info('Initializing with config:', this.config);
 
         // Setup container
         this.setupContainer();
@@ -237,9 +244,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         // Initialize theme manager first (needed by other components)
         this.themeManager = new ThemeManager();
 
-        if (this.debug) {
-            console.log('GraphNetwork: Theme manager initialized');
-        }
+        this.logger.debug('Theme manager initialized');
 
         // Initialize physics engine
         this.physics = new PhysicsEngine({
@@ -249,9 +254,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             groupingStrength: this.config.groupingStrength
         });
 
-        if (this.debug) {
-            console.log('GraphNetwork: Physics engine initialized');
-        }
+        this.logger.debug('Physics engine initialized');
 
         // Initialize SVG renderer with theme manager
         this.renderer = new SVGRenderer(this.container, this.containerId, this.themeManager!, {
@@ -260,9 +263,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         });
         this.renderer.initialize();
 
-        if (this.debug) {
-            console.log('GraphNetwork: SVG renderer initialized');
-        }
+        this.logger.debug('SVG renderer initialized');
 
         // Initialize UI manager with callbacks
         const uiCallbacks: UICallbacks = {
@@ -277,9 +278,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         this.ui = new UIManager(this.container, this.config, uiCallbacks, this.themeManager);
         this.ui.initialize();
 
-        if (this.debug) {
-            console.log('GraphNetwork: UI manager initialized');
-        }
+        this.logger.debug('UI manager initialized');
 
         // Initialize event manager with callbacks
         this.eventCallbacks = {
@@ -322,9 +321,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         // Set initial theme after all modules are initialized
         this.setTheme(this.config.theme);
 
-        if (this.debug) {
-            console.log('GraphNetwork: All modules initialized successfully');
-        }
+        this.logger.debug('All modules initialized successfully');
     }
 
     /**
@@ -343,9 +340,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         const containerWidth = rect.width || 800;
         const containerHeight = rect.height || 600;
 
-        if (this.debug) {
-            console.log(`GraphNetwork: Container dimensions: ${containerWidth}x${containerHeight}`);
-        }
+        this.logger.debug(`Container dimensions: ${containerWidth}x${containerHeight}`);
 
         // Create and validate nodes
         nodes.forEach((nodeData, index) => {
@@ -447,9 +442,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         this.lastFrameTime = performance.now();
         this.frameCount = 0;
 
-        if (this.debug) {
-            console.log('GraphNetwork: Animation started');
-        }
+        this.logger.debug('Animation started');
 
         this.animate();
     }
@@ -464,9 +457,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             this.animationFrame = null;
         }
 
-        if (this.debug) {
-            console.log('GraphNetwork: Animation stopped');
-        }
+        this.logger.debug('Animation stopped');
     }
 
     /**
@@ -593,8 +584,8 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         const breadcrumbPath: BreadcrumbItem[] = [{ name: 'All Nodes' }];
         this.ui?.renderBreadcrumbs(breadcrumbPath);
 
-        if (this.debug && hadFilter) {
-            console.log('GraphNetwork: Filter reset - showing all nodes');
+        if (hadFilter) {
+            this.logger.debug('Filter reset - showing all nodes');
         }
 
         this.emit('filterReset', {
@@ -627,9 +618,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             node.resetPosition(containerWidth, containerHeight);
         });
 
-        if (this.debug) {
-            console.log(`GraphNetwork: Reset positions for ${this.nodes.size} nodes`);
-        }
+        this.logger.debug(`Reset positions for ${this.nodes.size} nodes`);
     }
 
     /**
@@ -643,9 +632,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         this.renderer?.setTransform(0, 0, 1);
         this.events?.setTransform(0, 0, 1);
 
-        if (this.debug) {
-            console.log('GraphNetwork: View and layout reset');
-        }
+        this.logger.debug('View and layout reset');
 
         this.emit('reset', {
             nodeCount: this.nodes.size,
@@ -784,9 +771,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         const rect = this.container.getBoundingClientRect();
         this.renderer?.resize(rect.width, rect.height);
 
-        if (this.debug) {
-            console.log(`GraphNetwork: Resized to ${rect.width}x${rect.height}`);
-        }
+        this.logger.debug(`Resized to ${rect.width}x${rect.height}`);
 
         this.emit('resize', { width: rect.width, height: rect.height });
     }
@@ -884,9 +869,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         this.currentFilterNodeId = null;
         this.renderer?.clearElements();
 
-        if (this.debug) {
-            console.log('GraphNetwork: Graph data cleared');
-        }
+        this.logger.debug('Graph data cleared');
     }
 
     /**
@@ -982,9 +965,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
                 }
             }
 
-            if (this.debug) {
-                console.log(`GraphNetwork: Added node "${nodeData.name}" (${nodeData.id})`);
-            }
+            this.logger.debug(`Added node "${nodeData.name}" (${nodeData.id})`);
 
             // Emit enhanced event
             this.emit('nodeAdded', {
@@ -997,12 +978,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
 
             return node;
         } catch (error) {
-            if (this.debug) {
-                console.error(
-                    'GraphNetwork: Failed to add node:',
-                    GraphErrorUtils.getErrorDetails(error)
-                );
-            }
+            this.logger.error('Failed to add node:', GraphErrorUtils.getErrorDetails(error));
             throw error;
         }
     }

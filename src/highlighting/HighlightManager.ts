@@ -16,6 +16,7 @@ import {
     NeighborHighlightOptions,
     HighlightEvent
 } from '../types/styling';
+import { createLogger } from '../utils/Logger';
 
 /**
  * Highlight change callback type
@@ -49,6 +50,7 @@ export class HighlightManager implements IHighlightManager {
     private readonly onHighlightChange?: HighlightChangeCallback;
     private graphAdjacency?: GraphAdjacency;
     private animationCounter = 0;
+    private readonly logger = createLogger('HighlightManager');
 
     /**
      * Create a new HighlightManager
@@ -121,9 +123,7 @@ export class HighlightManager implements IHighlightManager {
         options: PathHighlightOptions = {}
     ): string[] | null {
         if (!this.graphAdjacency) {
-            console.warn(
-                'HighlightManager: Graph adjacency not initialized. Call updateGraphStructure() first.'
-            );
+            this.logger.warn('Graph adjacency not initialized. Call updateGraphStructure() first.');
             return null;
         }
 
@@ -186,9 +186,7 @@ export class HighlightManager implements IHighlightManager {
      */
     highlightNeighbors(nodeId: string, options: NeighborHighlightOptions = {}): string[] {
         if (!this.graphAdjacency) {
-            console.warn(
-                'HighlightManager: Graph adjacency not initialized. Call updateGraphStructure() first.'
-            );
+            this.logger.warn('Graph adjacency not initialized. Call updateGraphStructure() first.');
             return [];
         }
 
@@ -267,9 +265,7 @@ export class HighlightManager implements IHighlightManager {
      */
     highlightConnections(nodeId: string, style: HighlightStyle = {}): string[] {
         if (!this.graphAdjacency) {
-            console.warn(
-                'HighlightManager: Graph adjacency not initialized. Call updateGraphStructure() first.'
-            );
+            this.logger.warn('Graph adjacency not initialized. Call updateGraphStructure() first.');
             return [];
         }
 
@@ -516,7 +512,7 @@ export class HighlightManager implements IHighlightManager {
                 const progress = (elapsed / duration) % 1;
 
                 // Apply animated dash offset to edges in path
-                elements.forEach((elementId, index) => {
+                elements.forEach((elementId, _index) => {
                     if (this.state.edges.has(elementId)) {
                         const element = document.getElementById(`edge-${elementId}`);
                         if (element) {

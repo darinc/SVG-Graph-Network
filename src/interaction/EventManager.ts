@@ -1,6 +1,7 @@
 import { Node } from '../Node';
 import { Vector } from '../Vector';
 import { NodeData, TransformState, InteractionConfig, Position } from '../types/index';
+import { createLogger } from '../utils/Logger';
 
 /**
  * Event callback signatures
@@ -139,6 +140,7 @@ export class EventManager<T extends NodeData = NodeData> {
     private readonly eventCallbacks = new Map<string, EventCallback[]>();
     private readonly interactionState: InteractionState<T>;
     private transformState: TransformState;
+    private readonly logger = createLogger('EventManager');
 
     // References (set during initialization)
     private svg: SVGSVGElement | null = null;
@@ -804,7 +806,7 @@ export class EventManager<T extends NodeData = NodeData> {
                 try {
                     callback(data);
                 } catch (error) {
-                    console.error(`Error in event callback for '${event}':`, error);
+                    this.logger.error(`Error in event callback for '${event}':`, error);
                 }
             });
         }

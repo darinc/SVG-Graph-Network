@@ -9,6 +9,7 @@
  */
 
 import { NodeData } from '../../types/index';
+import { createLogger } from '../../utils/Logger';
 
 export type EventCallback<T = any> = (data: T) => void;
 
@@ -17,6 +18,7 @@ export type EventCallback<T = any> = (data: T) => void;
  */
 export class InteractionEventEmitter<T extends NodeData = NodeData> {
     private eventCallbacks = new Map<string, EventCallback[]>();
+    private readonly logger = createLogger('InteractionEventEmitter');
 
     /**
      * Add event listener
@@ -80,7 +82,7 @@ export class InteractionEventEmitter<T extends NodeData = NodeData> {
                 try {
                     callback(data);
                 } catch (error) {
-                    console.error(`Error in event callback for '${event}':`, error);
+                    this.logger.error(`Error in event callback for '${event}':`, error);
                 }
             });
         }

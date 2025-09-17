@@ -394,6 +394,7 @@ describe('HighlightManager', () => {
 
             expect(result).toBeNull();
             expect(consoleWarnSpy).toHaveBeenCalledWith(
+                '[HighlightManager] WARN:',
                 expect.stringContaining('Graph adjacency not initialized')
             );
 

@@ -3,6 +3,7 @@ import { Vector } from '../Vector';
 import { NodeData, LinkData, TransformState, SVGElements, Bounds } from '../types/index';
 import { ThemeManager, VisualState } from '../theming/ThemeManager';
 import { NodeShapeFactory } from './NodeShapeFactory';
+import { createLogger } from '../utils/Logger';
 
 /**
  * Link representation for rendering
@@ -61,6 +62,7 @@ export class SVGRenderer {
     private readonly config: RendererConfig;
     private readonly themeManager: ThemeManager;
     private readonly shapeFactory: NodeShapeFactory;
+    private readonly logger = createLogger('SVGRenderer');
 
     // SVG elements
     private canvas: HTMLDivElement | null = null;
@@ -421,7 +423,7 @@ export class SVGRenderer {
                 this.svg.style.backgroundImage = backgroundImage;
                 this.svg.style.backgroundSize = `${gridSize}px ${gridSize}px`;
 
-                console.log(
+                this.logger.debug(
                     `Applied grid pattern: ${gridColor} at ${gridSize}px for theme: ${this.themeManager.getCurrentTheme().name}`
                 );
             } else {
@@ -585,7 +587,7 @@ export class SVGRenderer {
         } catch (error) {
             // Handle getBBox errors in some browsers
             if (this.config.debug) {
-                console.warn('Could not get text bounding box:', error);
+                this.logger.warn('Could not get text bounding box:', error);
             }
         }
     }
