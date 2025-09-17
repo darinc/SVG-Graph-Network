@@ -54,16 +54,16 @@
   },
   "searchInComments": true,
   "cleanOutputDir": true,
-  "titleLink": "https://github.com/yourname/svg-graph-network",
+  "titleLink": "https://github.com/darinc/svg-graph-network",
   "navigationLinks": {
-    "GitHub": "https://github.com/yourname/svg-graph-network",
+    "GitHub": "https://github.com/darinc/svg-graph-network",
     "NPM": "https://www.npmjs.com/package/svg-graph-network"
   },
   "sidebarLinks": {
-    "Examples": "https://github.com/yourname/svg-graph-network/tree/main/examples",
-    "Contributing": "https://github.com/yourname/svg-graph-network/blob/main/CONTRIBUTING.md"
+    "Examples": "https://github.com/darinc/svg-graph-network/tree/main/examples",
+    "Contributing": "https://github.com/darinc/svg-graph-network/blob/main/CONTRIBUTING.md"
   },
-  "hostedBaseUrl": "https://yourname.github.io/svg-graph-network/",
+  "hostedBaseUrl": "https://darinc.github.io/svg-graph-network/",
   "githubPages": true,
   "hideGenerator": false,
   "navigation": {

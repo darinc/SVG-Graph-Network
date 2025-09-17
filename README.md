@@ -325,7 +325,7 @@ npm run lint        # Check code quality
 
 ## 📄 License
 
-MIT © [Contributors](https://github.com/yourusername/svg-graph-network/contributors)
+MIT © [Contributors](https://github.com/darinc/svg-graph-network/contributors)
 
 ---
 

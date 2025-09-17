@@ -25,7 +25,7 @@ Thank you for your interest in contributing to SVG Graph Network! This document 
 
 1. Fork and clone the repository:
    ```bash
-   git clone https://github.com/yourusername/svg-graph-network.git
+   git clone https://github.com/darinc/svg-graph-network.git
    cd svg-graph-network
    ```
 

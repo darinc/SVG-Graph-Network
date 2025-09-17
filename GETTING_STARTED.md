@@ -97,6 +97,6 @@ const graph = new GraphNetwork('container', {
 
 ## Need Help?
 
-- 🐛 [Report bugs](https://github.com/yourusername/svg-graph-network/issues)
-- 💬 [Ask questions](https://github.com/yourusername/svg-graph-network/discussions)
+- 🐛 [Report bugs](https://github.com/darinc/svg-graph-network/issues)
+- 💬 [Ask questions](https://github.com/darinc/svg-graph-network/discussions)
 - 📖 [Read full docs](README.md)
