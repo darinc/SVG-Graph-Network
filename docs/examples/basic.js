@@ -1,13 +1,24 @@
-// Import the library for development
-import GraphNetwork from '../src/index.ts';
-
-// Make it available globally
-window.GraphNetwork = GraphNetwork;
+// Use the globally available SVGGraphNetwork from the dual-mode script loading
+// No imports needed - the library is loaded via script tag
 
 console.log('Basic example loaded');
 
-// Initialize the graph when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
+// Initialize the graph when both DOM and library are ready
+function initializeWhenReady() {
+    console.log('Checking for SVGGraphNetwork...', typeof SVGGraphNetwork);
+    if (typeof SVGGraphNetwork !== 'undefined') {
+        console.log('SVGGraphNetwork found, initializing graph...');
+        initializeGraph();
+    } else {
+        console.log('SVGGraphNetwork not ready, waiting...');
+        // Wait a bit and try again
+        setTimeout(initializeWhenReady, 100);
+    }
+}
+
+function initializeGraph() {
+    console.log('Starting graph initialization...');
+
     // Prevent multiple initializations (for HMR)
     if (window.graph) {
         try {
@@ -38,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Initialize the graph
-    const graph = new GraphNetwork('graph-container', {
+    window.graph = new SVGGraphNetwork('graph-container', {
         data: graphData,
         config: {
             showTitle: false,
@@ -48,19 +59,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Event listeners
-    graph.on('nodeDoubleClick', (data) => {
+    window.graph.on('nodeDoubleClick', (data) => {
         console.log('Node double clicked:', data.node.data.name);
     });
 
-    graph.on('filtered', (data) => {
+    window.graph.on('filtered', (data) => {
         console.log('Graph filtered by node:', data.nodeId);
     });
 
-    graph.on('filterReset', () => {
+    window.graph.on('filterReset', () => {
         console.log('Filter reset');
     });
 
-    graph.on('themeChanged', (data) => {
+    window.graph.on('themeChanged', (data) => {
         console.log('Theme changed to:', data.theme);
     });
     
@@ -74,24 +85,24 @@ document.addEventListener('DOMContentLoaded', () => {
         // Test switching to different themes
         setTimeout(() => {
             console.log('Switching to dark theme...');
-            graph.setTheme('dark');
+            window.graph.setTheme('dark');
         }, 2000);
         
         setTimeout(() => {
             console.log('Switching to minimal theme...');
-            graph.setTheme('minimal');
+            window.graph.setTheme('minimal');
         }, 4000);
         
         setTimeout(() => {
             console.log('Switching back to light theme...');
-            graph.setTheme('light');
+            window.graph.setTheme('light');
         }, 6000);
     };
     
     // Test custom node styling
     window.testCustomStyling = function() {
         // Customize the primary node style
-        graph.setNodeTypeStyle('primary', {
+        window.graph.setNodeTypeStyle('primary', {
             fill: '#ff6b6b',
             stroke: '#ff5252',
             strokeWidth: 3,
@@ -99,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         // Customize secondary nodes
-        graph.setNodeTypeStyle('secondary', {
+        window.graph.setNodeTypeStyle('secondary', {
             fill: '#4ecdc4',
             stroke: '#26a69a',
             strokeWidth: 2,
@@ -112,14 +123,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Test visual states
     window.testStates = function() {
         // Set some nodes to different visual states
-        graph.setElementState('A', 'hover', true);
+        window.graph.setElementState('A', 'hover', true);
         setTimeout(() => graph.setElementState('B', 'selected', true), 1000);
         setTimeout(() => graph.setElementState('C', 'active', true), 2000);
         setTimeout(() => {
             // Reset all states
-            graph.setElementState('A', 'hover', false);
-            graph.setElementState('B', 'selected', false);
-            graph.setElementState('C', 'active', false);
+            window.graph.setElementState('A', 'hover', false);
+            window.graph.setElementState('B', 'selected', false);
+            window.graph.setElementState('C', 'active', false);
         }, 4000);
         
         console.log('Testing visual states...');
@@ -154,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         
         // Add the node to the graph
-        graph.addNode(newNode);
+        window.graph.addNode(newNode);
         
         // Connect to 1-3 random existing nodes
         const numConnections = Math.floor(Math.random() * 3) + 1;
@@ -175,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
             );
             
             if (!linkExists) {
-                graph.addLink({
+                window.graph.addLink({
                     source: newId,
                     target: randomExistingNode,
                     label: randomLabel,
@@ -216,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Create a unique edge ID for removal
             const edgeId = `${edge.source}-${edge.target}`;
             try {
-                graph.removeLink(edgeId);
+                window.graph.removeLink(edgeId);
             } catch (e) {
                 // Edge might already be removed, continue
                 console.log(`Edge ${edgeId} already removed or not found`);
@@ -224,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         // Remove the node
-        graph.removeNode(randomNode.id);
+        window.graph.removeNode(randomNode.id);
         
         console.log(`Deleted node: ${randomNode.id} and ${connectedEdges.length} connected edges`);
     };
@@ -237,4 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('- graph.getCurrentTheme() - Get current theme info');
     console.log('- addRandomNode() - Add a random node with connections');
     console.log('- deleteRandomNode() - Delete a random node and its edges');
-});
+}
+
+// Start initialization when DOM is ready
+document.addEventListener('DOMContentLoaded', initializeWhenReady);

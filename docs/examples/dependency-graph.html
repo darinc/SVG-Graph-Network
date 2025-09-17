@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Graph Network - Module Dependencies</title>
+    <link rel="stylesheet" href="../assets/svg-graph-network.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .container {
+            display: flex;
+            height: calc(100vh - 80px);
+        }
+
+        .sidebar {
+            width: 300px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .main-content {
+            flex: 1;
+            position: relative;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        #graph-container {
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 0;
+        }
+
+        .controls-section {
+            margin-bottom: 2rem;
+        }
+
+        .controls-section h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #333;
+            border-bottom: 2px solid #4ECDC4;
+            padding-bottom: 0.5rem;
+        }
+
+        .filter-group {
+            margin-bottom: 1rem;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #4ECDC4;
+        }
+
+        .category-filters {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 0.5rem;
+        }
+
+        .category-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin-bottom: 0.25rem;
+            transition: background-color 0.2s;
+        }
+
+        .category-item:hover {
+            background: rgba(78, 205, 196, 0.1);
+        }
+
+        .category-checkbox {
+            margin-right: 0.75rem;
+        }
+
+        .category-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            margin-right: 0.75rem;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .category-label {
+            flex: 1;
+            font-size: 0.85rem;
+            text-transform: capitalize;
+        }
+
+        .category-count {
+            font-size: 0.75rem;
+            color: #666;
+            background: #f0f0f0;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+        }
+
+        .stats-section {
+            background: rgba(240, 240, 240, 0.5);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .stat-label {
+            color: #666;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .legend {
+            margin-top: 1rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .legend-icon {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+
+        .controls-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: #4ECDC4;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #45b5a8;
+        }
+
+        .btn-secondary {
+            background: #e1e5e9;
+            color: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5d9;
+        }
+
+        .node-info {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            max-width: 300px;
+            display: none;
+            z-index: 10;
+        }
+
+        .node-info h4 {
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .node-info p {
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .node-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .metric {
+            text-align: center;
+            padding: 0.5rem;
+            background: rgba(240, 240, 240, 0.7);
+            border-radius: 6px;
+        }
+
+        .metric-value {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        .metric-label {
+            font-size: 0.7rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            z-index: 20;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4ECDC4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                max-height: 40vh;
+            }
+
+            .main-content {
+                height: 60vh;
+            }
+
+            .node-info {
+                position: relative;
+                top: auto;
+                right: auto;
+                margin: 1rem;
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>SVG Graph Network - Module Dependencies</h1>
+        <p>Interactive visualization of TypeScript module relationships in the SVG-Graph-Network library</p>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <div class="stats-section">
+                <div class="stat-item">
+                    <span class="stat-label">Total Modules:</span>
+                    <span class="stat-value" id="total-modules">-</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Dependencies:</span>
+                    <span class="stat-value" id="total-dependencies">-</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Categories:</span>
+                    <span class="stat-value" id="total-categories">-</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Most Imported:</span>
+                    <span class="stat-value" id="most-imported">-</span>
+                </div>
+            </div>
+
+            <div class="controls-section">
+                <h3>Controls</h3>
+                <div class="controls-buttons">
+                    <button class="btn btn-primary" onclick="resetCamera()">Reset View</button>
+                    <button class="btn btn-secondary" onclick="showAllModules()">Show All</button>
+                </div>
+            </div>
+
+            <div class="controls-section">
+                <h3>Search</h3>
+                <div class="filter-group">
+                    <label for="module-search">Find Module:</label>
+                    <input type="text" id="module-search" class="search-input"
+                           placeholder="Search modules..."
+                           oninput="searchModules(this.value)">
+                </div>
+            </div>
+
+            <div class="controls-section">
+                <h3>Filter by Category</h3>
+                <div class="category-filters" id="category-filters">
+                    <!-- Categories will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="controls-section">
+                <h3>Legend</h3>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-icon" style="background: #DC2626;"></div>
+                        <span>Core Architecture</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-icon" style="background: #6B7280;"></div>
+                        <span>Type System</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-icon" style="background: #059669;"></div>
+                        <span>Visual Layer</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-icon" style="background: #0891B2;"></div>
+                        <span>Interaction Layer</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-icon" style="background: #EA580C;"></div>
+                        <span>Infrastructure</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Loading module dependencies...</p>
+            </div>
+
+            <div id="graph-container"></div>
+
+            <div class="node-info" id="node-info">
+                <h4 id="node-title">Module Info</h4>
+                <p><strong>Path:</strong> <span id="node-path">-</span></p>
+                <p><strong>Category:</strong> <span id="node-category">-</span></p>
+                <div class="node-metrics">
+                    <div class="metric">
+                        <div class="metric-value" id="node-lines">-</div>
+                        <div class="metric-label">Lines</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="node-exports">-</div>
+                        <div class="metric-label">Exports</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="node-imports">-</div>
+                        <div class="metric-label">Imports</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="node-size">-</div>
+                        <div class="metric-label">Size (KB)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-detect dev vs production environment
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            // Development: Use webpack-served bundle
+            document.write('<script src="/svg-graph-network.js"><\/script>');
+        } else {
+            // Production: Use relative path to assets (up one directory from examples/)
+            document.write('<script src="../assets/svg-graph-network.js"><\/script>');
+        }
+    </script>
+    <script>
+        let graph;
+        let allData;
+        let activeCategories = new Set();
+
+        async function initializeGraph() {
+            try {
+                // Load module dependency data
+                const response = await fetch('../assets/modules-data.json');
+                allData = await response.json();
+
+                // Update statistics
+                updateStatistics();
+
+                // Create category filters
+                createCategoryFilters();
+
+                // Initialize graph with light theme
+                graph = new SVGGraphNetwork('graph-container', {
+                    config: {
+                        theme: 'light',
+                        showLegend: true
+                    },
+                    physics: {
+                        enabled: true,
+                        charge: -300,
+                        linkDistance: 100,
+                        damping: 0.3
+                    },
+                    interaction: {
+                        dragNodes: true,
+                        zoomEnabled: true,
+                        panEnabled: true
+                    },
+                    styling: {
+                        nodes: {
+                            default: {
+                                strokeWidth: 2,
+                                stroke: '#333'
+                            },
+                            hover: {
+                                strokeWidth: 3,
+                                stroke: '#000'
+                            },
+                            selected: {
+                                strokeWidth: 4,
+                                stroke: '#000'
+                            }
+                        },
+                        links: {
+                            default: {
+                                strokeWidth: 1,
+                                stroke: '#666',
+                                opacity: 0.6
+                            },
+                            hover: {
+                                strokeWidth: 2,
+                                opacity: 0.8
+                            }
+                        }
+                    }
+                });
+
+                // Set custom colors for each node type
+                setCustomNodeTypeColors();
+
+                // Load initial data
+                loadGraphData();
+
+                // Setup event handlers
+                setupEventHandlers();
+
+                // Hide loading indicator
+                document.getElementById('loading').style.display = 'none';
+
+            } catch (error) {
+                console.error('Error initializing graph:', error);
+                document.getElementById('loading').innerHTML =
+                    '<p style="color: red;">Error loading module data</p>';
+            }
+        }
+
+        function updateStatistics() {
+            document.getElementById('total-modules').textContent = allData.stats.totalModules;
+            document.getElementById('total-dependencies').textContent = allData.stats.totalDependencies;
+            document.getElementById('total-categories').textContent = Object.keys(allData.stats.categories).length;
+
+            if (allData.stats.topImported.length > 0) {
+                const top = allData.stats.topImported[0];
+                document.getElementById('most-imported').textContent =
+                    `${top.module.replace('.ts', '')} (${top.count})`;
+            }
+        }
+
+        function createCategoryFilters() {
+            const container = document.getElementById('category-filters');
+            const categories = allData.stats.categories;
+
+            // Group categories by high-level groups
+            const groupCounts = {};
+            Object.entries(categories).forEach(([category, count]) => {
+                const group = mapCategoryToGroup(category);
+                groupCounts[group] = (groupCounts[group] || 0) + count;
+            });
+
+            // Initialize all groups as active (but track original categories)
+            activeCategories.clear();
+            Object.keys(categories).forEach(cat => activeCategories.add(cat));
+
+            // Create filter items for groups
+            Object.entries(groupCounts).forEach(([group, count]) => {
+                const item = document.createElement('div');
+                item.className = 'category-item';
+
+                // Get color for group
+                const color = getGroupColor(group);
+
+                item.innerHTML = `
+                    <input type="checkbox" class="category-checkbox" id="group-${group.replace(/\s+/g, '-')}" checked
+                           onchange="toggleGroup('${group}', this.checked)">
+                    <div class="category-color" style="background-color: ${color};"></div>
+                    <span class="category-label">${getGroupDisplayName(group)}</span>
+                    <span class="category-count">${count}</span>
+                `;
+
+                container.appendChild(item);
+            });
+        }
+
+        function mapCategoryToGroup(category) {
+            // Map granular categories to high-level groups (using valid DOM identifiers)
+            const groupMapping = {
+                // Core Architecture
+                main: 'core-architecture',
+                foundation: 'core-architecture',
+                core: 'core-architecture',
+                entry: 'core-architecture',
+
+                // Type System
+                types: 'type-system',
+                errors: 'type-system',
+
+                // Visual Layer
+                rendering: 'visual-layer',
+                ui: 'visual-layer',
+                styling: 'visual-layer',
+                theming: 'visual-layer',
+
+                // Interaction Layer
+                interaction: 'interaction-layer',
+                selection: 'interaction-layer',
+                highlighting: 'interaction-layer',
+                events: 'interaction-layer',
+
+                // Infrastructure
+                physics: 'infrastructure',
+                camera: 'infrastructure',
+                utils: 'infrastructure'
+            };
+            return groupMapping[category] || 'infrastructure';
+        }
+
+        function getGroupDisplayName(groupId) {
+            // Map valid DOM identifiers to display names
+            const displayNames = {
+                'core-architecture': 'Core Architecture',
+                'type-system': 'Type System',
+                'visual-layer': 'Visual Layer',
+                'interaction-layer': 'Interaction Layer',
+                'infrastructure': 'Infrastructure'
+            };
+            return displayNames[groupId] || groupId;
+        }
+
+        function getGroupColor(group) {
+            // Simplified color scheme for 5 groups (using group IDs)
+            const colors = {
+                'core-architecture': '#DC2626',   // Red-600
+                'type-system': '#6B7280',         // Gray-500
+                'visual-layer': '#059669',        // Emerald-600
+                'interaction-layer': '#0891B2',   // Sky-600
+                'infrastructure': '#EA580C'       // Orange-600
+            };
+            return colors[group] || '#6B7280';
+        }
+
+        function setCustomNodeTypeColors() {
+            // Apply custom colors to each group type (using group IDs)
+            const groups = ['core-architecture', 'type-system', 'visual-layer', 'interaction-layer', 'infrastructure'];
+            groups.forEach(group => {
+                const color = getGroupColor(group);
+                graph.setNodeTypeStyle(group, {
+                    fill: color,
+                    stroke: '#333',
+                    strokeWidth: 2
+                });
+            });
+        }
+
+        function loadGraphData() {
+            console.log('Loading graph data...', allData);
+            console.log('allData.nodes:', allData?.nodes?.length);
+            console.log('allData.edges:', allData?.edges?.length);
+
+            // Filter data based on active categories
+            const filteredNodes = allData.nodes.filter(node =>
+                activeCategories.has(node.category)
+            );
+
+            const nodeIds = new Set(filteredNodes.map(n => n.id));
+            const filteredEdges = allData.edges.filter(edge =>
+                nodeIds.has(edge.source) && nodeIds.has(edge.target)
+            );
+
+            // Transform nodes for the graph
+            const graphNodes = filteredNodes.map(node => {
+                // Scale size based on lines of code and imports (15-60 range)
+                const baseSize = Math.min(60, Math.max(15, node.metrics.lines / 80 + 10));
+                const importBonus = allData.stats.topImported.find(t => t.module === node.path)?.count || 0;
+                const adjustedSize = Math.min(60, baseSize + importBonus / 2);
+
+                // Map category to high-level group
+                const group = mapCategoryToGroup(node.category);
+
+                return {
+                    id: node.id,
+                    name: node.label,  // setData expects 'name' not 'label'
+                    type: group,       // Use high-level group instead of granular category
+                    shape: "rectangle",
+                    size: adjustedSize,
+                    data: {
+                        ...node,
+                        group: group,  // Store both original category and group
+                        originalCategory: node.category
+                    }
+                };
+            });
+
+            // Transform edges for the graph
+            const graphEdges = filteredEdges.map(edge => ({
+                id: edge.id,
+                source: edge.source,
+                target: edge.target
+            }));
+
+            // Load data into graph
+            console.log('Setting graph data:', { nodes: graphNodes.length, links: graphEdges.length });
+            console.log('First node:', graphNodes[0]);
+            console.log('First link:', graphEdges[0]);
+
+            graph.setData({
+                nodes: graphNodes,
+                links: graphEdges
+            });
+        }
+
+        function setupEventHandlers() {
+            // Node hover/selection events
+            graph.on('nodeHover', (event) => {
+                if (event.node) {
+                    showNodeInfo(event.node.data);
+                    highlightConnections(event.node.id);
+                } else {
+                    hideNodeInfo();
+                    clearHighlights();
+                }
+            });
+
+            graph.on('nodeClick', (event) => {
+                if (event.node) {
+                    showNodeInfo(event.node.data);
+                    highlightConnections(event.node.id);
+                }
+            });
+        }
+
+        function showNodeInfo(nodeData) {
+            const info = document.getElementById('node-info');
+            const data = nodeData;
+
+            document.getElementById('node-title').textContent = data.label;
+            document.getElementById('node-path').textContent = data.path;
+            // Show both group and original category
+            const group = data.group || mapCategoryToGroup(data.originalCategory || data.category);
+            const category = data.originalCategory || data.category;
+            document.getElementById('node-category').textContent = `${group} (${category})`;
+            document.getElementById('node-lines').textContent = data.metrics.lines;
+            document.getElementById('node-exports').textContent = data.metrics.exports;
+            document.getElementById('node-size').textContent = Math.round(data.metrics.size / 1024);
+
+            // Count imports to this node
+            const importCount = allData.edges.filter(e => e.target === data.id).length;
+            document.getElementById('node-imports').textContent = importCount;
+
+            info.style.display = 'block';
+        }
+
+        function hideNodeInfo() {
+            document.getElementById('node-info').style.display = 'none';
+        }
+
+        function highlightConnections(nodeId) {
+            // Get connected edges
+            const connectedEdges = allData.edges.filter(e =>
+                e.source === nodeId || e.target === nodeId
+            );
+
+            // Highlight logic would go here
+            // For now, this is a placeholder for the highlighting functionality
+        }
+
+        function clearHighlights() {
+            // Clear highlighting logic would go here
+        }
+
+        function toggleGroup(group, enabled) {
+            // Find all categories that belong to this group
+            const categoriesInGroup = Object.keys(allData.stats.categories).filter(cat =>
+                mapCategoryToGroup(cat) === group
+            );
+
+            if (enabled) {
+                categoriesInGroup.forEach(cat => activeCategories.add(cat));
+            } else {
+                categoriesInGroup.forEach(cat => activeCategories.delete(cat));
+            }
+            loadGraphData();
+        }
+
+        function toggleCategory(category, enabled) {
+            if (enabled) {
+                activeCategories.add(category);
+            } else {
+                activeCategories.delete(category);
+            }
+            loadGraphData();
+        }
+
+        function searchModules(query) {
+            if (!query.trim()) {
+                loadGraphData();
+                return;
+            }
+
+            const filteredNodes = allData.nodes.filter(node =>
+                activeCategories.has(node.category) &&
+                (node.label.toLowerCase().includes(query.toLowerCase()) ||
+                 node.path.toLowerCase().includes(query.toLowerCase()))
+            );
+
+            const nodeIds = new Set(filteredNodes.map(n => n.id));
+            const filteredEdges = allData.edges.filter(edge =>
+                nodeIds.has(edge.source) && nodeIds.has(edge.target)
+            );
+
+            const graphNodes = filteredNodes.map(node => {
+                // Scale size based on lines of code and imports (15-60 range)
+                const baseSize = Math.min(60, Math.max(15, node.metrics.lines / 80 + 10));
+                const importBonus = allData.stats.topImported.find(t => t.module === node.path)?.count || 0;
+                const adjustedSize = Math.min(60, baseSize + importBonus / 2);
+
+                // Map category to high-level group
+                const group = mapCategoryToGroup(node.category);
+
+                return {
+                    id: node.id,
+                    name: node.label,  // setData expects 'name' not 'label'
+                    type: group,       // Use high-level group instead of granular category
+                    shape: "rectangle",
+                    size: adjustedSize,
+                    data: {
+                        ...node,
+                        group: group,  // Store both original category and group
+                        originalCategory: node.category
+                    }
+                };
+            });
+
+            const graphEdges = filteredEdges.map(edge => ({
+                id: edge.id,
+                source: edge.source,
+                target: edge.target
+            }));
+
+            graph.setData({
+                nodes: graphNodes,
+                links: graphEdges
+            });
+        }
+
+        function resetCamera() {
+            graph.resetView();
+        }
+
+
+        function showAllModules() {
+            // Enable all categories
+            Object.keys(allData.stats.categories).forEach(cat => {
+                activeCategories.add(cat);
+            });
+
+            // Check all group checkboxes (using group IDs)
+            const groups = ['core-architecture', 'type-system', 'visual-layer', 'interaction-layer', 'infrastructure'];
+            groups.forEach(group => {
+                const checkbox = document.getElementById(`group-${group}`);
+                if (checkbox) checkbox.checked = true;
+            });
+
+            // Clear search
+            document.getElementById('module-search').value = '';
+
+            // Reload data
+            loadGraphData();
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', initializeGraph);
+    </script>
+</body>
+</html>

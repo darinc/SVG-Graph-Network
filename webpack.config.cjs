@@ -12,7 +12,7 @@ const config = {
     path: path.resolve(__dirname, 'dist'),
     filename: isProduction ? '[name].min.js' : '[name].js',
     library: {
-      name: 'GraphNetwork',
+      name: 'SVGGraphNetwork',
       type: 'umd',
       export: 'default'
     },
@@ -61,29 +61,12 @@ const config = {
 if (!isProduction) {
   config.devServer = {
     static: {
-      directory: path.join(__dirname, 'examples'),
+      directory: path.join(__dirname, 'docs'),
     },
     port: 8080,
     open: true,
     hot: true
   };
-  
-  // Add examples as additional entry points for development
-  config.entry['basic-example'] = './examples/basic.js';
-  config.entry['advanced-example'] = './examples/advanced.js';
-  
-  config.plugins.push(
-    new HtmlWebpackPlugin({
-      filename: 'index.html',
-      template: './examples/basic.html',
-      chunks: ['basic-example']
-    }),
-    new HtmlWebpackPlugin({
-      filename: 'advanced.html',
-      template: './examples/advanced.html',
-      chunks: ['advanced-example']
-    })
-  );
 }
 
 module.exports = config;

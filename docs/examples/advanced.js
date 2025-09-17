@@ -1,13 +1,19 @@
-// Import the library for development
-import GraphNetwork from '../src/index.ts';
-
-// Make it available globally  
-window.GraphNetwork = GraphNetwork;
+// Use the globally available SVGGraphNetwork from the dual-mode script loading
+// No imports needed - the library is loaded via script tag
 
 console.log('Advanced example loaded');
 
-// Initialize the graph when DOM is ready
-document.addEventListener('DOMContentLoaded', async () => {
+// Initialize the graph when both DOM and library are ready
+function initializeWhenReady() {
+    if (typeof SVGGraphNetwork !== 'undefined') {
+        initializeGraph();
+    } else {
+        // Wait a bit and try again
+        setTimeout(initializeWhenReady, 100);
+    }
+}
+
+async function initializeGraph() {
     // Prevent multiple initializations (for HMR) with proper cleanup
     if (window.graph) {
         try {
@@ -196,7 +202,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Initialize the advanced graph with full features
-    const graph = new GraphNetwork('graph-container', {
+    window.graph = new SVGGraphNetwork('graph-container', {
         data: getCurrentNetworkData(),
         config: {
             title: getCurrentTitle(),
@@ -229,7 +235,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log(`Switching to ${isModernEra ? '2024' : '1914'} diplomatic network...`);
         
         // Use Phase 4 enhanced setData API with smooth transitions
-        graph.setData(getCurrentNetworkData(), {
+        window.graph.setData(getCurrentNetworkData(), {
             animate: true,
             duration: 800,
             preservePositions: false,  // Allow new layout for different data
@@ -237,7 +243,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         
         // Update configuration
-        graph.updateConfig({ 
+        window.graph.updateConfig({ 
             title: getCurrentTitle() 
         });
         
@@ -252,36 +258,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // Event listeners for advanced interactions
-    graph.on('nodeDoubleClick', (data) => {
+    window.graph.on('nodeDoubleClick', (data) => {
         console.log(`🎯 Filtering by ${data.node.data.name}`);
     });
 
-    graph.on('filtered', (data) => {
+    window.graph.on('filtered', (data) => {
         console.log(`🔍 Graph filtered by ${data.nodeId}, showing ${data.visibleNodes.length} nodes`);
     });
 
-    graph.on('filterReset', () => {
+    window.graph.on('filterReset', () => {
         console.log('🌐 Showing all nodes');
     });
 
-    graph.on('themeChanged', (data) => {
+    window.graph.on('themeChanged', (data) => {
         console.log(`🎨 Theme changed to ${data.theme}`);
     });
 
-    graph.on('zoom', (data) => {
+    window.graph.on('zoom', (data) => {
         console.log(`🔍 Zoomed to ${data.scale.toFixed(2)}x`);
     });
     
     // Showcase Phase 5 Selection & Highlighting APIs
-    graph.on('nodeClick', (data) => {
+    window.graph.on('nodeClick', (data) => {
         const nodeId = data.node.data.id;
         
         // Demo selection functionality
         if (graph.isNodeSelected(nodeId)) {
-            graph.deselectNode(nodeId);
+            window.graph.deselectNode(nodeId);
             console.log(`👋 Deselected ${data.node.data.name}`);
         } else {
-            graph.selectNode(nodeId, { additive: true });
+            window.graph.selectNode(nodeId, { additive: true });
             console.log(`👆 Selected ${data.node.data.name}`);
         }
     });
@@ -289,8 +295,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Add keyboard shortcuts for advanced features
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-            graph.deselectAll();
-            graph.clearHighlights();
+            window.graph.deselectAll();
+            window.graph.clearHighlights();
             console.log('🧹 Cleared all selections and highlights');
         } else if (e.key === 'h') {
             // Highlight neighbors of selected nodes
@@ -346,4 +352,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('');
     console.log('🎛️ CONTROLS: Use the control panel to adjust physics parameters');
     console.log('📊 LEGEND: Shows node types and relationship meanings');
-});
+}
+
+// Start initialization when DOM is ready
+document.addEventListener('DOMContentLoaded', initializeWhenReady);

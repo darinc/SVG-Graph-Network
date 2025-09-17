@@ -94,6 +94,16 @@
         </div>
     </div>
     
+    <script>
+        // Auto-detect dev vs production environment
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            // Development: Use webpack-served bundle
+            document.write('<script src="/svg-graph-network.js"><\/script>');
+        } else {
+            // Production: Use relative path to assets
+            document.write('<script src="../assets/svg-graph-network.js"><\/script>');
+        }
+    </script>
     <script src="basic.js"></script>
 </body>
 </html>

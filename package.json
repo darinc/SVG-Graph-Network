@@ -28,6 +28,7 @@
     "type-check": "tsc --noEmit",
     "type-check:watch": "tsc --noEmit --watch",
     "docs": "typedoc",
+    "pages:build": "npm run build && npm run docs && node scripts/analyze-dependencies.cjs",
     "docs:serve": "npm run docs && npx http-server docs/api -p 8080 -o",
     "docs:watch": "typedoc --watch",
     "size": "size-limit",

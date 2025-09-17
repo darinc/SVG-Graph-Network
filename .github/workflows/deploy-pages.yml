@@ -1,0 +1,160 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build GitHub Pages
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run tests
+      run: npm run test
+
+    - name: Run linting
+      run: npm run lint
+
+    - name: Build library
+      run: npm run build
+
+    - name: Generate API documentation
+      run: npm run docs
+
+    - name: Analyze module dependencies
+      run: node scripts/analyze-dependencies.cjs
+
+    - name: Setup GitHub Pages
+      uses: actions/configure-pages@v4
+
+    - name: Prepare GitHub Pages content
+      run: |
+        # Create pages directory
+        mkdir -p gh-pages
+
+        # Copy docs content
+        cp -r docs/* gh-pages/
+
+        # Copy built library assets
+        mkdir -p gh-pages/assets
+        cp dist/svg-graph-network.min.js gh-pages/assets/svg-graph-network.js
+        cp dist/svg-graph-network.css gh-pages/assets/
+
+        # Copy examples with correct paths
+        mkdir -p gh-pages/examples
+        cp examples/*.html gh-pages/examples/
+        cp examples/*.js gh-pages/examples/
+
+        # Update example HTML files to use correct library path
+        sed -i 's|../dist/|../assets/|g' gh-pages/examples/*.html
+
+        # Copy README and other documentation
+        cp README.md gh-pages/
+        cp CONTRIBUTING.md gh-pages/
+        cp API.md gh-pages/
+
+        # Create sitemap
+        echo "Creating sitemap..."
+        cat > gh-pages/sitemap.xml << 'EOF'
+        <?xml version="1.0" encoding="UTF-8"?>
+        <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+          <url>
+            <loc>https://darinc.github.io/SVG-Graph-Network/</loc>
+            <lastmod>$(date -u +%Y-%m-%d)</lastmod>
+            <priority>1.0</priority>
+          </url>
+          <url>
+            <loc>https://darinc.github.io/SVG-Graph-Network/modules.html</loc>
+            <lastmod>$(date -u +%Y-%m-%d)</lastmod>
+            <priority>0.9</priority>
+          </url>
+          <url>
+            <loc>https://darinc.github.io/SVG-Graph-Network/examples/basic.html</loc>
+            <lastmod>$(date -u +%Y-%m-%d)</lastmod>
+            <priority>0.8</priority>
+          </url>
+          <url>
+            <loc>https://darinc.github.io/SVG-Graph-Network/examples/advanced.html</loc>
+            <lastmod>$(date -u +%Y-%m-%d)</lastmod>
+            <priority>0.8</priority>
+          </url>
+          <url>
+            <loc>https://darinc.github.io/SVG-Graph-Network/api/</loc>
+            <lastmod>$(date -u +%Y-%m-%d)</lastmod>
+            <priority>0.7</priority>
+          </url>
+        </urlset>
+        EOF
+
+        # Create robots.txt
+        cat > gh-pages/robots.txt << 'EOF'
+        User-agent: *
+        Allow: /
+
+        Sitemap: https://darinc.github.io/SVG-Graph-Network/sitemap.xml
+        EOF
+
+        # Add build timestamp
+        echo "Built at: $(date -u)" > gh-pages/build-info.txt
+        echo "Commit: ${{ github.sha }}" >> gh-pages/build-info.txt
+        echo "Repository: ${{ github.repository }}" >> gh-pages/build-info.txt
+
+    - name: Upload GitHub Pages artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ./gh-pages
+
+  deploy:
+    name: Deploy to GitHub Pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
+
+  notify:
+    name: Post-deployment notification
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: always()
+
+    steps:
+    - name: Report deployment status
+      run: |
+        if [ "${{ needs.deploy.result }}" == "success" ]; then
+          echo "✅ GitHub Pages deployment successful!"
+          echo "🌐 Site URL: https://darinc.github.io/SVG-Graph-Network/"
+          echo "📊 Module Dependencies: https://darinc.github.io/SVG-Graph-Network/modules.html"
+          echo "📖 API Docs: https://darinc.github.io/SVG-Graph-Network/api/"
+        else
+          echo "❌ GitHub Pages deployment failed!"
+          exit 1
+        fi
