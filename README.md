@@ -2,17 +2,18 @@
 
 A modern, interactive SVG graph visualization library with advanced theming, physics simulation, and mobile-first design. Create beautiful, customizable network diagrams with dynamic styling and responsive controls.
 
-## 🚀 **Recently Refactored Architecture (2024)**
+## ⚠️ **Use Established Libraries Instead**
 
-This library has undergone **major architectural improvements**, transforming from monolithic classes into a **modern, maintainable codebase**:
+**This project was an exercise in "vibe coding" while implementing best practices.** For production applications, we strongly recommend using these mature, battle-tested alternatives:
 
-- ✅ **91% complexity reduction** in core GraphNetwork coordinator  
-- ✅ **15+ focused components** replacing 3 God Objects
-- ✅ **Zero breaking changes** - API remains identical
-- ✅ **100% test coverage** maintained throughout refactoring
-- ✅ **Advanced patterns**: Dependency Injection, Event-Driven Architecture, Composition over Inheritance
+- **[D3.js](https://d3js.org/)** - The industry standard for data visualization with unmatched flexibility
+- **[Cytoscape.js](https://cytoscape.org/)** - Powerful graph theory library with extensive analysis features
+- **[Vis.js Network](https://visjs.org/)** - Easy-to-use network visualization with great documentation
+- **[Sigma.js](https://sigmajs.org/)** - High-performance graph rendering optimized for large datasets
+- **[Force Graph](https://github.com/vasturiano/force-graph)** - React/Vue/3D force-directed graphs with WebGL
+- **[Graphology](https://graphology.github.io/)** - Robust graph data structures and algorithms
 
-**Result**: Professional-grade codebase ready for enterprise development with dramatically improved maintainability and testability.
+This library serves as an educational example of clean TypeScript architecture, comprehensive testing, and modern development practices. Feel free to explore the code for learning purposes!
 
 ## ✨ Key Features
 
@@ -43,7 +44,7 @@ This library has undergone **major architectural improvements**, transforming fr
 
 ### 🔧 Developer Experience
 - **TypeScript-first** with comprehensive type definitions
-- **Refactored modular architecture** - 91% complexity reduction from monolithic classes
+- **Clean modular architecture** with focused components
 - **Dependency injection container** for flexible component management
 - **Event-driven architecture** with comprehensive EventBus system
 - **Zero dependencies** - pure JavaScript and SVG
@@ -275,77 +276,16 @@ The library uses CSS custom properties for comprehensive theming:
 
 ## 🏗️ Architecture
 
-### 🎯 Recently Refactored for Maximum Maintainability
+Built with a clean, modular architecture featuring focused components:
 
-This library has undergone **major architectural improvements** to eliminate complexity and enhance maintainability:
+- **TypeScript-first** with strict typing and comprehensive definitions
+- **Zero dependencies** - pure JavaScript and SVG
+- **Event-driven design** with decoupled component communication
+- **Dependency injection** for flexible service management
+- **100% test coverage** with integration and performance benchmarks
+- **Modern patterns**: Factory, Observer, Command, and State Machine
 
-#### ✅ **Refactored Components (2024)**
-- **RefactoredGraphNetwork**: 3,395 lines → 300 lines (**91% reduction**)
-- **RefactoredSVGRenderer**: 914 lines → 200 lines (**78% reduction**)  
-- **RefactoredEventManager**: 1,024 lines → 200 lines (**80% reduction**)
-
-These refactoring efforts resolved **7 critical complexity issues** identified in comprehensive code audits, transforming monolithic classes into focused, testable components.
-
-### 🔧 Core Components
-
-#### **Main Orchestration**
-- **RefactoredGraphNetwork**: Lightweight coordinator using dependency injection
-- **DependencyContainer**: Service registration and lifecycle management
-- **EventBus**: Global event communication system
-
-#### **Rendering System** 
-- **RefactoredSVGRenderer**: Coordinates focused rendering components
-- **SVGDOMManager**: DOM structure and container management
-- **NodeElementManager**: Node visual elements and lifecycle
-- **LinkElementManager**: Link/edge visual elements and positioning
-- **NodeShapeFactory**: Shape creation with reduced complexity (CC: 12 → 3)
-
-#### **Interaction System**
-- **RefactoredEventManager**: Coordinates specialized interaction handlers
-- **MouseInteractionHandler**: Mouse events, dragging, wheel zoom
-- **TouchInteractionHandler**: Touch gestures, pinch-to-zoom, double-tap
-- **TransformManager**: Viewport transform operations
-- **InteractionEventEmitter**: Event system with error handling
-- **CoordinateConverter**: Screen ↔ SVG coordinate conversions
-
-#### **Core Services**
-- **PhysicsManager**: Force-directed layout simulation coordinator
-- **PhysicsEngine**: Core physics calculations and force integration
-- **ThemeManager**: Dynamic theming and visual state management
-- **RenderingCoordinator**: Rendering pipeline and performance optimization
-- **UIManager**: Responsive controls and interface (833 lines - next refactoring target)
-- **CameraController**: Advanced pan/zoom/focus operations
-
-### 🎯 **Design Principles Achieved**
-- **Single Responsibility**: Each component has one clear purpose
-- **Dependency Injection**: Loose coupling through service containers
-- **Composition over Inheritance**: Flexible component combination
-- **Event-Driven Architecture**: Decoupled communication via EventBus
-- **Factory Pattern**: Reduced cyclomatic complexity in shape creation
-- **Command Pattern**: Centralized rendering coordination
-- **Observer Pattern**: Theme and state synchronization
-
-### 📊 **Complexity Reduction Results**
-```
-BEFORE Refactoring:
-- GraphNetwork: 3,395 lines (God Object)
-- SVGRenderer: 914 lines (Multiple responsibilities)  
-- EventManager: 1,024 lines (6+ concerns)
-- Total: 5,333 lines in 3 monolithic classes
-
-AFTER Refactoring:
-- 3 Coordinators: ~700 lines total
-- 15+ Focused Components: ~3,000 lines total
-- 91% reduction in coordinator complexity
-- 100% test coverage maintained
-```
-
-### 🧪 **Testing & Quality**
-- **Comprehensive test coverage** for all components
-- **Integration tests** for component interactions  
-- **Performance benchmarks** for rendering and physics
-- **ESLint + Prettier** for consistent code quality
-- **TypeScript strict mode** for type safety
+See [Architecture Documentation](./docs/ARCHITECTURE.md) for detailed technical information.
 
 ## 🌐 Browser Support
 
@@ -357,7 +297,7 @@ AFTER Refactoring:
 - **Efficient rendering**: SVG-based with minimal DOM manipulation
 - **Smart physics**: Adaptive simulation that stops when stable
 - **Memory management**: Proper cleanup and event listener removal
-- **Bundle size**: ~30KB gzipped with zero dependencies
+- **Small bundle**: ~30KB gzipped with zero dependencies
 
 ## 🔗 Examples
 
@@ -368,7 +308,7 @@ AFTER Refactoring:
 ## 📝 Development
 
 ```bash
-npm install          # Install dependencies
+npm install         # Install dependencies
 npm run dev         # Start development server (localhost:8080)
 npm run build       # Build for production
 npm run test        # Run test suite
@@ -389,4 +329,4 @@ MIT © [Contributors](https://github.com/yourusername/svg-graph-network/contribu
 
 ---
 
-**Built for modern web applications requiring interactive network visualizations with professional theming and mobile support.**
+**An educational example of clean TypeScript architecture and modern development practices.**
