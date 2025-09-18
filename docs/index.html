@@ -116,10 +116,11 @@
         #hero-graph {
             width: 100%;
             height: 400px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 12px;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
         /* Navigation */
@@ -651,83 +652,125 @@
     <script>
         // Initialize hero graph demo
         function initHeroGraph() {
+            // Check if SVGGraphNetwork is available
+            if (typeof SVGGraphNetwork === 'undefined') {
+                console.log('SVGGraphNetwork not available, retrying...');
+                setTimeout(initHeroGraph, 100);
+                return;
+            }
+
             const container = document.getElementById('hero-graph');
             if (!container) return;
 
             try {
-                const heroGraph = new SVGGraphNetwork(container, {
+                // Use container ID string, not DOM element
+                const heroGraph = new SVGGraphNetwork('hero-graph', {
+                    config: {
+                        theme: 'light',
+                        showLegend: false
+                    },
                     physics: {
                         enabled: true,
                         charge: -200,
-                        linkDistance: 80,
-                        damping: 0.4
+                        linkDistance: 60,
+                        damping: 0.4,
+                        attractionStrength: 20  // Much higher attraction to keep nodes very close
                     },
                     interaction: {
                         dragNodes: true,
                         zoomEnabled: false,
                         panEnabled: false
-                    },
-                    styling: {
-                        nodes: {
-                            default: {
-                                radius: 12,
-                                fill: 'rgba(255, 255, 255, 0.9)',
-                                stroke: 'rgba(255, 255, 255, 0.5)',
-                                strokeWidth: 2
-                            },
-                            hover: {
-                                radius: 16,
-                                fill: 'rgba(255, 255, 255, 1)',
-                                stroke: 'rgba(255, 255, 255, 0.8)',
-                                strokeWidth: 3
-                            }
-                        },
-                        links: {
-                            default: {
-                                stroke: 'rgba(255, 255, 255, 0.4)',
-                                strokeWidth: 2
-                            }
-                        }
                     }
                 });
 
-                // Create demo data
+                // Create demo data with proper format
                 const demoNodes = [
-                    { id: 'core', label: 'Core', x: 200, y: 200 },
-                    { id: 'ui', label: 'UI', x: 100, y: 100 },
-                    { id: 'physics', label: 'Physics', x: 300, y: 100 },
-                    { id: 'render', label: 'Render', x: 150, y: 300 },
-                    { id: 'events', label: 'Events', x: 250, y: 300 },
-                    { id: 'utils', label: 'Utils', x: 350, y: 200 }
+                    { id: 'core', name: 'Core Engine', type: 'primary', shape: 'rectangle', size: 25 },
+                    { id: 'renderer', name: 'SVG Renderer', type: 'secondary', shape: 'rectangle', size: 20 },
+                    { id: 'physics', name: 'Physics', type: 'secondary', shape: 'rectangle', size: 20 },
+                    { id: 'interactions', name: 'Interactions', type: 'tertiary', shape: 'rectangle', size: 18 }
                 ];
 
                 const demoLinks = [
-                    { id: 'core-ui', source: 'core', target: 'ui' },
-                    { id: 'core-physics', source: 'core', target: 'physics' },
-                    { id: 'core-render', source: 'core', target: 'render' },
-                    { id: 'core-events', source: 'core', target: 'events' },
-                    { id: 'ui-utils', source: 'ui', target: 'utils' },
-                    { id: 'physics-utils', source: 'physics', target: 'utils' },
-                    { id: 'render-events', source: 'render', target: 'events' }
+                    { source: 'core', target: 'renderer', label: 'renders', weight: 2, line_type: 'solid' },
+                    { source: 'core', target: 'physics', label: 'simulates', weight: 2, line_type: 'solid' },
+                    { source: 'core', target: 'interactions', label: 'handles', weight: 2, line_type: 'solid' }
                 ];
 
+                // Set custom colors that use the themed light colors
+                heroGraph.setNodeTypeStyle('primary', {
+                    fill: '#fca5a5',
+                    stroke: '#ef4444',
+                    strokeWidth: 3
+                });
+
+                heroGraph.setNodeTypeStyle('secondary', {
+                    fill: '#93c5fd',
+                    stroke: '#3b82f6',
+                    strokeWidth: 2
+                });
+
+                heroGraph.setNodeTypeStyle('tertiary', {
+                    fill: '#a7f3d0',
+                    stroke: '#10b981',
+                    strokeWidth: 2
+                });
+
+                // Set data with proper format
                 heroGraph.setData({
                     nodes: demoNodes,
                     links: demoLinks
                 });
 
-                // Auto-animate the demo
+                // Add some subtle animation
+                let animationPhase = 0;
                 setInterval(() => {
-                    if (Math.random() > 0.7) {
-                        const randomNode = demoNodes[Math.floor(Math.random() * demoNodes.length)];
-                        // Could add highlighting or other effects here
+                    try {
+                        const nodes = ['core', 'renderer', 'physics', 'interactions'];
+                        const currentNode = nodes[animationPhase % nodes.length];
+
+                        // Set hover state for subtle highlight
+                        heroGraph.setElementState(currentNode, 'hover', true);
+
+                        // Clear previous node highlight
+                        const prevNode = nodes[(animationPhase - 1 + nodes.length) % nodes.length];
+                        heroGraph.setElementState(prevNode, 'hover', false);
+
+                        animationPhase++;
+                    } catch (e) {
+                        // Ignore animation errors
                     }
-                }, 2000);
+                }, 3000);
 
             } catch (error) {
                 console.log('Hero graph initialization failed:', error);
-                // Fallback: show a static message
-                container.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: rgba(255,255,255,0.8); font-size: 1.2rem;"><i class="fas fa-project-diagram" style="font-size: 4rem;"></i></div>';
+                // Fallback: show a static SVG icon
+                const container = document.getElementById('hero-graph');
+                if (container) {
+                    container.innerHTML = `
+                        <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: rgba(255,255,255,0.8);">
+                            <svg width="200" height="150" viewBox="0 0 200 150" style="filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));">
+                                <defs>
+                                    <style>
+                                        .demo-node { fill: rgba(255,255,255,0.9); stroke: rgba(255,255,255,0.6); stroke-width: 2; }
+                                        .demo-link { stroke: rgba(255,255,255,0.4); stroke-width: 2; }
+                                    </style>
+                                </defs>
+                                <line x1="100" y1="75" x2="50" y2="40" class="demo-link"/>
+                                <line x1="100" y1="75" x2="150" y2="40" class="demo-link"/>
+                                <line x1="100" y1="75" x2="100" y2="110" class="demo-link"/>
+                                <circle cx="100" cy="75" r="15" class="demo-node"/>
+                                <circle cx="50" cy="40" r="12" class="demo-node"/>
+                                <circle cx="150" cy="40" r="12" class="demo-node"/>
+                                <circle cx="100" cy="110" r="12" class="demo-node"/>
+                                <text x="100" y="80" text-anchor="middle" fill="rgba(255,255,255,0.9)" font-size="10" font-family="sans-serif">Core</text>
+                                <text x="50" y="45" text-anchor="middle" fill="rgba(255,255,255,0.9)" font-size="8" font-family="sans-serif">UI</text>
+                                <text x="150" y="45" text-anchor="middle" fill="rgba(255,255,255,0.9)" font-size="8" font-family="sans-serif">Physics</text>
+                                <text x="100" y="115" text-anchor="middle" fill="rgba(255,255,255,0.9)" font-size="8" font-family="sans-serif">Render</text>
+                            </svg>
+                        </div>
+                    `;
+                }
             }
         }
 
