@@ -708,5 +708,10 @@ async function initializeGraph() {
     console.log('📊 LEGEND: Shows node types and relationship meanings');
 }
 
-// Start initialization when DOM is ready
-document.addEventListener('DOMContentLoaded', initializeWhenReady);
+// Start initialization when DOM is ready, but only if SVGGraphNetwork is already loaded
+document.addEventListener('DOMContentLoaded', function () {
+    if (typeof SVGGraphNetwork !== 'undefined') {
+        initializeWhenReady();
+    }
+    // If not loaded, the script onload handler will call initializeWhenReady()
+});

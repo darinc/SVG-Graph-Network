@@ -102,7 +102,7 @@
 
         <script>
             // Auto-detect dev vs production environment and load script dynamically
-            (function() {
+            (function () {
                 const script = document.createElement('script');
                 if (
                     window.location.hostname === 'localhost' ||
@@ -114,7 +114,14 @@
                     // Production: Use relative path to assets
                     script.src = '../assets/svg-graph-network.js';
                 }
-                script.onerror = function() {
+                script.onload = function () {
+                    console.log('SVGGraphNetwork script loaded successfully');
+                    // Trigger initialization if it's waiting
+                    if (window.initializeWhenReady) {
+                        window.initializeWhenReady();
+                    }
+                };
+                script.onerror = function () {
                     console.error('Failed to load SVGGraphNetwork script from:', script.src);
                 };
                 document.head.appendChild(script);

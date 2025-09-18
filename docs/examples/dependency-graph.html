@@ -464,7 +464,7 @@
         <script>
             // Auto-detect dev vs production environment
             // Auto-detect dev vs production environment and load script dynamically
-            (function() {
+            (function () {
                 const script = document.createElement('script');
                 if (
                     window.location.hostname === 'localhost' ||
@@ -476,7 +476,14 @@
                     // Production: Use relative path to assets (up one directory from examples/)
                     script.src = '../assets/svg-graph-network.js';
                 }
-                script.onerror = function() {
+                script.onload = function () {
+                    console.log('SVGGraphNetwork script loaded successfully');
+                    // Trigger initialization if it's waiting
+                    if (window.initDependencyGraph) {
+                        window.initDependencyGraph();
+                    }
+                };
+                script.onerror = function () {
                     console.error('Failed to load SVGGraphNetwork script from:', script.src);
                 };
                 document.head.appendChild(script);
@@ -919,8 +926,16 @@
                 loadGraphData();
             }
 
-            // Initialize when page loads
-            window.addEventListener('load', initializeGraph);
+            // Make initializeGraph available globally for script onload handler
+            window.initDependencyGraph = initializeGraph;
+
+            // Initialize when page loads, but only if SVGGraphNetwork is already available
+            window.addEventListener('load', function () {
+                if (typeof SVGGraphNetwork !== 'undefined') {
+                    initializeGraph();
+                }
+                // If not loaded, the script onload handler will call initDependencyGraph()
+            });
         </script>
     </body>
 </html>
