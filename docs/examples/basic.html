@@ -116,7 +116,7 @@
                     script.src = '../assets/svg-graph-network.js';
                 }
                 script.onload = function () {
-                    console.log('GraphNetwork script loaded successfully');
+                    console.log('SVGGraphNetwork script loaded successfully');
                     // Small delay to ensure global variable is available
                     setTimeout(function () {
                         if (window.initializeWhenReady) {
@@ -125,7 +125,7 @@
                     }, 10);
                 };
                 script.onerror = function () {
-                    console.error('Failed to load GraphNetwork script from:', script.src);
+                    console.error('Failed to load SVGGraphNetwork script from:', script.src);
                 };
                 document.head.appendChild(script);
             })();

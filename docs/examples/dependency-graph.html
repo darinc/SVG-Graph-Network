@@ -477,14 +477,14 @@
                     script.src = '../assets/svg-graph-network.js';
                 }
                 script.onload = function () {
-                    console.log('GraphNetwork script loaded successfully');
+                    console.log('SVGGraphNetwork script loaded successfully');
                     // Trigger initialization if it's waiting
                     if (window.initDependencyGraph) {
                         window.initDependencyGraph();
                     }
                 };
                 script.onerror = function () {
-                    console.error('Failed to load GraphNetwork script from:', script.src);
+                    console.error('Failed to load SVGGraphNetwork script from:', script.src);
                 };
                 document.head.appendChild(script);
             })();
@@ -507,7 +507,7 @@
                     createCategoryFilters();
 
                     // Initialize graph with light theme
-                    graph = new GraphNetwork('graph-container', {
+                    graph = new SVGGraphNetwork('graph-container', {
                         config: {
                             theme: 'light',
                             showLegend: true
@@ -929,9 +929,9 @@
             // Make initializeGraph available globally for script onload handler
             window.initDependencyGraph = initializeGraph;
 
-            // Initialize when page loads, but only if GraphNetwork is already available
+            // Initialize when page loads, but only if SVGGraphNetwork is already available
             window.addEventListener('load', function () {
-                if (typeof GraphNetwork !== 'undefined') {
+                if (typeof SVGGraphNetwork !== 'undefined') {
                     initializeGraph();
                 }
                 // If not loaded, the script onload handler will call initDependencyGraph()

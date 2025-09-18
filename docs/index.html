@@ -531,7 +531,7 @@
 
         <main role="main">
             <!-- Hero Section -->
-            <header class="hero" id="hero" role="banner">
+            <section class="hero" id="hero">
             <div class="hero-content">
                 <div class="hero-text">
                     <h1 id="main-heading">SVG Graph Network</h1>
@@ -834,8 +834,8 @@
             // Initialize hero graph demo
             function initHeroGraph() {
                 // Check if GraphNetwork is available
-                if (typeof GraphNetwork === 'undefined') {
-                    console.log('GraphNetwork not available, cannot initialize hero graph');
+                if (typeof SVGGraphNetwork === 'undefined') {
+                    console.log('SVGGraphNetwork not available, cannot initialize hero graph');
                     return;
                 }
 
@@ -844,7 +844,7 @@
 
                 try {
                     // Use container ID string, not DOM element
-                    const heroGraph = new GraphNetwork('hero-graph', {
+                    const heroGraph = new SVGGraphNetwork('hero-graph', {
                         config: {
                             theme: 'light',
                             showLegend: false
@@ -1078,7 +1078,7 @@
 
             // Initialize when DOM is ready, but only if GraphNetwork is already loaded
             document.addEventListener('DOMContentLoaded', function () {
-                if (typeof GraphNetwork !== 'undefined') {
+                if (typeof SVGGraphNetwork !== 'undefined') {
                     initHeroGraph();
                 }
                 // If not loaded, the script onload handler will call initHeroGraph()
