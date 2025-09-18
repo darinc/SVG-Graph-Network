@@ -103,17 +103,24 @@
         <div id="graph-container"></div>
 
         <script>
-            // Auto-detect dev vs production environment
-            if (
-                window.location.hostname === 'localhost' ||
-                window.location.hostname === '127.0.0.1'
-            ) {
-                // Development: Use webpack-served bundle
-                document.write('<script src="/svg-graph-network.js"><\/script>');
-            } else {
-                // Production: Use relative path to assets
-                document.write('<script src="../assets/svg-graph-network.js"><\/script>');
-            }
+            // Auto-detect dev vs production environment and load script dynamically
+            (function() {
+                const script = document.createElement('script');
+                if (
+                    window.location.hostname === 'localhost' ||
+                    window.location.hostname === '127.0.0.1'
+                ) {
+                    // Development: Use webpack-served bundle
+                    script.src = '/svg-graph-network.js';
+                } else {
+                    // Production: Use relative path to assets
+                    script.src = '../assets/svg-graph-network.js';
+                }
+                script.onerror = function() {
+                    console.error('Failed to load SVGGraphNetwork script from:', script.src);
+                };
+                document.head.appendChild(script);
+            })();
         </script>
         <script src="advanced.js"></script>
     </body>
