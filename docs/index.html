@@ -709,25 +709,38 @@
         </footer>
 
         <script>
-            // Auto-detect dev vs production environment
-            if (
-                window.location.hostname === 'localhost' ||
-                window.location.hostname === '127.0.0.1'
-            ) {
-                // Development: Use webpack-served bundle
-                document.write('<script src="/svg-graph-network.js"><\/script>');
-            } else {
-                // Production: Use pre-built asset
-                document.write('<script src="assets/svg-graph-network.js"><\/script>');
-            }
+            // Auto-detect dev vs production environment and load script dynamically
+            (function () {
+                const script = document.createElement('script');
+                if (
+                    window.location.hostname === 'localhost' ||
+                    window.location.hostname === '127.0.0.1'
+                ) {
+                    // Development: Use webpack-served bundle
+                    script.src = '/svg-graph-network.js';
+                } else {
+                    // Production: Use pre-built asset
+                    script.src = 'assets/svg-graph-network.js';
+                }
+                script.onload = function () {
+                    console.log('SVGGraphNetwork script loaded successfully');
+                    // Trigger initialization if it's waiting
+                    if (window.initHeroGraph) {
+                        window.initHeroGraph();
+                    }
+                };
+                script.onerror = function () {
+                    console.error('Failed to load SVGGraphNetwork script from:', script.src);
+                };
+                document.head.appendChild(script);
+            })();
         </script>
         <script>
             // Initialize hero graph demo
             function initHeroGraph() {
                 // Check if SVGGraphNetwork is available
                 if (typeof SVGGraphNetwork === 'undefined') {
-                    console.log('SVGGraphNetwork not available, retrying...');
-                    setTimeout(initHeroGraph, 100);
+                    console.log('SVGGraphNetwork not available, cannot initialize hero graph');
                     return;
                 }
 
@@ -963,6 +976,17 @@
                     const target = e.target.getAttribute('href');
                     smoothScroll(target);
                 }
+            });
+
+            // Make initHeroGraph globally available for script onload handler
+            window.initHeroGraph = initHeroGraph;
+
+            // Initialize when DOM is ready, but only if SVGGraphNetwork is already loaded
+            document.addEventListener('DOMContentLoaded', function () {
+                if (typeof SVGGraphNetwork !== 'undefined') {
+                    initHeroGraph();
+                }
+                // If not loaded, the script onload handler will call initHeroGraph()
             });
         </script>
     </body>
