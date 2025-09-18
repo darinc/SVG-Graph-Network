@@ -6,3 +6,9 @@ coverage/
 *.yml
 *.yaml
 package-lock.json
+
+# Built/generated assets in docs directory
+docs/assets/svg-graph-network.js
+docs/assets/svg-graph-network.css
+docs/assets/modules-data.json
+docs/api/

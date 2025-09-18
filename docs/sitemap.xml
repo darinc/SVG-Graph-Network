@@ -9,7 +9,7 @@
         <changefreq>weekly</changefreq>
         <priority>1.0</priority>
         <image:image>
-            <image:loc>https://darinc.github.io/SVG-Graph-Network/assets/og-image.png</image:loc>
+            <image:loc>https://darinc.github.io/SVG-Graph-Network/assets/svg-graph-network.png</image:loc>
             <image:caption>SVG Graph Network - Interactive graph visualization</image:caption>
         </image:image>
     </url>
