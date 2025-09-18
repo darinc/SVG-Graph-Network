@@ -58,9 +58,9 @@ jobs:
     - name: Verify build artifacts
       run: |
         ls -la dist/
-        test -f dist/svg-graph-network.js
         test -f dist/svg-graph-network.min.js
         test -f dist/svg-graph-network.css
+        test -f dist/index.d.ts
 
   format-check:
     name: Format Check
