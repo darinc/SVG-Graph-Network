@@ -67,8 +67,9 @@ jobs:
     - name: Verify build artifacts
       run: |
         ls -la dist/
-        test -f dist/svg-graph-network.umd.js
-        test -f dist/svg-graph-network.es.js
+        test -f dist/svg-graph-network.js
+        test -f dist/svg-graph-network.min.js
+        test -f dist/svg-graph-network.css
 
   format-check:
     name: Format Check
@@ -88,4 +89,4 @@ jobs:
       run: npm ci
 
     - name: Check code formatting
-      run: npx prettier --check 'src/**/*.js' 'tests/**/*.js'
+      run: npx prettier --check 'src/**/*.{ts,js}' 'tests/**/*.{ts,js}' 'docs/**/*.{html,js}' '*.{json,md,yml,yaml}'
