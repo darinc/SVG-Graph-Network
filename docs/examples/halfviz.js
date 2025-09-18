@@ -8,12 +8,12 @@ let currentData = { nodes: [], links: [] };
 
 // Initialize when ready
 function initializeWhenReady() {
-    console.log('Checking for SVGGraphNetwork...', typeof SVGGraphNetwork);
-    if (typeof SVGGraphNetwork !== 'undefined') {
-        console.log('SVGGraphNetwork found, initializing halfviz demo...');
+    console.log('Checking for GraphNetwork...', typeof GraphNetwork);
+    if (typeof GraphNetwork !== 'undefined') {
+        console.log('GraphNetwork found, initializing halfviz demo...');
         initHalfviz();
     } else {
-        console.log('SVGGraphNetwork not ready, waiting...');
+        console.log('GraphNetwork not ready, waiting...');
         setTimeout(initializeWhenReady, 100);
     }
 }
@@ -42,7 +42,7 @@ function initHalfviz() {
         links: []
     };
 
-    window.graph = new SVGGraphNetwork('graph-container', {
+    window.graph = new GraphNetwork('graph-container', {
         data: initialData,
         config: {
             showTitle: false,
@@ -510,9 +510,9 @@ window.clearGraph = clearGraph;
 window.loadExample = loadExample;
 window.exportData = exportData;
 
-// Start initialization when DOM is ready, but only if SVGGraphNetwork is already loaded
+// Start initialization when DOM is ready, but only if GraphNetwork is already loaded
 document.addEventListener('DOMContentLoaded', function () {
-    if (typeof SVGGraphNetwork !== 'undefined') {
+    if (typeof GraphNetwork !== 'undefined') {
         initializeWhenReady();
     }
     // If not loaded, the script onload handler will call initHalfviz()

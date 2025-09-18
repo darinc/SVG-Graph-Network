@@ -5,12 +5,12 @@ console.log('Basic example loaded');
 
 // Initialize the graph when both DOM and library are ready
 function initializeWhenReady() {
-    console.log('Checking for SVGGraphNetwork...', typeof SVGGraphNetwork);
-    if (typeof SVGGraphNetwork !== 'undefined') {
-        console.log('SVGGraphNetwork found, initializing graph...');
+    console.log('Checking for GraphNetwork...', typeof GraphNetwork);
+    if (typeof GraphNetwork !== 'undefined') {
+        console.log('GraphNetwork found, initializing graph...');
         initializeGraph();
     } else {
-        console.log('SVGGraphNetwork not ready, waiting...');
+        console.log('GraphNetwork not ready, waiting...');
         // Wait a bit and try again
         setTimeout(initializeWhenReady, 100);
     }
@@ -49,7 +49,7 @@ function initializeGraph() {
     };
 
     // Initialize the graph
-    window.graph = new SVGGraphNetwork('graph-container', {
+    window.graph = new GraphNetwork('graph-container', {
         data: graphData,
         config: {
             showTitle: false,
@@ -258,9 +258,9 @@ function initializeGraph() {
     console.log('- deleteRandomNode() - Delete a random node and its edges');
 }
 
-// Start initialization when DOM is ready, but only if SVGGraphNetwork is already loaded
+// Start initialization when DOM is ready, but only if GraphNetwork is already loaded
 document.addEventListener('DOMContentLoaded', function () {
-    if (typeof SVGGraphNetwork !== 'undefined') {
+    if (typeof GraphNetwork !== 'undefined') {
         initializeWhenReady();
     }
     // If not loaded, the script onload handler will call initializeWhenReady()

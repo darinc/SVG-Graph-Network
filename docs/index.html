@@ -723,14 +723,16 @@
                     script.src = 'assets/svg-graph-network.js';
                 }
                 script.onload = function () {
-                    console.log('SVGGraphNetwork script loaded successfully');
-                    // Trigger initialization if it's waiting
-                    if (window.initHeroGraph) {
-                        window.initHeroGraph();
-                    }
+                    console.log('GraphNetwork script loaded successfully');
+                    // Small delay to ensure global variable is available
+                    setTimeout(function() {
+                        if (window.initHeroGraph) {
+                            window.initHeroGraph();
+                        }
+                    }, 10);
                 };
                 script.onerror = function () {
-                    console.error('Failed to load SVGGraphNetwork script from:', script.src);
+                    console.error('Failed to load GraphNetwork script from:', script.src);
                 };
                 document.head.appendChild(script);
             })();
@@ -738,9 +740,9 @@
         <script>
             // Initialize hero graph demo
             function initHeroGraph() {
-                // Check if SVGGraphNetwork is available
-                if (typeof SVGGraphNetwork === 'undefined') {
-                    console.log('SVGGraphNetwork not available, cannot initialize hero graph');
+                // Check if GraphNetwork is available
+                if (typeof GraphNetwork === 'undefined') {
+                    console.log('GraphNetwork not available, cannot initialize hero graph');
                     return;
                 }
 
@@ -749,7 +751,7 @@
 
                 try {
                     // Use container ID string, not DOM element
-                    const heroGraph = new SVGGraphNetwork('hero-graph', {
+                    const heroGraph = new GraphNetwork('hero-graph', {
                         config: {
                             theme: 'light',
                             showLegend: false
@@ -981,9 +983,9 @@
             // Make initHeroGraph globally available for script onload handler
             window.initHeroGraph = initHeroGraph;
 
-            // Initialize when DOM is ready, but only if SVGGraphNetwork is already loaded
+            // Initialize when DOM is ready, but only if GraphNetwork is already loaded
             document.addEventListener('DOMContentLoaded', function () {
-                if (typeof SVGGraphNetwork !== 'undefined') {
+                if (typeof GraphNetwork !== 'undefined') {
                     initHeroGraph();
                 }
                 // If not loaded, the script onload handler will call initHeroGraph()

@@ -1,11 +1,11 @@
-// Use the globally available SVGGraphNetwork from the dual-mode script loading
+// Use the globally available GraphNetwork from the dual-mode script loading
 // No imports needed - the library is loaded via script tag
 
 console.log('Advanced example loaded');
 
 // Initialize the graph when both DOM and library are ready
 function initializeWhenReady() {
-    if (typeof SVGGraphNetwork !== 'undefined') {
+    if (typeof GraphNetwork !== 'undefined') {
         initializeGraph();
     } else {
         // Wait a bit and try again
@@ -552,7 +552,7 @@ async function initializeGraph() {
     }
 
     // Initialize the advanced graph with full features
-    window.graph = new SVGGraphNetwork('graph-container', {
+    window.graph = new GraphNetwork('graph-container', {
         data: getCurrentNetworkData(),
         config: {
             title: getCurrentTitle(),
@@ -708,9 +708,9 @@ async function initializeGraph() {
     console.log('📊 LEGEND: Shows node types and relationship meanings');
 }
 
-// Start initialization when DOM is ready, but only if SVGGraphNetwork is already loaded
+// Start initialization when DOM is ready, but only if GraphNetwork is already loaded
 document.addEventListener('DOMContentLoaded', function () {
-    if (typeof SVGGraphNetwork !== 'undefined') {
+    if (typeof GraphNetwork !== 'undefined') {
         initializeWhenReady();
     }
     // If not loaded, the script onload handler will call initializeWhenReady()

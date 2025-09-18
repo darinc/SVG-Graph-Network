@@ -115,14 +115,16 @@
                     script.src = '../assets/svg-graph-network.js';
                 }
                 script.onload = function () {
-                    console.log('SVGGraphNetwork script loaded successfully');
-                    // Trigger initialization if it's waiting
-                    if (window.initializeWhenReady) {
-                        window.initializeWhenReady();
-                    }
+                    console.log('GraphNetwork script loaded successfully');
+                    // Small delay to ensure global variable is available
+                    setTimeout(function() {
+                        if (window.initializeWhenReady) {
+                            window.initializeWhenReady();
+                        }
+                    }, 10);
                 };
                 script.onerror = function () {
-                    console.error('Failed to load SVGGraphNetwork script from:', script.src);
+                    console.error('Failed to load GraphNetwork script from:', script.src);
                 };
                 document.head.appendChild(script);
             })();
