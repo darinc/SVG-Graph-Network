@@ -5,9 +5,9 @@
 
 import { GraphNetwork } from '../../src/GraphNetwork';
 import { NodeData, LinkData, EdgeData, GraphData } from '../../src/types/index';
-import { 
-    NodeValidationError, 
-    NodeExistsError, 
+import {
+    NodeValidationError,
+    NodeExistsError,
     NodeNotFoundError,
     EdgeValidationError,
     EdgeExistsError,
@@ -15,7 +15,6 @@ import {
     InvalidEdgeReferencesError
 } from '../../src/errors/GraphErrors';
 import { createMockContainer, cleanupContainer } from '../utils/testHelpers';
-
 
 // Sample test data
 const sampleNodes: NodeData[] = [
@@ -41,11 +40,11 @@ describe('GraphNetwork', () => {
     beforeEach(() => {
         // Create a mock container using the helper
         container = createMockContainer('test-container');
-        
+
         // Initialize graph with minimal config
         graph = new GraphNetwork('test-container', {
-            config: { 
-                showControls: false, 
+            config: {
+                showControls: false,
                 showLegend: false,
                 showTitle: false,
                 showBreadcrumbs: false
@@ -319,7 +318,10 @@ describe('GraphNetwork', () => {
 
         describe('updateEdge()', () => {
             it('should update edge properties', () => {
-                const result = graph.updateEdge('edge1', { label: 'Updated Connection', weight: 5 });
+                const result = graph.updateEdge('edge1', {
+                    label: 'Updated Connection',
+                    weight: 5
+                });
                 expect(result).toBe(true);
 
                 const edge = graph.getEdge('edge1');
@@ -370,7 +372,7 @@ describe('GraphNetwork', () => {
             it('should return a copy of node data', () => {
                 const node = graph.getNode('node1');
                 node!.name = 'Modified';
-                
+
                 const originalNode = graph.getNode('node1');
                 expect(originalNode?.name).toBe('Node 1'); // Should not be modified
             });
@@ -461,9 +463,9 @@ describe('GraphNetwork', () => {
                     { id: 'node2', name: 'Performance Test 2' }
                 ];
 
-                const updatedIds = graph.updateNodes(updates, { 
+                const updatedIds = graph.updateNodes(updates, {
                     skipRedraw: true,
-                    skipValidation: false 
+                    skipValidation: false
                 });
 
                 expect(updatedIds).toHaveLength(2);
@@ -555,9 +557,7 @@ describe('GraphNetwork', () => {
                         { id: 'node1', name: 'Updated Node 1' }, // Conflict
                         { id: 'node4', name: 'New Node 4' } // New
                     ],
-                    links: [
-                        { source: 'node1', target: 'node4', label: 'New Connection' }
-                    ]
+                    links: [{ source: 'node1', target: 'node4', label: 'New Connection' }]
                 };
 
                 graph.mergeData(mergeData, {
@@ -610,7 +610,7 @@ describe('GraphNetwork', () => {
 
             it('should handle clear options', () => {
                 graph.setData(sampleGraphData);
-                
+
                 graph.clearData({ animate: true, duration: 500 });
 
                 expect(graph.getNodes()).toHaveLength(0);
@@ -653,9 +653,9 @@ describe('GraphNetwork', () => {
 
             it('should rollback transaction changes', () => {
                 const originalName = graph.getNode('node1')?.name;
-                
+
                 graph.startTransaction();
-                
+
                 // Make changes
                 graph.addNode({ id: 'rollback-node', name: 'Rollback Node' });
                 graph.updateNode('node1', { name: 'Rollback Update' });
@@ -679,7 +679,7 @@ describe('GraphNetwork', () => {
         describe('Transaction State Management', () => {
             it('should prevent nested transactions', () => {
                 graph.startTransaction();
-                
+
                 expect(() => {
                     graph.startTransaction();
                 }).toThrow('Transaction already in progress');
@@ -702,7 +702,7 @@ describe('GraphNetwork', () => {
 
                 const txId = graph.startTransaction();
                 const status = graph.getTransactionStatus();
-                
+
                 expect(status).toBeDefined();
                 expect(status?.id).toBe(txId);
                 expect(status?.operationCount).toBe(0);

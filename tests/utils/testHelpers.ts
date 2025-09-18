@@ -47,7 +47,12 @@ export function createSampleGraphData(): GraphData {
             createMockLink({ source: 'node1', target: 'node2', label: 'connects to' }),
             createMockLink({ source: 'node2', target: 'node3', label: 'flows to' }),
             createMockLink({ source: 'node3', target: 'node4', label: 'leads to' }),
-            createMockLink({ source: 'node1', target: 'node4', label: 'related to', line_type: 'dashed' })
+            createMockLink({
+                source: 'node1',
+                target: 'node4',
+                label: 'related to',
+                line_type: 'dashed'
+            })
         ]
     };
 }
@@ -76,7 +81,10 @@ export function cleanupContainer(container: HTMLElement | null): void {
 /**
  * Create mock event object
  */
-export function createMockEvent(type: string = 'click', overrides: Partial<Event> = {}): Event & { clientX?: number; clientY?: number; target?: Element } {
+export function createMockEvent(
+    type: string = 'click',
+    overrides: Partial<Event> = {}
+): Event & { clientX?: number; clientY?: number; target?: Element } {
     return {
         type,
         preventDefault: jest.fn(),
@@ -91,17 +99,16 @@ export function createMockEvent(type: string = 'click', overrides: Partial<Event
 /**
  * Create mock touch event
  */
-export function createMockTouchEvent(type: string = 'touchstart', overrides: Partial<TouchEvent> = {}): TouchEvent {
+export function createMockTouchEvent(
+    type: string = 'touchstart',
+    overrides: Partial<TouchEvent> = {}
+): TouchEvent {
     return {
         type,
         preventDefault: jest.fn(),
         stopPropagation: jest.fn(),
-        touches: [
-            { clientX: 100, clientY: 100, identifier: 0 } as Touch
-        ],
-        changedTouches: [
-            { clientX: 100, clientY: 100, identifier: 0 } as Touch
-        ],
+        touches: [{ clientX: 100, clientY: 100, identifier: 0 } as Touch],
+        changedTouches: [{ clientX: 100, clientY: 100, identifier: 0 } as Touch],
         ...overrides
     } as TouchEvent;
 }

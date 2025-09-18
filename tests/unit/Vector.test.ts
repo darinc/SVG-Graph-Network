@@ -32,7 +32,7 @@ describe('Vector', () => {
             const v1 = new Vector(10, 20);
             const v2 = new Vector(5, 15);
             const result = v1.add(v2);
-            
+
             expect(result.x).toBe(15);
             expect(result.y).toBe(35);
         });
@@ -41,7 +41,7 @@ describe('Vector', () => {
             const v1 = new Vector(10, 20);
             const v2 = new Vector(-5, -15);
             const result = v1.add(v2);
-            
+
             expect(result.x).toBe(5);
             expect(result.y).toBe(5);
         });
@@ -50,7 +50,7 @@ describe('Vector', () => {
             const v1 = new Vector(10, 20);
             const v2 = new Vector(5, 15);
             const result = v1.add(v2);
-            
+
             expect(v1.x).toBe(10);
             expect(v1.y).toBe(20);
             expect(result).not.toBe(v1);
@@ -60,7 +60,7 @@ describe('Vector', () => {
             const v1 = new Vector(10, 20);
             const v2 = new Vector(0, 0);
             const result = v1.add(v2);
-            
+
             expect(result.x).toBe(10);
             expect(result.y).toBe(20);
         });
@@ -71,7 +71,7 @@ describe('Vector', () => {
             const v1 = new Vector(10, 20);
             const v2 = new Vector(5, 15);
             const result = v1.subtract(v2);
-            
+
             expect(result.x).toBe(5);
             expect(result.y).toBe(5);
         });
@@ -80,7 +80,7 @@ describe('Vector', () => {
             const v1 = new Vector(10, 20);
             const v2 = new Vector(-5, -15);
             const result = v1.subtract(v2);
-            
+
             expect(result.x).toBe(15);
             expect(result.y).toBe(35);
         });
@@ -89,7 +89,7 @@ describe('Vector', () => {
             const v1 = new Vector(10, 20);
             const v2 = new Vector(5, 15);
             const result = v1.subtract(v2);
-            
+
             expect(v1.x).toBe(10);
             expect(v1.y).toBe(20);
             expect(result).not.toBe(v1);
@@ -99,7 +99,7 @@ describe('Vector', () => {
             const v1 = new Vector(10, 20);
             const v2 = new Vector(10, 20);
             const result = v1.subtract(v2);
-            
+
             expect(result.x).toBe(0);
             expect(result.y).toBe(0);
         });
@@ -109,7 +109,7 @@ describe('Vector', () => {
         test('should multiply vector by scalar correctly', () => {
             const vector = new Vector(10, 20);
             const result = vector.multiply(2);
-            
+
             expect(result.x).toBe(20);
             expect(result.y).toBe(40);
         });
@@ -117,7 +117,7 @@ describe('Vector', () => {
         test('should handle negative scalar multiplication', () => {
             const vector = new Vector(10, 20);
             const result = vector.multiply(-2);
-            
+
             expect(result.x).toBe(-20);
             expect(result.y).toBe(-40);
         });
@@ -125,7 +125,7 @@ describe('Vector', () => {
         test('should handle zero scalar multiplication', () => {
             const vector = new Vector(10, 20);
             const result = vector.multiply(0);
-            
+
             expect(result.x).toBe(0);
             expect(result.y).toBe(0);
         });
@@ -133,7 +133,7 @@ describe('Vector', () => {
         test('should handle fractional scalar multiplication', () => {
             const vector = new Vector(10, 20);
             const result = vector.multiply(0.5);
-            
+
             expect(result.x).toBe(5);
             expect(result.y).toBe(10);
         });
@@ -141,7 +141,7 @@ describe('Vector', () => {
         test('should not modify original vector', () => {
             const vector = new Vector(10, 20);
             const result = vector.multiply(2);
-            
+
             expect(vector.x).toBe(10);
             expect(vector.y).toBe(20);
             expect(result).not.toBe(vector);
@@ -152,7 +152,7 @@ describe('Vector', () => {
         test('should divide vector by scalar correctly', () => {
             const vector = new Vector(10, 20);
             const result = vector.divide(2);
-            
+
             expect(result.x).toBe(5);
             expect(result.y).toBe(10);
         });
@@ -160,7 +160,7 @@ describe('Vector', () => {
         test('should handle negative scalar division', () => {
             const vector = new Vector(10, 20);
             const result = vector.divide(-2);
-            
+
             expect(result.x).toBe(-5);
             expect(result.y).toBe(-10);
         });
@@ -168,14 +168,14 @@ describe('Vector', () => {
         test('should handle fractional scalar division', () => {
             const vector = new Vector(10, 20);
             const result = vector.divide(0.5);
-            
+
             expect(result.x).toBe(20);
             expect(result.y).toBe(40);
         });
 
         test('should throw error when dividing by zero', () => {
             const vector = new Vector(10, 20);
-            
+
             expect(() => {
                 vector.divide(0);
             }).toThrow('Division by zero');
@@ -184,7 +184,7 @@ describe('Vector', () => {
         test('should not modify original vector', () => {
             const vector = new Vector(10, 20);
             const result = vector.divide(2);
-            
+
             expect(vector.x).toBe(10);
             expect(vector.y).toBe(20);
             expect(result).not.toBe(vector);
@@ -215,7 +215,7 @@ describe('Vector', () => {
         test('should calculate magnitude for unit vectors', () => {
             const vector1 = new Vector(1, 0);
             const vector2 = new Vector(0, 1);
-            
+
             expect(vector1.magnitude()).toBe(1);
             expect(vector2.magnitude()).toBe(1);
         });
@@ -225,7 +225,7 @@ describe('Vector', () => {
         test('should normalize vector to unit length', () => {
             const vector = new Vector(3, 4);
             const normalized = vector.normalize();
-            
+
             expect(normalized.magnitude()).toBeCloseTo(1);
             expect(normalized.x).toBeCloseTo(0.6);
             expect(normalized.y).toBeCloseTo(0.8);
@@ -234,7 +234,7 @@ describe('Vector', () => {
         test('should handle negative coordinates', () => {
             const vector = new Vector(-3, -4);
             const normalized = vector.normalize();
-            
+
             expect(normalized.magnitude()).toBeCloseTo(1);
             expect(normalized.x).toBeCloseTo(-0.6);
             expect(normalized.y).toBeCloseTo(-0.8);
@@ -242,7 +242,7 @@ describe('Vector', () => {
 
         test('should throw error for zero vector', () => {
             const vector = new Vector(0, 0);
-            
+
             expect(() => {
                 vector.normalize();
             }).toThrow('Cannot normalize zero vector');
@@ -251,7 +251,7 @@ describe('Vector', () => {
         test('should not modify original vector', () => {
             const vector = new Vector(3, 4);
             const normalized = vector.normalize();
-            
+
             expect(vector.x).toBe(3);
             expect(vector.y).toBe(4);
             expect(normalized).not.toBe(vector);
@@ -260,7 +260,7 @@ describe('Vector', () => {
         test('should handle already normalized vector', () => {
             const vector = new Vector(1, 0);
             const normalized = vector.normalize();
-            
+
             expect(normalized.magnitude()).toBeCloseTo(1);
             expect(normalized.x).toBeCloseTo(1);
             expect(normalized.y).toBeCloseTo(0);
@@ -271,35 +271,35 @@ describe('Vector', () => {
         test('should calculate distance between two vectors correctly', () => {
             const v1 = new Vector(0, 0);
             const v2 = new Vector(3, 4);
-            
+
             expect(Vector.distance(v1, v2)).toBe(5);
         });
 
         test('should handle negative coordinates', () => {
             const v1 = new Vector(-1, -1);
             const v2 = new Vector(2, 3);
-            
+
             expect(Vector.distance(v1, v2)).toBe(5);
         });
 
         test('should return zero for identical vectors', () => {
             const v1 = new Vector(10, 20);
             const v2 = new Vector(10, 20);
-            
+
             expect(Vector.distance(v1, v2)).toBe(0);
         });
 
         test('should be symmetric', () => {
             const v1 = new Vector(1, 2);
             const v2 = new Vector(4, 6);
-            
+
             expect(Vector.distance(v1, v2)).toBe(Vector.distance(v2, v1));
         });
 
         test('should handle floating point coordinates', () => {
             const v1 = new Vector(0.5, 0.5);
             const v2 = new Vector(1.5, 1.5);
-            
+
             expect(Vector.distance(v1, v2)).toBeCloseTo(Math.sqrt(2));
         });
     });

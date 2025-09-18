@@ -1,7 +1,7 @@
 /**
  * PhysicsManager Tests
- * 
- * Tests the physics integration layer that extracts physics responsibilities 
+ *
+ * Tests the physics integration layer that extracts physics responsibilities
  * from the GraphNetwork God Object.
  */
 
@@ -18,25 +18,37 @@ describe('PhysicsManager', () => {
 
     beforeEach(() => {
         // Create mock nodes
-        const node1 = new Node<NodeData>({
-            id: 'node1',
-            name: 'Node 1',
-            type: 'default'
-        }, 800, 600);
+        const node1 = new Node<NodeData>(
+            {
+                id: 'node1',
+                name: 'Node 1',
+                type: 'default'
+            },
+            800,
+            600
+        );
         node1.position = new Vector(100, 100);
 
-        const node2 = new Node<NodeData>({
-            id: 'node2',
-            name: 'Node 2',
-            type: 'default'
-        }, 800, 600);
+        const node2 = new Node<NodeData>(
+            {
+                id: 'node2',
+                name: 'Node 2',
+                type: 'default'
+            },
+            800,
+            600
+        );
         node2.position = new Vector(200, 200);
 
-        const node3 = new Node<NodeData>({
-            id: 'node3',
-            name: 'Node 3',
-            type: 'default'
-        }, 800, 600);
+        const node3 = new Node<NodeData>(
+            {
+                id: 'node3',
+                name: 'Node 3',
+                type: 'default'
+            },
+            800,
+            600
+        );
         node3.position = new Vector(300, 300);
 
         mockNodes = new Map([
@@ -94,9 +106,9 @@ describe('PhysicsManager', () => {
     describe('Simulation State Management', () => {
         test('should start simulation', () => {
             expect(physicsManager.isActive()).toBeFalsy();
-            
+
             physicsManager.start();
-            
+
             expect(physicsManager.isActive()).toBeTruthy();
             const metrics = physicsManager.getMetrics();
             expect(metrics.isSimulating).toBeTruthy();
@@ -107,9 +119,9 @@ describe('PhysicsManager', () => {
         test('should stop simulation', () => {
             physicsManager.start();
             expect(physicsManager.isActive()).toBeTruthy();
-            
+
             physicsManager.stop();
-            
+
             expect(physicsManager.isActive()).toBeFalsy();
             const metrics = physicsManager.getMetrics();
             expect(metrics.isSimulating).toBeFalsy();
@@ -120,33 +132,33 @@ describe('PhysicsManager', () => {
         test('should pause and resume simulation', () => {
             physicsManager.start();
             expect(physicsManager.isActive()).toBeTruthy();
-            
+
             physicsManager.pause();
             expect(physicsManager.isActive()).toBeFalsy();
-            
+
             const metrics = physicsManager.getMetrics();
             expect(metrics.isSimulating).toBeTruthy();
             expect(metrics.isPaused).toBeTruthy();
             expect(metrics.isActive).toBeFalsy();
-            
+
             physicsManager.resume();
             expect(physicsManager.isActive()).toBeTruthy();
         });
 
         test('should not resume if not simulating', () => {
             expect(physicsManager.isActive()).toBeFalsy();
-            
+
             physicsManager.resume();
-            
+
             expect(physicsManager.isActive()).toBeFalsy();
         });
 
         test('should reset simulation state', () => {
             physicsManager.start();
             physicsManager.pause();
-            
+
             physicsManager.reset();
-            
+
             const metrics = physicsManager.getMetrics();
             expect(metrics.isSimulating).toBeFalsy();
             expect(metrics.isPaused).toBeFalsy();
@@ -161,54 +173,58 @@ describe('PhysicsManager', () => {
 
         test('should execute simulation step when active', () => {
             const result = physicsManager.simulateStep(mockNodes, mockLinks, filteredNodes);
-            
+
             expect(result).toBeTruthy();
         });
 
         test('should skip simulation step when inactive', () => {
             physicsManager.stop();
-            
+
             const result = physicsManager.simulateStep(mockNodes, mockLinks, filteredNodes);
-            
+
             expect(result).toBeFalsy();
         });
 
         test('should skip simulation step when paused', () => {
             physicsManager.pause();
-            
+
             const result = physicsManager.simulateStep(mockNodes, mockLinks, filteredNodes);
-            
+
             expect(result).toBeFalsy();
         });
 
         test('should handle empty node maps', () => {
             const emptyNodes = new Map<string, Node<NodeData>>();
             const emptyFiltered = new Set<string>();
-            
+
             const result = physicsManager.simulateStep(emptyNodes, [], emptyFiltered);
-            
+
             expect(result).toBeTruthy(); // Should still execute even with no nodes
         });
 
         test('should handle empty links', () => {
             const result = physicsManager.simulateStep(mockNodes, [], filteredNodes);
-            
+
             expect(result).toBeTruthy();
         });
 
         test('should filter out invalid links', () => {
-            const invalidNode = new Node<NodeData>({
-                id: 'invalid',
-                name: 'Invalid'
-            }, 800, 600);
-            
+            const invalidNode = new Node<NodeData>(
+                {
+                    id: 'invalid',
+                    name: 'Invalid'
+                },
+                800,
+                600
+            );
+
             const invalidLinks: GraphLink<NodeData>[] = [
                 { source: mockNodes.get('node1')!, target: invalidNode }, // Target not in nodes map
                 { source: mockNodes.get('node1')!, target: mockNodes.get('node2')! } // Valid link
             ];
-            
+
             const result = physicsManager.simulateStep(mockNodes, invalidLinks, filteredNodes);
-            
+
             expect(result).toBeTruthy();
         });
     });
@@ -223,9 +239,13 @@ describe('PhysicsManager', () => {
                 { source: 'node1', target: 'node2', weight: 1.0 },
                 { source: 'node2', target: 'node3', weight: 0.5 }
             ];
-            
-            const result = physicsManager.simulateStepWithRawLinks(mockNodes, rawLinks, filteredNodes);
-            
+
+            const result = physicsManager.simulateStepWithRawLinks(
+                mockNodes,
+                rawLinks,
+                filteredNodes
+            );
+
             expect(result).toBeTruthy();
         });
 
@@ -234,21 +254,27 @@ describe('PhysicsManager', () => {
                 { source: 'node1', target: 'nonexistent' },
                 { source: 'node1', target: 'node2' }
             ];
-            
-            const result = physicsManager.simulateStepWithRawLinks(mockNodes, rawLinks, filteredNodes);
-            
+
+            const result = physicsManager.simulateStepWithRawLinks(
+                mockNodes,
+                rawLinks,
+                filteredNodes
+            );
+
             expect(result).toBeTruthy();
         });
 
         test('should skip raw links simulation when inactive', () => {
             physicsManager.stop();
-            
-            const rawLinks: RawLinkData[] = [
-                { source: 'node1', target: 'node2' }
-            ];
-            
-            const result = physicsManager.simulateStepWithRawLinks(mockNodes, rawLinks, filteredNodes);
-            
+
+            const rawLinks: RawLinkData[] = [{ source: 'node1', target: 'node2' }];
+
+            const result = physicsManager.simulateStepWithRawLinks(
+                mockNodes,
+                rawLinks,
+                filteredNodes
+            );
+
             expect(result).toBeFalsy();
         });
     });
@@ -259,9 +285,9 @@ describe('PhysicsManager', () => {
                 damping: 0.7,
                 repulsionStrength: 3000
             };
-            
+
             physicsManager.updateConfig(newConfig);
-            
+
             const config = physicsManager.getConfig();
             expect(config.damping).toBe(0.7);
             expect(config.repulsionStrength).toBe(3000);
@@ -270,9 +296,9 @@ describe('PhysicsManager', () => {
         test('should preserve existing config when updating partial config', () => {
             const originalConfig = physicsManager.getConfig();
             const originalAttraction = originalConfig.attractionStrength;
-            
+
             physicsManager.updateConfig({ damping: 0.85 });
-            
+
             const updatedConfig = physicsManager.getConfig();
             expect(updatedConfig.damping).toBe(0.85);
             expect(updatedConfig.attractionStrength).toBe(originalAttraction);
@@ -285,19 +311,19 @@ describe('PhysicsManager', () => {
             expect(metrics.isSimulating).toBeFalsy();
             expect(metrics.isPaused).toBeFalsy();
             expect(metrics.isActive).toBeFalsy();
-            
+
             physicsManager.start();
             metrics = physicsManager.getMetrics();
             expect(metrics.isSimulating).toBeTruthy();
             expect(metrics.isPaused).toBeFalsy();
             expect(metrics.isActive).toBeTruthy();
-            
+
             physicsManager.pause();
             metrics = physicsManager.getMetrics();
             expect(metrics.isSimulating).toBeTruthy();
             expect(metrics.isPaused).toBeTruthy();
             expect(metrics.isActive).toBeFalsy();
-            
+
             physicsManager.stop();
             metrics = physicsManager.getMetrics();
             expect(metrics.isSimulating).toBeFalsy();
@@ -309,7 +335,7 @@ describe('PhysicsManager', () => {
     describe('Integration with PhysicsEngine', () => {
         test('should properly initialize underlying PhysicsEngine', () => {
             const config = physicsManager.getConfig();
-            
+
             // Verify that config properties are accessible
             expect(typeof config.damping).toBe('number');
             expect(typeof config.repulsionStrength).toBe('number');
@@ -319,9 +345,9 @@ describe('PhysicsManager', () => {
         test('should delegate config updates to PhysicsEngine', () => {
             const originalDamping = physicsManager.getConfig().damping;
             const newDamping = originalDamping * 0.8;
-            
+
             physicsManager.updateConfig({ damping: newDamping });
-            
+
             expect(physicsManager.getConfig().damping).toBe(newDamping);
         });
     });
@@ -330,9 +356,9 @@ describe('PhysicsManager', () => {
         test('should clean up resources on destroy', () => {
             physicsManager.start();
             expect(physicsManager.isActive()).toBeTruthy();
-            
+
             physicsManager.destroy();
-            
+
             expect(physicsManager.isActive()).toBeFalsy();
         });
 
@@ -349,9 +375,9 @@ describe('PhysicsManager', () => {
             const sparseNodes = new Map<string, Node<NodeData>>();
             sparseNodes.set('node1', mockNodes.get('node1')!);
             // node2 and node3 missing
-            
+
             physicsManager.start();
-            
+
             expect(() => {
                 physicsManager.simulateStep(sparseNodes, mockLinks, new Set(['node1']));
             }).not.toThrow();
@@ -359,18 +385,18 @@ describe('PhysicsManager', () => {
 
         test('should handle empty filtered nodes set', () => {
             physicsManager.start();
-            
+
             const result = physicsManager.simulateStep(mockNodes, mockLinks, new Set());
-            
+
             expect(result).toBeTruthy();
         });
 
-        test('should handle filtered nodes that don\'t exist in nodes map', () => {
+        test("should handle filtered nodes that don't exist in nodes map", () => {
             physicsManager.start();
             const invalidFiltered = new Set(['node1', 'nonexistent', 'node2']);
-            
+
             const result = physicsManager.simulateStep(mockNodes, mockLinks, invalidFiltered);
-            
+
             expect(result).toBeTruthy();
         });
     });

@@ -1,6 +1,6 @@
 /**
  * UIManager Tests
- * 
+ *
  * Comprehensive tests for the UIManager component to improve
  * test coverage from 19.07% to full coverage
  */
@@ -13,8 +13,8 @@ import { NodeData, UIConfig } from '../../../src/types/index';
 // Mock DOM environment
 Object.defineProperty(window, 'getComputedStyle', {
     value: () => ({
-        getPropertyValue: () => '',
-    }),
+        getPropertyValue: () => ''
+    })
 });
 
 describe('UIManager', () => {
@@ -35,24 +35,36 @@ describe('UIManager', () => {
 
         // Create mock nodes
         mockNodes = [
-            new Node<NodeData>({
-                id: 'node1',
-                name: 'Circle Node',
-                type: 'primary',
-                shape: 'circle'
-            }, 800, 600),
-            new Node<NodeData>({
-                id: 'node2',
-                name: 'Rectangle Node',
-                type: 'secondary',
-                shape: 'rectangle'
-            }, 800, 600),
-            new Node<NodeData>({
-                id: 'node3',
-                name: 'Triangle Node',
-                type: 'tertiary',
-                shape: 'triangle'
-            }, 800, 600)
+            new Node<NodeData>(
+                {
+                    id: 'node1',
+                    name: 'Circle Node',
+                    type: 'primary',
+                    shape: 'circle'
+                },
+                800,
+                600
+            ),
+            new Node<NodeData>(
+                {
+                    id: 'node2',
+                    name: 'Rectangle Node',
+                    type: 'secondary',
+                    shape: 'rectangle'
+                },
+                800,
+                600
+            ),
+            new Node<NodeData>(
+                {
+                    id: 'node3',
+                    name: 'Triangle Node',
+                    type: 'tertiary',
+                    shape: 'triangle'
+                },
+                800,
+                600
+            )
         ];
 
         // Create callbacks
@@ -130,14 +142,14 @@ describe('UIManager', () => {
 
         test('should update title text', () => {
             uiManager.updateTitle('Updated Graph Title');
-            
+
             const titleElement = container.querySelector('.graph-network-title');
             expect(titleElement?.textContent).toBe('Updated Graph Title');
         });
 
         test('should apply theme colors to title', () => {
             uiManager.updateThemeColors();
-            
+
             const titleElement = container.querySelector('.graph-network-title') as HTMLElement;
             expect(titleElement).not.toBeNull();
             // Theme colors should be applied via CSS
@@ -160,7 +172,9 @@ describe('UIManager', () => {
             const breadcrumbContainer = container.querySelector('.graph-network-breadcrumbs');
             expect(breadcrumbContainer).not.toBeNull();
 
-            const breadcrumbItems = breadcrumbContainer?.querySelectorAll('.graph-network-breadcrumb');
+            const breadcrumbItems = breadcrumbContainer?.querySelectorAll(
+                '.graph-network-breadcrumb'
+            );
             expect(breadcrumbItems?.length).toBe(2);
         });
 
@@ -172,7 +186,9 @@ describe('UIManager', () => {
 
             uiManager.renderBreadcrumbs(breadcrumbs);
 
-            const clickableItem = container.querySelector('.graph-network-breadcrumb[data-action="reset"]') as HTMLElement;
+            const clickableItem = container.querySelector(
+                '.graph-network-breadcrumb[data-action="reset"]'
+            ) as HTMLElement;
             expect(clickableItem).not.toBeNull();
 
             // Simulate click
@@ -214,12 +230,16 @@ describe('UIManager', () => {
 
             const newNodes = [
                 ...mockNodes,
-                new Node<NodeData>({
-                    id: 'node4',
-                    name: 'Square Node',
-                    type: 'quaternary',
-                    shape: 'square'
-                }, 800, 600)
+                new Node<NodeData>(
+                    {
+                        id: 'node4',
+                        name: 'Square Node',
+                        type: 'quaternary',
+                        shape: 'square'
+                    },
+                    800,
+                    600
+                )
             ];
 
             uiManager.updateLegend(newNodes);
@@ -231,12 +251,16 @@ describe('UIManager', () => {
         test('should group legend items by type and shape', () => {
             const duplicateTypeNodes = [
                 ...mockNodes,
-                new Node<NodeData>({
-                    id: 'node4',
-                    name: 'Another Primary',
-                    type: 'primary',
-                    shape: 'circle'
-                }, 800, 600)
+                new Node<NodeData>(
+                    {
+                        id: 'node4',
+                        name: 'Another Primary',
+                        type: 'primary',
+                        shape: 'circle'
+                    },
+                    800,
+                    600
+                )
             ];
 
             uiManager.updateLegend(duplicateTypeNodes);
@@ -290,7 +314,9 @@ describe('UIManager', () => {
         });
 
         test('should handle reset view button click', () => {
-            const resetBtn = container.querySelector('.graph-network-reset-view-button') as HTMLElement;
+            const resetBtn = container.querySelector(
+                '.graph-network-reset-view-button'
+            ) as HTMLElement;
             resetBtn.click();
 
             expect(callbacks.onResetView).toHaveBeenCalled();
@@ -308,15 +334,19 @@ describe('UIManager', () => {
         });
 
         test('should handle theme toggle click', () => {
-            const themeToggle = container.querySelector('.graph-network-theme-toggle') as HTMLElement;
+            const themeToggle = container.querySelector(
+                '.graph-network-theme-toggle'
+            ) as HTMLElement;
             themeToggle.click();
 
             expect(callbacks.onToggleTheme).toHaveBeenCalled();
         });
 
         test('should update theme toggle appearance', () => {
-            const themeToggle = container.querySelector('.graph-network-theme-toggle') as HTMLElement;
-            
+            const themeToggle = container.querySelector(
+                '.graph-network-theme-toggle'
+            ) as HTMLElement;
+
             uiManager.updateThemeToggle('light');
             expect(themeToggle.textContent).toBe('🌙');
 
@@ -343,12 +373,17 @@ describe('UIManager', () => {
         test('should not create physics controls when disabled', () => {
             // Test with showControls: false
             const disabledConfig: Partial<UIConfig> = { showControls: false };
-            const disabledManager = new UIManager(container, disabledConfig, callbacks, themeManager);
+            const disabledManager = new UIManager(
+                container,
+                disabledConfig,
+                callbacks,
+                themeManager
+            );
             disabledManager.initialize();
 
             const physicsPanel = container.querySelector('.graph-network-settings');
             expect(physicsPanel).toBeNull();
-            
+
             disabledManager.destroy();
         });
 
@@ -405,7 +440,7 @@ describe('UIManager', () => {
 
         test('should update configuration', () => {
             const newConfig = { title: 'Updated Title' };
-            
+
             uiManager.updateConfig(newConfig);
 
             // Verify config was updated
@@ -415,7 +450,7 @@ describe('UIManager', () => {
 
         test('should get UI elements', () => {
             const elements = uiManager.getUIElements();
-            
+
             expect(elements).not.toBeNull();
             expect(elements?.container).toBeDefined();
             expect(elements?.titleElement).toBeDefined();
@@ -443,7 +478,7 @@ describe('UIManager', () => {
             // Elements should have theme colors applied
             const titleElement = container.querySelector('.graph-network-title');
             const legendElement = container.querySelector('.graph-network-legend');
-            
+
             expect(titleElement).not.toBeNull();
             expect(legendElement).not.toBeNull();
         });
@@ -487,12 +522,16 @@ describe('UIManager', () => {
 
     describe('Error Handling', () => {
         test('should handle missing theme manager gracefully', () => {
-            const noThemeManager = new UIManager(container, { 
-                showTitle: false,
-                showLegend: false,
-                showThemeToggle: false
-            }, callbacks);
-            
+            const noThemeManager = new UIManager(
+                container,
+                {
+                    showTitle: false,
+                    showLegend: false,
+                    showThemeToggle: false
+                },
+                callbacks
+            );
+
             expect(() => {
                 noThemeManager.initialize();
                 noThemeManager.updateThemeColors();
@@ -502,23 +541,28 @@ describe('UIManager', () => {
 
         test('should handle missing callbacks gracefully', () => {
             const noCallbacksManager = new UIManager(container, {}, {}, themeManager);
-            
+
             expect(() => {
                 noCallbacksManager.initialize();
-                
+
                 // Try to trigger callbacks that don't exist
                 const zoomBtn = container.querySelector('.zoom-in-btn') as HTMLElement;
                 zoomBtn?.click();
-                
+
                 noCallbacksManager.destroy();
             }).not.toThrow();
         });
 
         test('should handle invalid configuration gracefully', () => {
             const invalidConfig = { title: null as any };
-            
+
             expect(() => {
-                const invalidManager = new UIManager(container, invalidConfig, callbacks, themeManager);
+                const invalidManager = new UIManager(
+                    container,
+                    invalidConfig,
+                    callbacks,
+                    themeManager
+                );
                 invalidManager.initialize();
                 invalidManager.destroy();
             }).not.toThrow();
@@ -542,7 +586,7 @@ describe('UIManager', () => {
 
         test('should support keyboard navigation', () => {
             const buttons = container.querySelectorAll('button');
-            
+
             buttons.forEach(button => {
                 expect(button.tabIndex).toBeGreaterThanOrEqual(0);
             });
@@ -551,13 +595,19 @@ describe('UIManager', () => {
 
     describe('Performance', () => {
         test('should handle large number of legend items efficiently', () => {
-            const largeNodeSet = Array.from({ length: 1000 }, (_, i) => 
-                new Node<NodeData>({
-                    id: `node-${i}`,
-                    name: `Node ${i}`,
-                    type: `type-${i % 10}`,
-                    shape: 'circle'
-                }, 800, 600)
+            const largeNodeSet = Array.from(
+                { length: 1000 },
+                (_, i) =>
+                    new Node<NodeData>(
+                        {
+                            id: `node-${i}`,
+                            name: `Node ${i}`,
+                            type: `type-${i % 10}`,
+                            shape: 'circle'
+                        },
+                        800,
+                        600
+                    )
             );
 
             uiManager.initialize();
@@ -572,14 +622,14 @@ describe('UIManager', () => {
 
         test('should batch DOM updates efficiently', () => {
             uiManager.initialize();
-            
+
             // Multiple rapid updates should not cause performance issues
             const startTime = performance.now();
-            
+
             for (let i = 0; i < 100; i++) {
                 uiManager.updateTitle(`Title ${i}`);
             }
-            
+
             const endTime = performance.now();
             expect(endTime - startTime).toBeLessThan(50);
         });

@@ -35,13 +35,13 @@ describe('StyleManager', () => {
     beforeEach(() => {
         // Clear any existing dynamic stylesheets
         document.head.innerHTML = '';
-        
+
         // Mock setTimeout to execute immediately in tests
         jest.spyOn(global, 'setTimeout').mockImplementation((fn: any) => {
             fn();
             return 123 as any;
         });
-        
+
         mockCallback = jest.fn((event: StyleEvent) => {
             lastEvent = event;
         });
@@ -51,7 +51,7 @@ describe('StyleManager', () => {
 
     afterEach(() => {
         jest.restoreAllMocks();
-        
+
         // Clean up any created stylesheets
         const dynamicStyle = document.getElementById('graph-dynamic-styles');
         if (dynamicStyle) {
@@ -82,13 +82,13 @@ describe('StyleManager', () => {
         test('should merge with existing node styles', () => {
             styleManager.setNodeStyle('node1', { fill: '#ff0000', strokeWidth: 2 });
             mockCallback.mockClear();
-            
+
             styleManager.setNodeStyle('node1', { stroke: '#000000', opacity: 0.5 });
 
             const style = styleManager.getNodeStyle('node1');
             expect(style).toMatchObject({
                 fill: '#ff0000',
-                stroke: '#000000', 
+                stroke: '#000000',
                 strokeWidth: 2,
                 opacity: 0.5
             });
@@ -111,8 +111,9 @@ describe('StyleManager', () => {
             expect(mockElement.setAttribute).toHaveBeenCalledWith('stroke-width', '3');
             expect(mockElement.setAttribute).toHaveBeenCalledWith('opacity', '0.8');
             // Note: size application depends on tagName, check if it was applied
-            const sizeCall = (mockElement.setAttribute as jest.Mock).mock.calls
-                .find(call => call[0] === 'r');
+            const sizeCall = (mockElement.setAttribute as jest.Mock).mock.calls.find(
+                call => call[0] === 'r'
+            );
             if (sizeCall) {
                 expect(sizeCall[1]).toBe('15');
             }
@@ -125,11 +126,13 @@ describe('StyleManager', () => {
             styleManager.setNodeStyle('node1', { size: 40 });
 
             // Check if rectangle sizing was applied
-            const widthCall = (mockElement.setAttribute as jest.Mock).mock.calls
-                .find(call => call[0] === 'width');
-            const heightCall = (mockElement.setAttribute as jest.Mock).mock.calls
-                .find(call => call[0] === 'height');
-                
+            const widthCall = (mockElement.setAttribute as jest.Mock).mock.calls.find(
+                call => call[0] === 'width'
+            );
+            const heightCall = (mockElement.setAttribute as jest.Mock).mock.calls.find(
+                call => call[0] === 'height'
+            );
+
             if (widthCall && heightCall) {
                 expect(widthCall[1]).toBe('40');
                 expect(heightCall[1]).toBe('40');
@@ -179,7 +182,10 @@ describe('StyleManager', () => {
             styleManager.setNodeState('node1', 'selected');
 
             expect(styleManager.getNodeState('node1')).toBe('selected');
-            expect(mockElement.classList.add).toHaveBeenCalledWith('graph-node', 'graph-node--selected');
+            expect(mockElement.classList.add).toHaveBeenCalledWith(
+                'graph-node',
+                'graph-node--selected'
+            );
         });
 
         test('should set edge visual state', () => {
@@ -189,7 +195,10 @@ describe('StyleManager', () => {
             styleManager.setEdgeState('edge1', 'highlighted');
 
             expect(styleManager.getEdgeState('edge1')).toBe('highlighted');
-            expect(mockElement.classList.add).toHaveBeenCalledWith('graph-edge', 'graph-edge--highlighted');
+            expect(mockElement.classList.add).toHaveBeenCalledWith(
+                'graph-edge',
+                'graph-edge--highlighted'
+            );
         });
 
         test('should not change state if already set', () => {
@@ -198,7 +207,7 @@ describe('StyleManager', () => {
 
             styleManager.setNodeState('node1', 'hover');
             (mockElement.classList.add as jest.Mock).mockClear();
-            
+
             styleManager.setNodeState('node1', 'hover'); // Same state
 
             expect(mockElement.classList.add).not.toHaveBeenCalled();
@@ -213,8 +222,14 @@ describe('StyleManager', () => {
 
             styleManager.updateStyles(['node1', 'node2'], { fill: '#00ff00', strokeWidth: 4 });
 
-            expect(styleManager.getNodeStyle('node1')).toMatchObject({ fill: '#00ff00', strokeWidth: 4 });
-            expect(styleManager.getNodeStyle('node2')).toMatchObject({ fill: '#00ff00', strokeWidth: 4 });
+            expect(styleManager.getNodeStyle('node1')).toMatchObject({
+                fill: '#00ff00',
+                strokeWidth: 4
+            });
+            expect(styleManager.getNodeStyle('node2')).toMatchObject({
+                fill: '#00ff00',
+                strokeWidth: 4
+            });
             expect(mockCallback).toHaveBeenCalled(); // At least called once
         });
 
@@ -241,7 +256,7 @@ describe('StyleManager', () => {
             styleManager.resetStyle(['node1']);
 
             expect(styleManager.getNodeStyle('node1')).toBeNull();
-            
+
             // Check that removeAttribute was called for style cleanup
             const removeAttributeCalls = (mockElement.removeAttribute as jest.Mock).mock.calls;
             expect(removeAttributeCalls.length).toBeGreaterThan(0);
@@ -272,7 +287,7 @@ describe('StyleManager', () => {
         test('should apply dark theme', () => {
             const mockNodeElement = createMockSVGElement();
             const mockEdgeElement = createMockSVGElement();
-            
+
             styleManager.registerElement('node1', 'node', mockNodeElement);
             styleManager.registerElement('edge1', 'edge', mockEdgeElement);
 
@@ -280,7 +295,7 @@ describe('StyleManager', () => {
 
             const nodeStyle = styleManager.getNodeStyle('node1');
             const edgeStyle = styleManager.getEdgeStyle('edge1');
-            
+
             expect(nodeStyle?.fill).toBe('#64748b');
             expect(nodeStyle?.stroke).toBe('#94a3b8');
             expect(edgeStyle?.stroke).toBe('#475569');
@@ -301,18 +316,18 @@ describe('StyleManager', () => {
     describe('Element Registration', () => {
         test('should register and unregister elements', () => {
             const mockElement = createMockSVGElement();
-            
+
             styleManager.registerElement('node1', 'node', mockElement);
             styleManager.setNodeStyle('node1', { fill: '#ff0000' });
-            
+
             // Element should receive style updates
             expect(mockElement.setAttribute).toHaveBeenCalledWith('fill', '#ff0000');
-            
+
             styleManager.unregisterElement('node1', 'node');
             (mockElement.setAttribute as jest.Mock).mockClear();
-            
+
             styleManager.setNodeStyle('node1', { stroke: '#000000' });
-            
+
             // Element should no longer receive updates
             expect(mockElement.setAttribute).not.toHaveBeenCalled();
         });
@@ -323,9 +338,9 @@ describe('StyleManager', () => {
             const mockElement = createMockSVGElement();
             styleManager.registerElement('node1', 'node', mockElement);
 
-            styleManager.setNodeStyle('node1', { 
+            styleManager.setNodeStyle('node1', {
                 className: 'custom-node-class',
-                fill: '#ff0000' 
+                fill: '#ff0000'
             });
 
             expect(mockElement.setAttribute).toHaveBeenCalledWith('class', 'custom-node-class');
@@ -339,7 +354,10 @@ describe('StyleManager', () => {
             styleManager.setNodeState('node1', 'selected');
 
             // Should remove old state classes and add new ones
-            expect(mockElement.classList.add).toHaveBeenCalledWith('graph-node', 'graph-node--selected');
+            expect(mockElement.classList.add).toHaveBeenCalledWith(
+                'graph-node',
+                'graph-node--selected'
+            );
         });
     });
 
@@ -353,7 +371,7 @@ describe('StyleManager', () => {
 
         test('should work without callback', () => {
             const managerWithoutCallback = new StyleManager();
-            
+
             expect(() => {
                 managerWithoutCallback.setNodeStyle('node1', { fill: '#ff0000' });
                 managerWithoutCallback.clearStyles();
@@ -364,7 +382,7 @@ describe('StyleManager', () => {
             const incompleteElement = {
                 // Missing setAttribute, removeAttribute, etc.
             } as SVGElement;
-            
+
             expect(() => {
                 styleManager.registerElement('node1', 'node', incompleteElement);
                 // This should fail gracefully when trying to apply styles
@@ -381,10 +399,10 @@ describe('StyleManager', () => {
             });
 
             const startTime = Date.now();
-            
+
             // Apply styles to many elements
             styleManager.updateStyles('all', { fill: '#ff0000', strokeWidth: 3 });
-            
+
             const endTime = Date.now();
             expect(endTime - startTime).toBeLessThan(100); // Should be fast
         });
@@ -396,7 +414,7 @@ describe('StyleManager', () => {
             // Set same style multiple times
             styleManager.setNodeStyle('node1', { fill: '#ff0000' });
             styleManager.setNodeStyle('node1', { fill: '#ff0000' }); // Same value
-            
+
             // Should still update (as it's additive), but efficiently
             expect(mockElement.setAttribute).toHaveBeenCalledWith('fill', '#ff0000');
         });

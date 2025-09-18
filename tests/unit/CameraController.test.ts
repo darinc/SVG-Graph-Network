@@ -25,7 +25,7 @@ const createMockTransformGroup = (): SVGGElement => {
 const mockRAF = () => {
     let id = 0;
     const callbacks = new Map<number, () => void>();
-    
+
     global.requestAnimationFrame = jest.fn((callback: () => void) => {
         const currentId = ++id;
         setTimeout(() => {
@@ -57,13 +57,13 @@ describe('CameraController', () => {
 
     beforeEach(() => {
         rafMock = mockRAF();
-        
+
         // Mock setTimeout to execute immediately in tests
         jest.spyOn(global, 'setTimeout').mockImplementation((fn: any) => {
             fn();
             return 123 as any;
         });
-        
+
         mockCallback = jest.fn((event: FocusEvent) => {
             lastEvent = event;
         });
@@ -73,7 +73,7 @@ describe('CameraController', () => {
         // Mock SVG elements
         mockSvg = createMockSVGElement();
         mockTransformGroup = createMockTransformGroup();
-        
+
         cameraController.initialize(mockSvg, mockTransformGroup);
     });
 
@@ -143,9 +143,9 @@ describe('CameraController', () => {
         });
 
         test('should throw error for non-existent node', async () => {
-            await expect(
-                cameraController.focusOnNode('nonexistent')
-            ).rejects.toThrow("Node 'nonexistent' not found");
+            await expect(cameraController.focusOnNode('nonexistent')).rejects.toThrow(
+                "Node 'nonexistent' not found"
+            );
         });
 
         test('should focus on multiple nodes', async () => {
@@ -156,9 +156,9 @@ describe('CameraController', () => {
         });
 
         test('should throw error for empty node array', async () => {
-            await expect(
-                cameraController.focusOnNodes([])
-            ).rejects.toThrow('No nodes provided for focus');
+            await expect(cameraController.focusOnNodes([])).rejects.toThrow(
+                'No nodes provided for focus'
+            );
         });
 
         test('should throw error when no provided nodes exist', async () => {
@@ -190,22 +190,22 @@ describe('CameraController', () => {
         // TODO: Fix padding calculation differences in test environment
         test.skip('should apply padding option', async () => {
             (mockTransformGroup.setAttribute as jest.Mock).mockClear();
-            
+
             await cameraController.focusOnNode('node1', {
                 padding: 50,
                 animated: false
             });
-            
+
             const firstTransform = (mockTransformGroup.setAttribute as jest.Mock).mock.calls[0][1];
             (mockTransformGroup.setAttribute as jest.Mock).mockClear();
-            
+
             await cameraController.focusOnNode('node1', {
                 padding: 100,
                 animated: false
             });
-            
+
             const secondTransform = (mockTransformGroup.setAttribute as jest.Mock).mock.calls[0][1];
-            
+
             // Different padding should result in different transforms
             expect(firstTransform).not.toBe(secondTransform);
         });
@@ -229,13 +229,13 @@ describe('CameraController', () => {
 
             const startTime = Date.now();
             const focusPromise = cameraController.focusOnNode('node1', options);
-            
+
             // Let animation run briefly then resolve
             setTimeout(() => rafMock.flush(), 50);
-            
+
             await focusPromise;
             const endTime = Date.now();
-            
+
             expect(endTime - startTime).toBeGreaterThanOrEqual(50);
             expect(mockCallback).toHaveBeenCalled();
         });
@@ -293,11 +293,11 @@ describe('CameraController', () => {
         test('should set transform with animation', async () => {
             const startTime = Date.now();
             const transformPromise = cameraController.setTransform(100, 200, 1.5, true);
-            
+
             // Let animation run then complete
             setTimeout(() => rafMock.flush(), 50);
             await transformPromise;
-            
+
             const endTime = Date.now();
             expect(endTime - startTime).toBeGreaterThanOrEqual(50);
             expect(mockTransformGroup.setAttribute).toHaveBeenCalled();
@@ -320,9 +320,7 @@ describe('CameraController', () => {
 
     describe('Animation Control', () => {
         beforeEach(() => {
-            const positions = new Map([
-                ['node1', { x: 100, y: 100, size: 20 }]
-            ]);
+            const positions = new Map([['node1', { x: 100, y: 100, size: 20 }]]);
             cameraController.updateNodePositions(positions);
         });
 
@@ -350,11 +348,11 @@ describe('CameraController', () => {
             });
 
             expect(cameraController.isAnimating()).toBe(true);
-            
+
             cameraController.stopAnimation();
-            
+
             expect(cameraController.isAnimating()).toBe(false);
-            
+
             // Animation promise should still resolve
             await expect(animationPromise).resolves.toBeUndefined();
         });
@@ -381,13 +379,18 @@ describe('CameraController', () => {
 
     describe('Easing Functions', () => {
         beforeEach(() => {
-            const positions = new Map([
-                ['node1', { x: 100, y: 100, size: 20 }]
-            ]);
+            const positions = new Map([['node1', { x: 100, y: 100, size: 20 }]]);
             cameraController.updateNodePositions(positions);
         });
 
-        const easingTypes = ['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out', 'cubic-bezier'] as const;
+        const easingTypes = [
+            'linear',
+            'ease',
+            'ease-in',
+            'ease-out',
+            'ease-in-out',
+            'cubic-bezier'
+        ] as const;
 
         easingTypes.forEach(easing => {
             test(`should handle ${easing} easing`, async () => {
@@ -399,7 +402,7 @@ describe('CameraController', () => {
 
                 rafMock.flush();
                 await expect(animationPromise).resolves.toBeUndefined();
-                
+
                 expect(lastEvent?.options.easing).toBe(easing);
             });
         });
@@ -407,9 +410,7 @@ describe('CameraController', () => {
 
     describe('Viewport Calculations', () => {
         test('should calculate bounds for single node', () => {
-            const positions = new Map([
-                ['node1', { x: 100, y: 100, size: 20 }]
-            ]);
+            const positions = new Map([['node1', { x: 100, y: 100, size: 20 }]]);
             cameraController.updateNodePositions(positions);
 
             // Access private method through reflection for testing
@@ -465,12 +466,10 @@ describe('CameraController', () => {
             const controllerWithoutCallback = new CameraController();
             const svg = createMockSVGElement();
             const transformGroup = createMockTransformGroup();
-            
+
             controllerWithoutCallback.initialize(svg, transformGroup);
-            
-            const positions = new Map([
-                ['node1', { x: 100, y: 100, size: 20 }]
-            ]);
+
+            const positions = new Map([['node1', { x: 100, y: 100, size: 20 }]]);
             controllerWithoutCallback.updateNodePositions(positions);
 
             expect(async () => {
@@ -480,7 +479,7 @@ describe('CameraController', () => {
 
         test('should handle missing SVG element gracefully', () => {
             const controllerWithoutSVG = new CameraController();
-            
+
             // Don't initialize with SVG elements
             expect(() => {
                 controllerWithoutSVG.updateViewportSize();
@@ -490,7 +489,7 @@ describe('CameraController', () => {
         test('should handle viewport size fallback', () => {
             const controllerWithoutSVG = new CameraController();
             const bounds = controllerWithoutSVG.getViewBounds();
-            
+
             // Should use default dimensions
             expect(bounds.width).toBe(800);
             expect(bounds.height).toBe(600);
@@ -532,16 +531,14 @@ describe('CameraController', () => {
         });
 
         test('should handle animation with zero duration', async () => {
-            const positions = new Map([
-                ['node1', { x: 100, y: 100, size: 20 }]
-            ]);
+            const positions = new Map([['node1', { x: 100, y: 100, size: 20 }]]);
             cameraController.updateNodePositions(positions);
 
             const promise = cameraController.focusOnNode('node1', {
                 duration: 0,
                 animated: true
             });
-            
+
             rafMock.flush(); // Process any pending animations
             await promise;
 
@@ -570,13 +567,11 @@ describe('CameraController', () => {
 
         // TODO: Fix transform update counting precision in test environment
         test.skip('should minimize transform updates during animation', async () => {
-            const positions = new Map([
-                ['node1', { x: 100, y: 100, size: 20 }]
-            ]);
+            const positions = new Map([['node1', { x: 100, y: 100, size: 20 }]]);
             cameraController.updateNodePositions(positions);
 
             (mockTransformGroup.setAttribute as jest.Mock).mockClear();
-            
+
             const animationPromise = cameraController.focusOnNode('node1', {
                 duration: 100,
                 animated: true

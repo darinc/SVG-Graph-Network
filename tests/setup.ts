@@ -80,32 +80,34 @@ expect.extend({
     toBePositioned(received: Element, x: number, y: number) {
         const transform = received.getAttribute('transform');
         const translateMatch = transform && transform.match(/translate\(([^,]+),([^)]+)\)/);
-        
+
         if (!translateMatch) {
             return {
                 message: () => `Expected element to have translate transform`,
                 pass: false
             };
         }
-        
+
         const [, actualX, actualY] = translateMatch;
-        const pass = Math.abs(parseFloat(actualX) - x) < 0.01 && 
-                    Math.abs(parseFloat(actualY) - y) < 0.01;
-        
+        const pass =
+            Math.abs(parseFloat(actualX) - x) < 0.01 && Math.abs(parseFloat(actualY) - y) < 0.01;
+
         return {
-            message: () => pass 
-                ? `Expected element not to be positioned at (${x}, ${y})`
-                : `Expected element to be positioned at (${x}, ${y}) but was at (${actualX}, ${actualY})`,
+            message: () =>
+                pass
+                    ? `Expected element not to be positioned at (${x}, ${y})`
+                    : `Expected element to be positioned at (${x}, ${y}) but was at (${actualX}, ${actualY})`,
             pass
         };
     },
-    
+
     toHaveClass(received: Element, className: string) {
         const pass = received.classList.contains(className);
         return {
-            message: () => pass 
-                ? `Expected element not to have class "${className}"`
-                : `Expected element to have class "${className}"`,
+            message: () =>
+                pass
+                    ? `Expected element not to have class "${className}"`
+                    : `Expected element to have class "${className}"`,
             pass
         };
     }

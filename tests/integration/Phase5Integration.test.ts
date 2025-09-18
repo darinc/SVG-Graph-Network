@@ -41,7 +41,7 @@ describe('Phase 5 Integration Tests', () => {
         existingContainers.forEach(el => el.remove());
 
         container = createMockContainer();
-        
+
         graph = new GraphNetwork('test-graph-container', {
             data: JSON.parse(JSON.stringify(sampleData)), // Deep clone
             config: {
@@ -126,7 +126,7 @@ describe('Phase 5 Integration Tests', () => {
         test('should handle selection modes', () => {
             // Test multi mode (default)
             expect(graph.getSelectionMode()).toBe('multi');
-            
+
             graph.selectNodes(['node1', 'node2']);
             expect(graph.getSelectedNodes().sort()).toEqual(['node1', 'node2']);
 
@@ -145,10 +145,10 @@ describe('Phase 5 Integration Tests', () => {
         });
 
         // TODO: Fix async event emission timing in test environment
-        test.skip('should emit selection events', (done) => {
+        test.skip('should emit selection events', done => {
             let eventCount = 0;
-            
-            graph.on('selectionChanged', (event) => {
+
+            graph.on('selectionChanged', event => {
                 eventCount++;
                 if (eventCount === 1) {
                     expect(event.selectedNodes).toEqual(['node1']);
@@ -212,7 +212,7 @@ describe('Phase 5 Integration Tests', () => {
 
             const style1 = graph.getNodeStyle('node1');
             const style2 = graph.getNodeStyle('node2');
-            
+
             expect(style1?.fill).toBe('#00ff00');
             expect(style1?.strokeWidth).toBe(2);
             expect(style2?.fill).toBe('#00ff00');
@@ -235,8 +235,8 @@ describe('Phase 5 Integration Tests', () => {
         });
 
         // TODO: Fix async style event timing in test environment
-        test.skip('should emit style events', (done) => {
-            graph.on('styleChanged', (event) => {
+        test.skip('should emit style events', done => {
+            graph.on('styleChanged', event => {
                 expect(event.elements).toEqual(['node1']);
                 expect(event.elementType).toBe('node');
                 expect(event.styles.fill).toBe('#ff0000');
@@ -292,7 +292,7 @@ describe('Phase 5 Integration Tests', () => {
 
             expect(result).toContain('node1');
             expect(result.length).toBeGreaterThan(1);
-            
+
             // Check that highlighting worked
             expect(graph.getHighlightedNodes().length).toBeGreaterThan(0);
         });
@@ -332,8 +332,8 @@ describe('Phase 5 Integration Tests', () => {
         });
 
         // TODO: Fix async highlight event timing in test environment
-        test.skip('should emit highlight events', (done) => {
-            graph.on('highlightChanged', (event) => {
+        test.skip('should emit highlight events', done => {
+            graph.on('highlightChanged', event => {
                 expect(event.highlightedNodes).toEqual(['node1']);
                 expect(event.highlightedEdges).toEqual([]);
                 done();
@@ -369,14 +369,14 @@ describe('Phase 5 Integration Tests', () => {
 
         test('should fit to view', async () => {
             await graph.fitToView(100);
-            
+
             // Should complete without error
             expect(true).toBe(true);
         });
 
         test('should center view', async () => {
             await graph.centerView();
-            
+
             // Should complete without error
             expect(true).toBe(true);
         });
@@ -401,8 +401,8 @@ describe('Phase 5 Integration Tests', () => {
         });
 
         // TODO: Fix async focus event timing in test environment
-        test.skip('should emit focus events', (done) => {
-            graph.on('focusChanged', (event) => {
+        test.skip('should emit focus events', done => {
+            graph.on('focusChanged', event => {
                 expect(event.targetNodes).toEqual(['node1']);
                 expect(event.transform).toHaveProperty('x');
                 expect(event.transform).toHaveProperty('y');
@@ -418,7 +418,7 @@ describe('Phase 5 Integration Tests', () => {
         test('should coordinate selection and highlighting', () => {
             // Select some nodes
             graph.selectNodes(['node1', 'node2']);
-            
+
             // Highlight some nodes (including one selected)
             graph.highlightNodes(['node2', 'node3']);
 
@@ -434,7 +434,7 @@ describe('Phase 5 Integration Tests', () => {
         test('should combine styling with selection', () => {
             // Apply base styling
             graph.setNodeStyle('node1', { fill: '#ff0000', strokeWidth: 2 });
-            
+
             // Select the node (which applies selection styling)
             graph.selectNode('node1');
 
@@ -490,14 +490,19 @@ describe('Phase 5 Integration Tests', () => {
 
     describe('Event Integration', () => {
         // TODO: Fix complex multi-manager event coordination in test environment
-        test.skip('should emit all Phase 5 events', (done) => {
+        test.skip('should emit all Phase 5 events', done => {
             const events: string[] = [];
-            
-            const eventTypes = ['selectionChanged', 'styleChanged', 'highlightChanged', 'focusChanged'];
+
+            const eventTypes = [
+                'selectionChanged',
+                'styleChanged',
+                'highlightChanged',
+                'focusChanged'
+            ];
             let completedEvents = 0;
 
             eventTypes.forEach(eventType => {
-                graph.on(eventType, (event) => {
+                graph.on(eventType, event => {
                     events.push(eventType);
                     completedEvents++;
                     if (completedEvents === eventTypes.length) {
@@ -515,7 +520,7 @@ describe('Phase 5 Integration Tests', () => {
         });
 
         // TODO: Fix rapid event sequence handling in test environment
-        test.skip('should handle rapid event sequences', (done) => {
+        test.skip('should handle rapid event sequences', done => {
             let selectionEvents = 0;
             let styleEvents = 0;
 
@@ -557,7 +562,7 @@ describe('Phase 5 Integration Tests', () => {
             additionalNodes.forEach(node => graph.addNode(node));
 
             const startTime = Date.now();
-            
+
             // Select many nodes
             const nodeIds = additionalNodes.map(n => n.id);
             graph.selectNodes(nodeIds);
@@ -613,17 +618,11 @@ describe('Phase 5 Integration Tests', () => {
         });
 
         test('should handle invalid focus targets gracefully', async () => {
-            await expect(
-                graph.focusOnNode('nonexistent')
-            ).rejects.toThrow();
+            await expect(graph.focusOnNode('nonexistent')).rejects.toThrow();
 
-            await expect(
-                graph.focusOnNodes(['nonexistent1', 'nonexistent2'])
-            ).rejects.toThrow();
+            await expect(graph.focusOnNodes(['nonexistent1', 'nonexistent2'])).rejects.toThrow();
 
-            await expect(
-                graph.focusOnNodes([])
-            ).rejects.toThrow();
+            await expect(graph.focusOnNodes([])).rejects.toThrow();
         });
 
         // TODO: Fix path highlighting algorithm in test environment

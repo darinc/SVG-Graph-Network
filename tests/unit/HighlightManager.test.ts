@@ -33,7 +33,7 @@ const createMockElement = (id: string): HTMLElement => {
             strokeDashoffset: ''
         }
     } as any;
-    
+
     mockElements.set(id, element);
     return element;
 };
@@ -55,13 +55,13 @@ describe('HighlightManager', () => {
 
     beforeEach(() => {
         mockElements.clear();
-        
+
         // Mock setTimeout to execute immediately in tests
         jest.spyOn(global, 'setTimeout').mockImplementation((fn: any) => {
             fn();
             return 123 as any;
         });
-        
+
         mockCallback = jest.fn((event: HighlightEvent) => {
             lastEvent = event;
         });
@@ -87,7 +87,7 @@ describe('HighlightManager', () => {
     describe('Basic Highlighting', () => {
         test('should highlight a single node', () => {
             const style: HighlightStyle = { color: '#ff0000', strokeWidth: 4 };
-            
+
             highlightManager.highlightNode('node1', style);
 
             expect(highlightManager.isNodeHighlighted('node1')).toBe(true);
@@ -99,10 +99,14 @@ describe('HighlightManager', () => {
 
         test('should highlight multiple nodes', () => {
             const style: HighlightStyle = { color: '#0000ff', strokeWidth: 3 };
-            
+
             highlightManager.highlightNodes(['node1', 'node2', 'node3'], style);
 
-            expect(highlightManager.getHighlightedNodes().sort()).toEqual(['node1', 'node2', 'node3']);
+            expect(highlightManager.getHighlightedNodes().sort()).toEqual([
+                'node1',
+                'node2',
+                'node3'
+            ]);
             sampleNodes.slice(0, 3).forEach(nodeId => {
                 expect(highlightManager.isNodeHighlighted(nodeId)).toBe(true);
             });
@@ -123,7 +127,7 @@ describe('HighlightManager', () => {
 
         test('should apply default styles when none provided', () => {
             const mockElement = mockElements.get('node-node1')!;
-            
+
             highlightManager.highlightNode('node1');
 
             expect(mockElement.setAttribute).toHaveBeenCalledWith('stroke', '#3b82f6');
@@ -180,7 +184,7 @@ describe('HighlightManager', () => {
         // TODO: Fix document.getElementById access in test environment
         test.skip('should handle path flow animation', () => {
             const mockEdgeElement = mockElements.get('edge-edge1')!;
-            
+
             highlightManager.highlightPath('node1', 'node2', {
                 showFlow: true,
                 flowSpeed: 2,
@@ -204,7 +208,7 @@ describe('HighlightManager', () => {
         test('should highlight neighbors with specified depth', () => {
             const result = highlightManager.highlightNeighbors('node1', { depth: 2 });
 
-            // Should include node1, its direct neighbors (node2, node4), 
+            // Should include node1, its direct neighbors (node2, node4),
             // and their neighbors (node3, node5)
             expect(result).toContain('node1');
             expect(result).toContain('node2');
@@ -240,7 +244,7 @@ describe('HighlightManager', () => {
 
         test('should handle fade by distance', () => {
             const mockNode2Element = mockElements.get('node-node2')!;
-            
+
             highlightManager.highlightNeighbors('node1', {
                 depth: 2,
                 fadeByDistance: true,
@@ -249,8 +253,9 @@ describe('HighlightManager', () => {
 
             // Check that opacity is reduced for distant nodes
             // node2 is depth 1, so opacity should be faded
-            const opacityCalls = (mockNode2Element.setAttribute as jest.Mock).mock.calls
-                .filter(call => call[0] === 'opacity');
+            const opacityCalls = (mockNode2Element.setAttribute as jest.Mock).mock.calls.filter(
+                call => call[0] === 'opacity'
+            );
             expect(opacityCalls.length).toBeGreaterThan(0);
             const opacityValue = parseFloat(opacityCalls[0][1]);
             expect(opacityValue).toBeLessThan(0.8);
@@ -270,7 +275,7 @@ describe('HighlightManager', () => {
         test('should apply connection styles', () => {
             const mockNodeElement = mockElements.get('node-node1')!;
             const mockEdgeElement = mockElements.get('edge-edge1')!;
-            
+
             const style: HighlightStyle = { color: '#ff00ff', strokeWidth: 4 };
             highlightManager.highlightConnections('node1', style);
 
@@ -289,7 +294,9 @@ describe('HighlightManager', () => {
 
             expect(highlightManager.isNodeHighlighted('node1')).toBe(false);
             expect(mockElement.classList.remove).toHaveBeenCalledWith(
-                'graph-highlight-animated', 'graph-highlight-glow', 'graph-highlight-pulse'
+                'graph-highlight-animated',
+                'graph-highlight-glow',
+                'graph-highlight-pulse'
             );
             expect(mockCallback).toHaveBeenCalledTimes(1);
         });
@@ -327,7 +334,7 @@ describe('HighlightManager', () => {
     describe('DOM Interaction', () => {
         test('should apply highlight styles to DOM elements', () => {
             const mockElement = mockElements.get('node-node1')!;
-            
+
             highlightManager.highlightNode('node1', {
                 color: '#ff0000',
                 strokeWidth: 5,
@@ -358,10 +365,13 @@ describe('HighlightManager', () => {
 
         test('should set z-index via CSS custom property', () => {
             const mockElement = mockElements.get('node-node1')!;
-            
+
             highlightManager.highlightNode('node1', { zIndex: 100 });
 
-            expect(mockElement.style.setProperty).toHaveBeenCalledWith('--highlight-z-index', '100');
+            expect(mockElement.style.setProperty).toHaveBeenCalledWith(
+                '--highlight-z-index',
+                '100'
+            );
         });
     });
 
@@ -404,9 +414,9 @@ describe('HighlightManager', () => {
 
     describe('Animation Management', () => {
         // TODO: Fix document.getElementById access in test environment
-        test.skip('should manage path flow animations', (done) => {
+        test.skip('should manage path flow animations', done => {
             const mockEdgeElement = mockElements.get('edge-edge1')!;
-            
+
             highlightManager.highlightPath('node1', 'node2', {
                 showFlow: true,
                 flowSpeed: 1,
@@ -429,7 +439,7 @@ describe('HighlightManager', () => {
             const originalRAF = global.requestAnimationFrame;
             const originalCAF = global.cancelAnimationFrame;
             const cancelSpy = jest.fn();
-            
+
             global.requestAnimationFrame = jest.fn(() => 123);
             global.cancelAnimationFrame = cancelSpy;
 
@@ -466,7 +476,7 @@ describe('HighlightManager', () => {
 
         test('should merge styles with defaults', () => {
             const mockElement = mockElements.get('node-node1')!;
-            
+
             highlightManager.highlightNode('node1', { color: '#ff0000' });
 
             // Should apply custom color but use default values for other properties
@@ -484,7 +494,7 @@ describe('HighlightManager', () => {
                 { id: 'CD', source: 'C', target: 'D' },
                 { id: 'DE', source: 'D', target: 'E' },
                 { id: 'EF', source: 'E', target: 'F' },
-                { id: 'AF', source: 'A', target: 'F' }, // Creates alternate path
+                { id: 'AF', source: 'A', target: 'F' } // Creates alternate path
             ];
 
             complexNodes.forEach(nodeId => createMockElement(`node-${nodeId}`));
