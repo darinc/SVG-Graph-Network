@@ -63,11 +63,6 @@ jobs:
         cp dist/svg-graph-network.min.js gh-pages/assets/svg-graph-network.js
         cp dist/svg-graph-network.css gh-pages/assets/
 
-        # Copy examples with correct paths
-        mkdir -p gh-pages/examples
-        cp examples/*.html gh-pages/examples/
-        cp examples/*.js gh-pages/examples/
-
         # Update example HTML files to use correct library path
         sed -i 's|../dist/|../assets/|g' gh-pages/examples/*.html
 
