@@ -103,6 +103,7 @@ export class UIManager {
             showTitle: true,
             showBreadcrumbs: true,
             theme: 'dark',
+            autoColor: true,
             title: 'Graph Network',
             ...config
         };

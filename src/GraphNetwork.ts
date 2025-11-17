@@ -242,7 +242,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
      */
     private initializeModules(): void {
         // Initialize theme manager first (needed by other components)
-        this.themeManager = new ThemeManager();
+        this.themeManager = new ThemeManager(undefined, this.config.autoColor ?? true);
 
         this.logger.debug('Theme manager initialized');
 
@@ -3307,6 +3307,31 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         if (this.debug) {
             console.log(`GraphNetwork: Updated style for edge type '${edgeType}'`);
         }
+    }
+
+    /**
+     * Enable or disable automatic color generation for undefined node types
+     * When enabled, node types without explicit color definitions will automatically
+     * receive visually distinct colors using a golden ratio algorithm.
+     * @param enabled - Whether to enable auto-coloring
+     */
+    setAutoColor(enabled: boolean): void {
+        this.config.autoColor = enabled;
+        if (this.themeManager) {
+            this.themeManager.setAutoColorEnabled(enabled);
+        }
+
+        if (this.debug) {
+            console.log(`GraphNetwork: Auto-coloring ${enabled ? 'enabled' : 'disabled'}`);
+        }
+    }
+
+    /**
+     * Check if automatic color generation is enabled
+     * @returns true if auto-coloring is enabled
+     */
+    isAutoColorEnabled(): boolean {
+        return this.config.autoColor ?? true;
     }
 
     /**

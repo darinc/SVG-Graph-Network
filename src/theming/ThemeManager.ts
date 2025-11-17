@@ -8,6 +8,8 @@
  * - User customization
  */
 
+import { AutoColorGenerator } from './AutoColorGenerator';
+
 export interface NodeStyleConfig {
     fill?: string;
     stroke?: string;
@@ -93,10 +95,14 @@ export class ThemeManager {
     private currentTheme: ThemeConfig;
     private registeredThemes = new Map<string, ThemeConfig>();
     private elementStates = new Map<string, Set<VisualState>>();
+    private autoColorGenerator: AutoColorGenerator;
+    private autoColorEnabled: boolean;
 
-    constructor(initialTheme?: ThemeConfig) {
+    constructor(initialTheme?: ThemeConfig, autoColorEnabled: boolean = true) {
         this.currentTheme = initialTheme || this.getDefaultTheme();
         this.registerBuiltinThemes();
+        this.autoColorEnabled = autoColorEnabled;
+        this.autoColorGenerator = new AutoColorGenerator();
     }
 
     /**
@@ -596,6 +602,19 @@ export class ThemeManager {
         // Apply type-specific styles
         if (nodeType && this.currentTheme.nodeStyles?.[nodeType]) {
             style = { ...style, ...this.currentTheme.nodeStyles[nodeType] };
+        } else if (nodeType && nodeType !== 'default' && this.autoColorEnabled) {
+            // Auto-generate colors for undefined node types
+            const autoStyle = this.autoColorGenerator.generateColorForType(
+                nodeType,
+                this.currentTheme.name
+            );
+            style = { ...style, ...autoStyle };
+
+            // Cache the generated style in the theme for future use
+            if (!this.currentTheme.nodeStyles) {
+                this.currentTheme.nodeStyles = {};
+            }
+            this.currentTheme.nodeStyles[nodeType] = autoStyle;
         }
 
         // Apply state styles (in priority order)
@@ -797,5 +816,29 @@ export class ThemeManager {
             size: canvas.gridSize,
             opacity: canvas.gridOpacity
         };
+    }
+
+    /**
+     * Enable or disable automatic color generation for undefined node types
+     */
+    setAutoColorEnabled(enabled: boolean): void {
+        this.autoColorEnabled = enabled;
+        if (!enabled) {
+            this.autoColorGenerator.reset();
+        }
+    }
+
+    /**
+     * Check if auto-coloring is enabled
+     */
+    isAutoColorEnabled(): boolean {
+        return this.autoColorEnabled;
+    }
+
+    /**
+     * Get the auto-color generator instance for advanced usage
+     */
+    getAutoColorGenerator(): AutoColorGenerator {
+        return this.autoColorGenerator;
     }
 }

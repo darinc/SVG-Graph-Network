@@ -86,6 +86,8 @@ export interface UIConfig {
     showBreadcrumbs: boolean;
     /** Visual theme */
     theme: 'light' | 'dark';
+    /** Automatically generate colors for undefined node types */
+    autoColor: boolean;
     /** Graph title */
     title: string;
 }
@@ -476,6 +478,7 @@ export const DEFAULT_CONFIG: GraphConfig = {
     showTitle: true,
     showBreadcrumbs: true,
     theme: 'dark',
+    autoColor: true,
     title: 'Graph Network'
 };
 

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoColor Feature Test</title>
+    <link rel="stylesheet" href="dist/svg-graph-network.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #1a1a1a;
+            color: #f0f0f0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #4299E1;
+        }
+        #graph-container {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #333;
+            margin: 20px 0;
+        }
+        .controls {
+            margin: 20px 0;
+            padding: 15px;
+            background: #2a2a2a;
+            border-radius: 8px;
+        }
+        button {
+            padding: 10px 20px;
+            margin-right: 10px;
+            background: #38A169;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #2F855A;
+        }
+        .info {
+            margin: 20px 0;
+            padding: 15px;
+            background: #2a2a2a;
+            border-radius: 8px;
+            border-left: 4px solid #4299E1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AutoColor Feature Test</h1>
+
+        <div class="info">
+            <strong>Testing:</strong> Custom node types (core, managers, filesystem, parsers, markdown, utilities)
+            should automatically receive distinct colors without manual color definitions.
+        </div>
+
+        <div class="controls">
+            <button onclick="toggleAutoColor()">Toggle AutoColor</button>
+            <button onclick="addRandomNode()">Add Random Node</button>
+            <span id="status" style="margin-left: 20px;"></span>
+        </div>
+
+        <div id="graph-container"></div>
+    </div>
+
+    <script src="dist/svg-graph-network.min.js"></script>
+    <script>
+        // Test data with custom node types (same as the client's data)
+        const testData = {
+            nodes: [
+                { id: "core", name: "Core Utilities", type: "core", shape: "circle", size: 35 },
+                { id: "managers", name: "Managers", type: "managers", shape: "circle", size: 30 },
+                { id: "filesystem", name: "File System", type: "filesystem", shape: "circle", size: 30 },
+                { id: "parsers", name: "Content Parsers", type: "parsers", shape: "circle", size: 25 },
+                { id: "markdown", name: "Markdown Rendering", type: "markdown", shape: "circle", size: 28 },
+                { id: "utilities", name: "Utilities", type: "utilities", shape: "circle", size: 22 }
+            ],
+            links: [
+                { source: "core", target: "managers", label: "manages state", weight: 3, line_type: "solid" },
+                { source: "core", target: "filesystem", label: "uses", weight: 3, line_type: "solid" },
+                { source: "managers", target: "filesystem", label: "persists to", weight: 2, line_type: "solid" },
+                { source: "core", target: "parsers", label: "routes to", weight: 2, line_type: "dashed" },
+                { source: "parsers", target: "filesystem", label: "reads from", weight: 2, line_type: "solid" },
+                { source: "markdown", target: "utilities", label: "sanitizes with", weight: 1, line_type: "dotted" }
+            ]
+        };
+
+        // Initialize graph with autoColor enabled (default)
+        const graph = new SVGGraphNetwork('graph-container', {
+            data: testData,
+            config: {
+                theme: 'dark',
+                showControls: true,
+                showLegend: true,
+                showTitle: true,
+                title: 'AutoColor Test - Custom Node Types',
+                autoColor: true  // Explicitly enable
+            }
+        });
+
+        // Update status
+        function updateStatus() {
+            const enabled = graph.isAutoColorEnabled();
+            document.getElementById('status').textContent = `AutoColor: ${enabled ? 'ENABLED ✓' : 'DISABLED ✗'}`;
+            document.getElementById('status').style.color = enabled ? '#38A169' : '#ef4444';
+        }
+
+        // Toggle autoColor feature
+        function toggleAutoColor() {
+            const currentState = graph.isAutoColorEnabled();
+            graph.setAutoColor(!currentState);
+            updateStatus();
+            console.log(`AutoColor toggled to: ${!currentState}`);
+
+            // Reload graph to see effect
+            graph.setData(testData);
+        }
+
+        // Add a random node with a new type
+        let nodeCounter = 1;
+        function addRandomNode() {
+            const randomTypes = ['database', 'cache', 'api', 'service', 'client', 'server', 'queue', 'worker'];
+            const randomType = randomTypes[Math.floor(Math.random() * randomTypes.length)];
+
+            const newNode = {
+                id: `node-${nodeCounter}`,
+                name: `${randomType} ${nodeCounter}`,
+                type: randomType,
+                shape: 'circle',
+                size: 25
+            };
+
+            graph.addNode(newNode);
+
+            // Connect to a random existing node
+            const existingNodes = graph.getNodes();
+            if (existingNodes.length > 1) {
+                const randomExisting = existingNodes[Math.floor(Math.random() * existingNodes.length)];
+                graph.addEdge({
+                    source: newNode.id,
+                    target: randomExisting.id,
+                    label: 'connects to',
+                    weight: 1
+                });
+            }
+
+            nodeCounter++;
+            console.log(`Added node: ${newNode.name} (type: ${randomType})`);
+        }
+
+        // Initial status
+        updateStatus();
+
+        console.log('AutoColor Test loaded successfully!');
+        console.log('Graph instance:', graph);
+        console.log('AutoColor enabled:', graph.isAutoColorEnabled());
+    </script>
+</body>
+</html>

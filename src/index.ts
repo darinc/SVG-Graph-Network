@@ -64,6 +64,9 @@ export type {
     UIElements
 } from './types/index';
 
+// Export theming classes
+export { AutoColorGenerator } from './theming/AutoColorGenerator';
+
 // Export theming types
 export type {
     ThemeConfig,
@@ -74,6 +77,8 @@ export type {
     ColorScheme,
     VisualState
 } from './theming/ThemeManager';
+
+export type { AutoColorConfig } from './theming/AutoColorGenerator';
 
 // Export styling types
 export type {
