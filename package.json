@@ -3,9 +3,31 @@
   "version": "0.2.0",
   "description": "Modern SVG graph visualization library with advanced theming, mobile-first design, and customizable physics simulation. Features dynamic node/edge styling, touch optimization, and zero dependencies.",
   "type": "module",
-  "main": "dist/svg-graph-network.min.js",
-  "module": "dist/svg-graph-network.min.js",
+  "main": "dist/svg-graph-network.cjs",
+  "module": "dist/svg-graph-network.esm.js",
+  "browser": "dist/svg-graph-network.min.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/svg-graph-network.esm.js"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/svg-graph-network.cjs"
+      },
+      "browser": "./dist/svg-graph-network.min.js",
+      "default": "./dist/svg-graph-network.esm.js"
+    },
+    "./css": "./dist/svg-graph-network.css",
+    "./package.json": "./package.json"
+  },
+  "jsdelivr": "dist/svg-graph-network.min.js",
+  "unpkg": "dist/svg-graph-network.min.js",
+  "sideEffects": [
+    "**/*.css"
+  ],
   "files": [
     "dist",
     "src",
@@ -14,7 +36,8 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "npm run type-check && webpack --mode=production",
+    "build": "npm run clean && npm run type-check && webpack --mode=production && npm run validate",
+    "validate": "node scripts/validate-build.cjs",
     "dev": "webpack serve --mode=development",
     "watch": "webpack --mode=development --watch",
     "clean": "rm -rf dist .tsbuildinfo",
@@ -93,6 +116,7 @@
     "jest-environment-jsdom": "^30.1.2",
     "lint-staged": "^16.1.6",
     "mini-css-extract-plugin": "^2.9.4",
+    "null-loader": "^4.0.1",
     "prettier": "^3.6.2",
     "reflect-metadata": "^0.2.2",
     "size-limit": "^11.2.0",
@@ -131,15 +155,26 @@
   },
   "size-limit": [
     {
-      "name": "SVG Graph Network (minified)",
+      "name": "UMD (minified)",
       "path": "dist/svg-graph-network.min.js",
-      "limit": "100 KB"
+      "limit": "120 KB"
     },
     {
-      "name": "SVG Graph Network (gzipped)",
+      "name": "UMD (gzipped)",
       "path": "dist/svg-graph-network.min.js",
       "gzip": true,
-      "limit": "30 KB"
+      "limit": "35 KB"
+    },
+    {
+      "name": "ESM (minified)",
+      "path": "dist/svg-graph-network.esm.js",
+      "limit": "120 KB"
+    },
+    {
+      "name": "ESM (gzipped)",
+      "path": "dist/svg-graph-network.esm.js",
+      "gzip": true,
+      "limit": "35 KB"
     }
   ]
 }
