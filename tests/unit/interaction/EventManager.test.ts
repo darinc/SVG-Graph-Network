@@ -438,40 +438,45 @@ describe('EventManager', () => {
             expect(eventManager.isPanning()).toBe(false);
         });
 
-        test('should detect double tap', done => {
-            const emitSpy = jest.spyOn(eventManager, 'emit');
+        test('should detect double tap', () => {
+            return new Promise<void>(resolve => {
+                const emitSpy = jest.spyOn(eventManager, 'emit');
 
-            // First tap
-            const touchStart1 = new TouchEvent('touchstart', {
-                touches: [createTouch(400, 300)],
-                bubbles: true
-            });
-            mockSvg.dispatchEvent(touchStart1);
-
-            const touchEnd1 = new TouchEvent('touchend', {
-                touches: [],
-                bubbles: true
-            });
-            mockSvg.dispatchEvent(touchEnd1);
-
-            // Second tap quickly
-            setTimeout(() => {
-                const touchStart2 = new TouchEvent('touchstart', {
+                // First tap
+                const touchStart1 = new TouchEvent('touchstart', {
                     touches: [createTouch(400, 300)],
                     bubbles: true
                 });
-                mockSvg.dispatchEvent(touchStart2);
+                mockSvg.dispatchEvent(touchStart1);
 
-                const touchEnd2 = new TouchEvent('touchend', {
+                const touchEnd1 = new TouchEvent('touchend', {
                     touches: [],
                     bubbles: true
                 });
-                mockSvg.dispatchEvent(touchEnd2);
+                mockSvg.dispatchEvent(touchEnd1);
 
-                expect(callbacks.resetFilter).toHaveBeenCalled();
-                expect(emitSpy).toHaveBeenCalledWith('backgroundDoubleClick', expect.any(Object));
-                done();
-            }, 200);
+                // Second tap quickly
+                setTimeout(() => {
+                    const touchStart2 = new TouchEvent('touchstart', {
+                        touches: [createTouch(400, 300)],
+                        bubbles: true
+                    });
+                    mockSvg.dispatchEvent(touchStart2);
+
+                    const touchEnd2 = new TouchEvent('touchend', {
+                        touches: [],
+                        bubbles: true
+                    });
+                    mockSvg.dispatchEvent(touchEnd2);
+
+                    expect(callbacks.resetFilter).toHaveBeenCalled();
+                    expect(emitSpy).toHaveBeenCalledWith(
+                        'backgroundDoubleClick',
+                        expect.any(Object)
+                    );
+                    resolve();
+                }, 200);
+            });
         });
     });
 
@@ -615,7 +620,7 @@ describe('EventManager', () => {
 
             eventManager.destroy();
 
-            expect(eventManager.getRegisteredEvents().length).toBe(0);
+            expect(eventManager.getRegisteredEvents()).toHaveLength(0);
         });
     });
 });

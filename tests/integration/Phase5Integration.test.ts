@@ -145,23 +145,29 @@ describe('Phase 5 Integration Tests', () => {
         });
 
         // TODO: Fix async event emission timing in test environment
-        test.skip('should emit selection events', done => {
-            let eventCount = 0;
+        test.skip('should emit selection events', () => {
+            return new Promise<void>(resolve => {
+                let eventCount = 0;
 
-            graph.on('selectionChanged', event => {
-                eventCount++;
-                if (eventCount === 1) {
-                    expect(event.selectedNodes).toEqual(['node1']);
-                    expect(event.addedNodes).toEqual(['node1']);
-                    graph.selectNode('node2', { additive: true });
-                } else if (eventCount === 2) {
-                    expect(event.selectedNodes.sort()).toEqual(['node1', 'node2']);
-                    expect(event.addedNodes).toEqual(['node2']);
-                    done();
-                }
+                graph.on('selectionChanged', event => {
+                    eventCount++;
+                    if (eventCount === 1) {
+                        // eslint-disable-next-line jest/no-conditional-expect
+                        expect(event.selectedNodes).toEqual(['node1']);
+                        // eslint-disable-next-line jest/no-conditional-expect
+                        expect(event.addedNodes).toEqual(['node1']);
+                        graph.selectNode('node2', { additive: true });
+                    } else if (eventCount === 2) {
+                        // eslint-disable-next-line jest/no-conditional-expect
+                        expect(event.selectedNodes.sort()).toEqual(['node1', 'node2']);
+                        // eslint-disable-next-line jest/no-conditional-expect
+                        expect(event.addedNodes).toEqual(['node2']);
+                        resolve();
+                    }
+                });
+
+                graph.selectNode('node1');
             });
-
-            graph.selectNode('node1');
         });
     });
 
@@ -235,15 +241,17 @@ describe('Phase 5 Integration Tests', () => {
         });
 
         // TODO: Fix async style event timing in test environment
-        test.skip('should emit style events', done => {
-            graph.on('styleChanged', event => {
-                expect(event.elements).toEqual(['node1']);
-                expect(event.elementType).toBe('node');
-                expect(event.styles.fill).toBe('#ff0000');
-                done();
-            });
+        test.skip('should emit style events', () => {
+            return new Promise<void>(resolve => {
+                graph.on('styleChanged', event => {
+                    expect(event.elements).toEqual(['node1']);
+                    expect(event.elementType).toBe('node');
+                    expect(event.styles.fill).toBe('#ff0000');
+                    resolve();
+                });
 
-            graph.setNodeStyle('node1', { fill: '#ff0000' });
+                graph.setNodeStyle('node1', { fill: '#ff0000' });
+            });
         });
     });
 
@@ -313,8 +321,8 @@ describe('Phase 5 Integration Tests', () => {
             graph.highlightNodes(['node1', 'node2']);
             graph.highlightEdges(['edge1', 'edge2']);
 
-            expect(graph.getHighlightedNodes().length).toBe(2);
-            expect(graph.getHighlightedEdges().length).toBe(2);
+            expect(graph.getHighlightedNodes()).toHaveLength(2);
+            expect(graph.getHighlightedEdges()).toHaveLength(2);
 
             // Clear specific highlights
             graph.clearNodeHighlight('node1');
@@ -332,14 +340,16 @@ describe('Phase 5 Integration Tests', () => {
         });
 
         // TODO: Fix async highlight event timing in test environment
-        test.skip('should emit highlight events', done => {
-            graph.on('highlightChanged', event => {
-                expect(event.highlightedNodes).toEqual(['node1']);
-                expect(event.highlightedEdges).toEqual([]);
-                done();
-            });
+        test.skip('should emit highlight events', () => {
+            return new Promise<void>(resolve => {
+                graph.on('highlightChanged', event => {
+                    expect(event.highlightedNodes).toEqual(['node1']);
+                    expect(event.highlightedEdges).toEqual([]);
+                    resolve();
+                });
 
-            graph.highlightNode('node1');
+                graph.highlightNode('node1');
+            });
         });
     });
 
@@ -401,16 +411,18 @@ describe('Phase 5 Integration Tests', () => {
         });
 
         // TODO: Fix async focus event timing in test environment
-        test.skip('should emit focus events', done => {
-            graph.on('focusChanged', event => {
-                expect(event.targetNodes).toEqual(['node1']);
-                expect(event.transform).toHaveProperty('x');
-                expect(event.transform).toHaveProperty('y');
-                expect(event.transform).toHaveProperty('scale');
-                done();
-            });
+        test.skip('should emit focus events', () => {
+            return new Promise<void>(resolve => {
+                graph.on('focusChanged', event => {
+                    expect(event.targetNodes).toEqual(['node1']);
+                    expect(event.transform).toHaveProperty('x');
+                    expect(event.transform).toHaveProperty('y');
+                    expect(event.transform).toHaveProperty('scale');
+                    resolve();
+                });
 
-            graph.focusOnNode('node1', { animated: false });
+                graph.focusOnNode('node1', { animated: false });
+            });
         });
     });
 
@@ -490,63 +502,68 @@ describe('Phase 5 Integration Tests', () => {
 
     describe('Event Integration', () => {
         // TODO: Fix complex multi-manager event coordination in test environment
-        test.skip('should emit all Phase 5 events', done => {
-            const events: string[] = [];
+        test.skip('should emit all Phase 5 events', () => {
+            return new Promise<void>(resolve => {
+                const events: string[] = [];
 
-            const eventTypes = [
-                'selectionChanged',
-                'styleChanged',
-                'highlightChanged',
-                'focusChanged'
-            ];
-            let completedEvents = 0;
+                const eventTypes = [
+                    'selectionChanged',
+                    'styleChanged',
+                    'highlightChanged',
+                    'focusChanged'
+                ];
+                let completedEvents = 0;
 
-            eventTypes.forEach(eventType => {
-                graph.on(eventType, event => {
-                    events.push(eventType);
-                    completedEvents++;
-                    if (completedEvents === eventTypes.length) {
-                        expect(events.sort()).toEqual(eventTypes.sort());
-                        done();
-                    }
+                eventTypes.forEach(eventType => {
+                    graph.on(eventType, _event => {
+                        events.push(eventType);
+                        completedEvents++;
+                        if (completedEvents === eventTypes.length) {
+                            // eslint-disable-next-line jest/no-conditional-expect
+                            expect(events.sort()).toEqual(eventTypes.sort());
+                            resolve();
+                        }
+                    });
                 });
-            });
 
-            // Trigger all event types
-            graph.selectNode('node1');
-            graph.setNodeStyle('node1', { fill: '#ff0000' });
-            graph.highlightNode('node1');
-            graph.focusOnNode('node1', { animated: false });
+                // Trigger all event types
+                graph.selectNode('node1');
+                graph.setNodeStyle('node1', { fill: '#ff0000' });
+                graph.highlightNode('node1');
+                graph.focusOnNode('node1', { animated: false });
+            });
         });
 
         // TODO: Fix rapid event sequence handling in test environment
-        test.skip('should handle rapid event sequences', done => {
-            let selectionEvents = 0;
-            let styleEvents = 0;
+        test.skip('should handle rapid event sequences', () => {
+            return new Promise<void>(resolve => {
+                let selectionEvents = 0;
+                let styleEvents = 0;
 
-            graph.on('selectionChanged', () => {
-                selectionEvents++;
+                graph.on('selectionChanged', () => {
+                    selectionEvents++;
+                });
+
+                graph.on('styleChanged', () => {
+                    styleEvents++;
+                });
+
+                // Rapid selection changes
+                for (let i = 0; i < 5; i++) {
+                    graph.toggleNodeSelection('node1');
+                }
+
+                // Rapid style changes
+                for (let i = 0; i < 5; i++) {
+                    graph.setNodeStyle('node1', { strokeWidth: i + 1 });
+                }
+
+                setTimeout(() => {
+                    expect(selectionEvents).toBe(5);
+                    expect(styleEvents).toBe(5);
+                    resolve();
+                }, 100);
             });
-
-            graph.on('styleChanged', () => {
-                styleEvents++;
-            });
-
-            // Rapid selection changes
-            for (let i = 0; i < 5; i++) {
-                graph.toggleNodeSelection('node1');
-            }
-
-            // Rapid style changes
-            for (let i = 0; i < 5; i++) {
-                graph.setNodeStyle('node1', { strokeWidth: i + 1 });
-            }
-
-            setTimeout(() => {
-                expect(selectionEvents).toBe(5);
-                expect(styleEvents).toBe(5);
-                done();
-            }, 100);
         });
     });
 
@@ -570,7 +587,7 @@ describe('Phase 5 Integration Tests', () => {
             const endTime = Date.now();
 
             expect(endTime - startTime).toBeLessThan(1000); // Should be reasonably fast
-            expect(graph.getSelectedNodes().length).toBe(100);
+            expect(graph.getSelectedNodes()).toHaveLength(100);
         });
 
         test('should clean up properly on destroy', () => {
@@ -644,7 +661,7 @@ describe('Phase 5 Integration Tests', () => {
             try {
                 graph.selectNode('nonexistent');
                 graph.highlightEdge('nonexistent');
-            } catch (error) {
+            } catch {
                 // Errors should not affect valid state
             }
 
