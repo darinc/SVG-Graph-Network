@@ -2,7 +2,7 @@
  * Type definitions for Phase 5: Styling & Interactivity APIs
  */
 
-import { Position } from './index';
+import { Position } from './common';
 
 // ==================== Visual States ====================
 

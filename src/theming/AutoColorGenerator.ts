@@ -1,4 +1,4 @@
-import { NodeStyleConfig } from './ThemeManager';
+import { NodeStyleConfig } from './types';
 
 /**
  * Configuration for automatic color generation

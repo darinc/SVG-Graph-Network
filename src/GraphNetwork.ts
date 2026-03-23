@@ -51,6 +51,16 @@ import {
 } from './types/styling';
 import { createLogger, LogLevel } from './utils/Logger';
 
+/** Escape HTML special characters to prevent XSS in innerHTML contexts. */
+function escapeHtml(str: string): string {
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 /**
  * Graph initialization options
  */
@@ -803,10 +813,10 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         if (this.tooltipConfig.formatter) {
             content = this.tooltipConfig.formatter(node);
         } else {
-            const parts: string[] = [`<strong>${node.getName()}</strong>`];
+            const parts: string[] = [`<strong>${escapeHtml(node.getName())}</strong>`];
 
             if (this.tooltipConfig.showType && node.getType()) {
-                parts.push(`Type: ${node.getType()}`);
+                parts.push(`Type: ${escapeHtml(node.getType()!)}`);
             }
 
             if (this.tooltipConfig.showPosition) {
@@ -819,7 +829,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
                 this.tooltipConfig.customFields.forEach(field => {
                     const value = (node.data as any)[field];
                     if (value !== undefined) {
-                        parts.push(`${field}: ${value}`);
+                        parts.push(`${escapeHtml(field)}: ${escapeHtml(String(value))}`);
                     }
                 });
             }

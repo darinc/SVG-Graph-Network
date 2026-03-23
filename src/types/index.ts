@@ -2,6 +2,8 @@
  * Core type definitions for SVG Graph Network library
  */
 
+import type { Position } from './common';
+
 // ==================== Core Data Types ====================
 
 /**
@@ -112,13 +114,8 @@ export interface GraphConfig extends PhysicsConfig, UIConfig, InteractionConfig 
 
 // ==================== Runtime Types ====================
 
-/**
- * 2D position coordinates
- */
-export interface Position {
-    x: number;
-    y: number;
-}
+// Re-exported from common.ts to maintain public API
+export type { Position } from './common';
 
 /**
  * Transform state for pan/zoom operations
@@ -507,6 +504,10 @@ export interface TooltipConfig {
     showPosition: boolean;
     showType: boolean;
     customFields?: string[];
+    /**
+     * Custom tooltip formatter. Note: The returned HTML is inserted via innerHTML.
+     * You are responsible for sanitizing any user-provided data to prevent XSS.
+     */
     formatter?: (node: any) => string;
 }
 
