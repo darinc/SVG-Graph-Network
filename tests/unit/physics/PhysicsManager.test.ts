@@ -82,7 +82,7 @@ describe('PhysicsManager', () => {
         test('should create PhysicsManager with default config', () => {
             const manager = new PhysicsManager();
             expect(manager).toBeDefined();
-            expect(manager.isActive()).toBeFalsy();
+            expect(manager.isActive()).toBe(false);
         });
 
         test('should create PhysicsManager with custom config', () => {
@@ -99,58 +99,58 @@ describe('PhysicsManager', () => {
         test('should create PhysicsManager using factory method', () => {
             const manager = PhysicsManager.create<NodeData>();
             expect(manager).toBeDefined();
-            expect(manager.isActive()).toBeFalsy();
+            expect(manager.isActive()).toBe(false);
         });
     });
 
     describe('Simulation State Management', () => {
         test('should start simulation', () => {
-            expect(physicsManager.isActive()).toBeFalsy();
+            expect(physicsManager.isActive()).toBe(false);
 
             physicsManager.start();
 
-            expect(physicsManager.isActive()).toBeTruthy();
+            expect(physicsManager.isActive()).toBe(true);
             const metrics = physicsManager.getMetrics();
-            expect(metrics.isSimulating).toBeTruthy();
-            expect(metrics.isPaused).toBeFalsy();
-            expect(metrics.isActive).toBeTruthy();
+            expect(metrics.isSimulating).toBe(true);
+            expect(metrics.isPaused).toBe(false);
+            expect(metrics.isActive).toBe(true);
         });
 
         test('should stop simulation', () => {
             physicsManager.start();
-            expect(physicsManager.isActive()).toBeTruthy();
+            expect(physicsManager.isActive()).toBe(true);
 
             physicsManager.stop();
 
-            expect(physicsManager.isActive()).toBeFalsy();
+            expect(physicsManager.isActive()).toBe(false);
             const metrics = physicsManager.getMetrics();
-            expect(metrics.isSimulating).toBeFalsy();
-            expect(metrics.isPaused).toBeFalsy();
-            expect(metrics.isActive).toBeFalsy();
+            expect(metrics.isSimulating).toBe(false);
+            expect(metrics.isPaused).toBe(false);
+            expect(metrics.isActive).toBe(false);
         });
 
         test('should pause and resume simulation', () => {
             physicsManager.start();
-            expect(physicsManager.isActive()).toBeTruthy();
+            expect(physicsManager.isActive()).toBe(true);
 
             physicsManager.pause();
-            expect(physicsManager.isActive()).toBeFalsy();
+            expect(physicsManager.isActive()).toBe(false);
 
             const metrics = physicsManager.getMetrics();
-            expect(metrics.isSimulating).toBeTruthy();
-            expect(metrics.isPaused).toBeTruthy();
-            expect(metrics.isActive).toBeFalsy();
+            expect(metrics.isSimulating).toBe(true);
+            expect(metrics.isPaused).toBe(true);
+            expect(metrics.isActive).toBe(false);
 
             physicsManager.resume();
-            expect(physicsManager.isActive()).toBeTruthy();
+            expect(physicsManager.isActive()).toBe(true);
         });
 
         test('should not resume if not simulating', () => {
-            expect(physicsManager.isActive()).toBeFalsy();
+            expect(physicsManager.isActive()).toBe(false);
 
             physicsManager.resume();
 
-            expect(physicsManager.isActive()).toBeFalsy();
+            expect(physicsManager.isActive()).toBe(false);
         });
 
         test('should reset simulation state', () => {
@@ -160,9 +160,9 @@ describe('PhysicsManager', () => {
             physicsManager.reset();
 
             const metrics = physicsManager.getMetrics();
-            expect(metrics.isSimulating).toBeFalsy();
-            expect(metrics.isPaused).toBeFalsy();
-            expect(metrics.isActive).toBeFalsy();
+            expect(metrics.isSimulating).toBe(false);
+            expect(metrics.isPaused).toBe(false);
+            expect(metrics.isActive).toBe(false);
         });
     });
 
@@ -174,7 +174,7 @@ describe('PhysicsManager', () => {
         test('should execute simulation step when active', () => {
             const result = physicsManager.simulateStep(mockNodes, mockLinks, filteredNodes);
 
-            expect(result).toBeTruthy();
+            expect(result).toBe(true);
         });
 
         test('should skip simulation step when inactive', () => {
@@ -182,7 +182,7 @@ describe('PhysicsManager', () => {
 
             const result = physicsManager.simulateStep(mockNodes, mockLinks, filteredNodes);
 
-            expect(result).toBeFalsy();
+            expect(result).toBe(false);
         });
 
         test('should skip simulation step when paused', () => {
@@ -190,7 +190,7 @@ describe('PhysicsManager', () => {
 
             const result = physicsManager.simulateStep(mockNodes, mockLinks, filteredNodes);
 
-            expect(result).toBeFalsy();
+            expect(result).toBe(false);
         });
 
         test('should handle empty node maps', () => {
@@ -199,13 +199,13 @@ describe('PhysicsManager', () => {
 
             const result = physicsManager.simulateStep(emptyNodes, [], emptyFiltered);
 
-            expect(result).toBeTruthy(); // Should still execute even with no nodes
+            expect(result).toBe(true); // Should still execute even with no nodes
         });
 
         test('should handle empty links', () => {
             const result = physicsManager.simulateStep(mockNodes, [], filteredNodes);
 
-            expect(result).toBeTruthy();
+            expect(result).toBe(true);
         });
 
         test('should filter out invalid links', () => {
@@ -225,7 +225,7 @@ describe('PhysicsManager', () => {
 
             const result = physicsManager.simulateStep(mockNodes, invalidLinks, filteredNodes);
 
-            expect(result).toBeTruthy();
+            expect(result).toBe(true);
         });
     });
 
@@ -246,7 +246,7 @@ describe('PhysicsManager', () => {
                 filteredNodes
             );
 
-            expect(result).toBeTruthy();
+            expect(result).toBe(true);
         });
 
         test('should handle invalid raw links', () => {
@@ -261,7 +261,7 @@ describe('PhysicsManager', () => {
                 filteredNodes
             );
 
-            expect(result).toBeTruthy();
+            expect(result).toBe(true);
         });
 
         test('should skip raw links simulation when inactive', () => {
@@ -275,7 +275,7 @@ describe('PhysicsManager', () => {
                 filteredNodes
             );
 
-            expect(result).toBeFalsy();
+            expect(result).toBe(false);
         });
     });
 
@@ -308,27 +308,27 @@ describe('PhysicsManager', () => {
     describe('Metrics and Monitoring', () => {
         test('should provide accurate simulation metrics', () => {
             let metrics = physicsManager.getMetrics();
-            expect(metrics.isSimulating).toBeFalsy();
-            expect(metrics.isPaused).toBeFalsy();
-            expect(metrics.isActive).toBeFalsy();
+            expect(metrics.isSimulating).toBe(false);
+            expect(metrics.isPaused).toBe(false);
+            expect(metrics.isActive).toBe(false);
 
             physicsManager.start();
             metrics = physicsManager.getMetrics();
-            expect(metrics.isSimulating).toBeTruthy();
-            expect(metrics.isPaused).toBeFalsy();
-            expect(metrics.isActive).toBeTruthy();
+            expect(metrics.isSimulating).toBe(true);
+            expect(metrics.isPaused).toBe(false);
+            expect(metrics.isActive).toBe(true);
 
             physicsManager.pause();
             metrics = physicsManager.getMetrics();
-            expect(metrics.isSimulating).toBeTruthy();
-            expect(metrics.isPaused).toBeTruthy();
-            expect(metrics.isActive).toBeFalsy();
+            expect(metrics.isSimulating).toBe(true);
+            expect(metrics.isPaused).toBe(true);
+            expect(metrics.isActive).toBe(false);
 
             physicsManager.stop();
             metrics = physicsManager.getMetrics();
-            expect(metrics.isSimulating).toBeFalsy();
-            expect(metrics.isPaused).toBeFalsy();
-            expect(metrics.isActive).toBeFalsy();
+            expect(metrics.isSimulating).toBe(false);
+            expect(metrics.isPaused).toBe(false);
+            expect(metrics.isActive).toBe(false);
         });
     });
 
@@ -355,11 +355,11 @@ describe('PhysicsManager', () => {
     describe('Resource Management', () => {
         test('should clean up resources on destroy', () => {
             physicsManager.start();
-            expect(physicsManager.isActive()).toBeTruthy();
+            expect(physicsManager.isActive()).toBe(true);
 
             physicsManager.destroy();
 
-            expect(physicsManager.isActive()).toBeFalsy();
+            expect(physicsManager.isActive()).toBe(false);
         });
 
         test('should handle multiple destroy calls gracefully', () => {
@@ -388,7 +388,7 @@ describe('PhysicsManager', () => {
 
             const result = physicsManager.simulateStep(mockNodes, mockLinks, new Set());
 
-            expect(result).toBeTruthy();
+            expect(result).toBe(true);
         });
 
         test("should handle filtered nodes that don't exist in nodes map", () => {
@@ -397,7 +397,7 @@ describe('PhysicsManager', () => {
 
             const result = physicsManager.simulateStep(mockNodes, mockLinks, invalidFiltered);
 
-            expect(result).toBeTruthy();
+            expect(result).toBe(true);
         });
     });
 });

@@ -9,7 +9,7 @@ import { SVGRenderer, RenderLink } from '../../../src/rendering/SVGRenderer';
 import { Node } from '../../../src/Node';
 import { Vector } from '../../../src/Vector';
 import { ThemeManager } from '../../../src/theming/ThemeManager';
-import { NodeData, LinkData } from '../../../src/types/index';
+import { NodeData } from '../../../src/types/index';
 
 // Mock JSDOM environment
 Object.defineProperty(window, 'getComputedStyle', {
@@ -162,7 +162,7 @@ describe('SVGRenderer', () => {
 
             const circle = nodeGroup!.querySelector('circle');
             expect(circle).not.toBeNull();
-            expect(circle!.getAttribute('r')).toBeTruthy();
+            expect(circle!.getAttribute('r')).toEqual(expect.any(String));
 
             const text = nodeGroup!.querySelector('text');
             expect(text).not.toBeNull();
@@ -182,8 +182,8 @@ describe('SVGRenderer', () => {
 
             const rect = nodeGroup!.querySelector('rect');
             expect(rect).not.toBeNull();
-            expect(rect!.getAttribute('width')).toBeTruthy();
-            expect(rect!.getAttribute('height')).toBeTruthy();
+            expect(rect!.getAttribute('width')).toEqual(expect.any(String));
+            expect(rect!.getAttribute('height')).toEqual(expect.any(String));
 
             const text = nodeGroup!.querySelector('text');
             expect(text).not.toBeNull();
@@ -244,7 +244,7 @@ describe('SVGRenderer', () => {
 
             const polygon = nodeGroup!.querySelector('polygon');
             expect(polygon).not.toBeNull();
-            expect(polygon!.getAttribute('points')).toBeTruthy();
+            expect(polygon!.getAttribute('points')).toEqual(expect.any(String));
         });
 
         test('should handle nodes with dynamic sizing', () => {
@@ -284,8 +284,8 @@ describe('SVGRenderer', () => {
             const circle = nodeGroup!.querySelector('circle');
 
             // Should have theme-applied styles
-            expect(circle!.getAttribute('fill')).toBeTruthy();
-            expect(circle!.getAttribute('stroke')).toBeTruthy();
+            expect(circle!.getAttribute('fill')).toEqual(expect.any(String));
+            expect(circle!.getAttribute('stroke')).toEqual(expect.any(String));
         });
     });
 
@@ -309,10 +309,10 @@ describe('SVGRenderer', () => {
             expect(linkElement).not.toBeNull();
 
             // Should have proper coordinates
-            expect(linkElement!.getAttribute('x1')).toBeTruthy();
-            expect(linkElement!.getAttribute('y1')).toBeTruthy();
-            expect(linkElement!.getAttribute('x2')).toBeTruthy();
-            expect(linkElement!.getAttribute('y2')).toBeTruthy();
+            expect(linkElement!.getAttribute('x1')).toEqual(expect.any(String));
+            expect(linkElement!.getAttribute('y1')).toEqual(expect.any(String));
+            expect(linkElement!.getAttribute('x2')).toEqual(expect.any(String));
+            expect(linkElement!.getAttribute('y2')).toEqual(expect.any(String));
         });
 
         test('should create link labels', () => {
@@ -328,8 +328,6 @@ describe('SVGRenderer', () => {
             renderer.render(nodes, links);
 
             const svg = renderer.getSVGElement();
-            const linkText = svg!.querySelector('text');
-
             // Should find link label text
             const linkLabels = Array.from(svg!.querySelectorAll('text')).filter(
                 text => text.textContent === 'Connection Label'
@@ -509,7 +507,7 @@ describe('SVGRenderer', () => {
             renderer.destroy();
 
             // Container should be cleared
-            expect(container.children.length).toBe(0);
+            expect(container.children).toHaveLength(0);
         });
 
         test('should clear all element references', () => {

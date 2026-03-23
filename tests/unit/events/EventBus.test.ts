@@ -55,7 +55,7 @@ describe('EventBus', () => {
 
             expect(eventBus.getTotalListeners()).toBe(1);
             expect(eventBus.getListenerCount('test-event')).toBe(1);
-            expect(eventBus.hasListeners('test-event')).toBeTruthy();
+            expect(eventBus.hasListeners('test-event')).toBe(true);
             expect(subscription.unsubscribe).toBeDefined();
         });
 
@@ -83,7 +83,7 @@ describe('EventBus', () => {
             subscription.unsubscribe();
 
             expect(eventBus.getTotalListeners()).toBe(0);
-            expect(eventBus.hasListeners('test-event')).toBeFalsy();
+            expect(eventBus.hasListeners('test-event')).toBe(false);
         });
 
         test('should handle multiple unsubscribes gracefully', () => {
@@ -101,7 +101,7 @@ describe('EventBus', () => {
             eventBus.once('once-event', mockHandler);
 
             expect(eventBus.getTotalListeners()).toBe(1);
-            expect(eventBus.hasListeners('once-event')).toBeTruthy();
+            expect(eventBus.hasListeners('once-event')).toBe(true);
         });
 
         test('should remove once listeners after emission', async () => {
@@ -111,7 +111,7 @@ describe('EventBus', () => {
 
             expect(mockHandler).toHaveBeenCalledWith('test-data');
             expect(eventBus.getTotalListeners()).toBe(0);
-            expect(eventBus.hasListeners('once-event')).toBeFalsy();
+            expect(eventBus.hasListeners('once-event')).toBe(false);
         });
 
         test('should support both once and persistent listeners', async () => {
@@ -209,7 +209,7 @@ describe('EventBus', () => {
             eventBus.emitSync('sync-once', 'data');
 
             expect(mockHandler).toHaveBeenCalledWith('data');
-            expect(eventBus.hasListeners('sync-once')).toBeFalsy();
+            expect(eventBus.hasListeners('sync-once')).toBe(false);
         });
     });
 
@@ -411,11 +411,11 @@ describe('EventBus', () => {
             const namespace = eventBus.createNamespace('test');
 
             namespace.on('event', mockHandler);
-            expect(namespace.hasListeners('event')).toBeTruthy();
+            expect(namespace.hasListeners('event')).toBe(true);
             expect(namespace.getListenerCount('event')).toBe(1);
 
             namespace.off('event');
-            expect(namespace.hasListeners('event')).toBeFalsy();
+            expect(namespace.hasListeners('event')).toBe(false);
         });
     });
 

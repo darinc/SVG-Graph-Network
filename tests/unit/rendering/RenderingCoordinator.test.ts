@@ -105,8 +105,8 @@ describe('RenderingCoordinator', () => {
             expect(coordinator).toBeDefined();
 
             const state = coordinator.getRenderingState();
-            expect(state.needsElementCreation).toBeTruthy();
-            expect(state.needsRender).toBeTruthy();
+            expect(state.needsElementCreation).toBe(true);
+            expect(state.needsRender).toBe(true);
         });
 
         test('should initialize underlying SVGRenderer', () => {
@@ -137,13 +137,13 @@ describe('RenderingCoordinator', () => {
 
         test('should track rendering state correctly', () => {
             let state = coordinator.getRenderingState();
-            expect(state.needsElementCreation).toBeTruthy();
-            expect(state.needsRender).toBeTruthy();
+            expect(state.needsElementCreation).toBe(true);
+            expect(state.needsRender).toBe(true);
 
             // After render, creation should be false but render might still be needed
             coordinator.render(mockNodes, mockLinks, filteredNodes);
             state = coordinator.getRenderingState();
-            expect(state.needsElementCreation).toBeFalsy();
+            expect(state.needsElementCreation).toBe(false);
         });
 
         test('should request element creation', () => {
@@ -152,8 +152,8 @@ describe('RenderingCoordinator', () => {
             coordinator.requestElementCreation();
 
             const state = coordinator.getRenderingState();
-            expect(state.needsElementCreation).toBeTruthy();
-            expect(state.needsRender).toBeTruthy();
+            expect(state.needsElementCreation).toBe(true);
+            expect(state.needsRender).toBe(true);
         });
 
         test('should request render', () => {
@@ -162,7 +162,7 @@ describe('RenderingCoordinator', () => {
             coordinator.requestRender();
 
             const state = coordinator.getRenderingState();
-            expect(state.needsRender).toBeTruthy();
+            expect(state.needsRender).toBe(true);
         });
 
         test('should request theme update', () => {
@@ -171,8 +171,8 @@ describe('RenderingCoordinator', () => {
             coordinator.requestThemeUpdate();
 
             const state = coordinator.getRenderingState();
-            expect(state.needsThemeUpdate).toBeTruthy();
-            expect(state.needsRender).toBeTruthy();
+            expect(state.needsThemeUpdate).toBe(true);
+            expect(state.needsRender).toBe(true);
         });
     });
 
@@ -184,7 +184,7 @@ describe('RenderingCoordinator', () => {
         test('should execute render when needed', () => {
             const result = coordinator.render(mockNodes, mockLinks, filteredNodes);
 
-            expect(result).toBeTruthy();
+            expect(result).toBe(true);
 
             // Verify SVGRenderer methods were called
             const rendererInstance = (SVGRenderer as jest.MockedClass<typeof SVGRenderer>).mock
@@ -204,7 +204,7 @@ describe('RenderingCoordinator', () => {
             // Immediate second render should be skipped
             const result = coordinator.render(mockNodes, mockLinks, filteredNodes);
 
-            expect(result).toBeFalsy();
+            expect(result).toBe(false);
         });
 
         test('should force render when requested', () => {
@@ -214,7 +214,7 @@ describe('RenderingCoordinator', () => {
             // Force render should execute even if not needed
             const result = coordinator.render(mockNodes, mockLinks, filteredNodes, true);
 
-            expect(result).toBeTruthy();
+            expect(result).toBe(true);
         });
 
         test('should handle empty nodes and links', () => {
@@ -224,7 +224,7 @@ describe('RenderingCoordinator', () => {
 
             const result = coordinator.render(emptyNodes, emptyLinks, emptyFiltered);
 
-            expect(result).toBeTruthy();
+            expect(result).toBe(true);
         });
 
         test('should apply theme updates during render', () => {
@@ -330,7 +330,7 @@ describe('RenderingCoordinator', () => {
 
             // Should request render after resize
             const state = coordinator.getRenderingState();
-            expect(state.needsRender).toBeTruthy();
+            expect(state.needsRender).toBe(true);
         });
     });
 
@@ -450,7 +450,7 @@ describe('RenderingCoordinator', () => {
         test('should handle full render cycle with multiple updates', () => {
             // Initial render
             let result = coordinator.render(mockNodes, mockLinks, filteredNodes);
-            expect(result).toBeTruthy();
+            expect(result).toBe(true);
 
             // Request updates
             coordinator.requestElementCreation();
@@ -458,7 +458,7 @@ describe('RenderingCoordinator', () => {
 
             // Second render with updates
             result = coordinator.render(mockNodes, mockLinks, filteredNodes);
-            expect(result).toBeTruthy();
+            expect(result).toBe(true);
 
             const rendererInstance = (SVGRenderer as jest.MockedClass<typeof SVGRenderer>).mock
                 .instances[0];

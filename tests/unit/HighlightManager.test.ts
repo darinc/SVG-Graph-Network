@@ -202,7 +202,7 @@ describe('HighlightManager', () => {
             expect(result).toContain('node2'); // Source node
             expect(result).toContain('node1'); // Neighbor
             expect(result).toContain('node3'); // Neighbor
-            expect(result.length).toBe(3); // Only direct neighbors
+            expect(result).toHaveLength(3); // Only direct neighbors
         });
 
         test('should highlight neighbors with specified depth', () => {
@@ -269,7 +269,7 @@ describe('HighlightManager', () => {
             expect(result).toContain('node1');
             expect(result).toContain('edge1'); // node1-node2
             expect(result).toContain('edge4'); // node1-node4
-            expect(result.length).toBe(3);
+            expect(result).toHaveLength(3);
         });
 
         test('should apply connection styles', () => {
@@ -414,23 +414,27 @@ describe('HighlightManager', () => {
 
     describe('Animation Management', () => {
         // TODO: Fix document.getElementById access in test environment
-        test.skip('should manage path flow animations', done => {
-            const mockEdgeElement = mockElements.get('edge-edge1')!;
+        test.skip('should manage path flow animations', () => {
+            return new Promise<void>(resolve => {
+                const mockEdgeElement = mockElements.get('edge-edge1')!;
 
-            highlightManager.highlightPath('node1', 'node2', {
-                showFlow: true,
-                flowSpeed: 1,
-                duration: 100 // Short duration for test
+                highlightManager.highlightPath('node1', 'node2', {
+                    showFlow: true,
+                    flowSpeed: 1,
+                    duration: 100 // Short duration for test
+                });
+
+                // Animation should start
+                expect(mockEdgeElement.classList.add).toHaveBeenCalledWith(
+                    'graph-highlight-animated'
+                );
+
+                // Check that stroke-dashoffset is being updated
+                setTimeout(() => {
+                    expect(mockEdgeElement.style.strokeDashoffset).toEqual(expect.any(String));
+                    resolve();
+                }, 50);
             });
-
-            // Animation should start
-            expect(mockEdgeElement.classList.add).toHaveBeenCalledWith('graph-highlight-animated');
-
-            // Check that stroke-dashoffset is being updated
-            setTimeout(() => {
-                expect(mockEdgeElement.style.strokeDashoffset).toBeTruthy();
-                done();
-            }, 50);
         });
 
         // TODO: Fix animation cleanup tracking in test environment
