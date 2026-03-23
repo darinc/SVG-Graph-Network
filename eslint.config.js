@@ -55,7 +55,7 @@ export default [
       '@typescript-eslint/no-non-null-assertion': 'off',
       
       // General code quality
-      'no-console': 'warn',
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
       'prefer-const': 'error',
       'no-var': 'error',
       

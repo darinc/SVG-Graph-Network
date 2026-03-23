@@ -1,70 +1,36 @@
 # SVG Graph Network
 
-A modern, interactive SVG graph visualization library with advanced theming, physics simulation, and mobile-first design. Create beautiful, customizable network diagrams with dynamic styling and responsive controls.
+[![CI](https://github.com/darinc/SVG-Graph-Network/actions/workflows/ci.yml/badge.svg)](https://github.com/darinc/SVG-Graph-Network/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/svg-graph-network.svg)](https://www.npmjs.com/package/svg-graph-network)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/svg-graph-network)](https://bundlephobia.com/package/svg-graph-network)
+[![license](https://img.shields.io/npm/l/svg-graph-network.svg)](https://github.com/darinc/SVG-Graph-Network/blob/main/LICENSE)
 
-## ⚠️ **Use Established Libraries Instead**
+A zero-dependency, TypeScript-first graph visualization library. Force-directed layouts, dark/light theming, mobile touch gestures, and crisp SVG rendering — all in ~23KB gzipped.
 
-**This project was an exercise in "vibe coding" while implementing best practices.** For production applications, we strongly recommend using these mature, battle-tested alternatives:
+**[Live Demo](https://darinc.github.io/SVG-Graph-Network/)** | **[API Docs](./docs/API.md)** | **[Examples](./docs/EXAMPLES.md)**
 
-- **[D3.js](https://d3js.org/)** - The industry standard for data visualization with unmatched flexibility
-- **[Cytoscape.js](https://cytoscape.org/)** - Powerful graph theory library with extensive analysis features
-- **[Vis.js Network](https://visjs.org/)** - Easy-to-use network visualization with great documentation
-- **[Sigma.js](https://sigmajs.org/)** - High-performance graph rendering optimized for large datasets
-- **[Force Graph](https://github.com/vasturiano/force-graph)** - React/Vue/3D force-directed graphs with WebGL
-- **[Graphology](https://graphology.github.io/)** - Robust graph data structures and algorithms
+## Why SVG Graph Network?
 
-This library serves as an educational example of clean TypeScript architecture, comprehensive testing, and modern development practices. Feel free to explore the code for learning purposes!
+- **Zero dependencies** — No transitive supply chain. One `npm install`, nothing else.
+- **5 lines to a working graph** — Opinionated defaults so you skip the boilerplate. D3 is a toolkit; this is a solution.
+- **TypeScript-first** — Designed in strict TypeScript, not retroactively typed. Full type definitions ship with the package.
+- **Mobile-native** — Pinch-to-zoom, touch drag, double-tap filtering built in from day one.
+- **Themeable** — Dark/light modes, automatic color generation for node types, CSS custom properties for full control.
+- **Small** — ~23KB gzipped. Compare to D3 (~90KB) or Cytoscape (~170KB).
 
-## ✨ Key Features
-
-### 🎨 Advanced Theming System
-- **Dynamic node/edge styling** - No hardcoded types, fully configurable
-- **Runtime theme switching** between dark and light modes  
-- **Configurable grid backgrounds** with theme-specific colors and patterns
-- **Visual state management** (normal, hover, selected, active, disabled)
-- **Theme-synchronized UI** - All elements update with theme changes
-
-### ⚡ High-Performance Physics
-- **Customizable force-directed layout** with fine-tuned physics parameters
-- **Multi-force simulation**: node repulsion, link attraction, type-based grouping
-- **Real-time physics controls** with immediate visual feedback
-- **Stable simulation** with configurable damping and convergence
-
-### 📱 Mobile-First Design  
-- **Touch-optimized interactions** - pinch-to-zoom, drag, double-tap filtering
-- **Responsive UI controls** that adapt to screen size
-- **Mobile gesture support** with smooth animations
-- **Progressive enhancement** from mobile to desktop
-
-### 🎯 Rich Interactions
-- **Multi-level filtering** by node connections with configurable depth
-- **Smooth pan/zoom/drag** with momentum and constraints  
-- **Event system** for custom integrations and analytics
-- **Keyboard accessibility** and screen reader support
-
-### 🔧 Developer Experience
-- **TypeScript-first** with comprehensive type definitions
-- **Clean modular architecture** with focused components
-- **Dependency injection container** for flexible component management
-- **Event-driven architecture** with comprehensive EventBus system
-- **Zero dependencies** - pure JavaScript and SVG
-- **Extensive configuration** options for every aspect
-- **Built-in error handling** with detailed error messages
-- **Professional codebase** ready for enterprise development
-
-### 🎪 Visual Flexibility
-- **Multiple node shapes** (circle, rectangle, square, triangle)
-- **Flexible link styling** (solid, dashed, dotted with custom colors)
-- **Dynamic legends** that update with data and themes
-- **Customizable grid patterns** integrated into the core library
-- **SVG-based rendering** for crisp visuals at any scale
-
-## 🚀 Quick Start
+## Quick Start
 
 ### Installation
 
 ```bash
 npm install svg-graph-network
+```
+
+Or via CDN:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/svg-graph-network/dist/svg-graph-network.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/svg-graph-network/dist/svg-graph-network.css">
 ```
 
 ### Basic Usage
@@ -77,7 +43,7 @@ const graph = new GraphNetwork('container-id', {
         nodes: [
             { id: "1", name: "Alice", type: "person", shape: "circle", size: 25 },
             { id: "2", name: "Bob", type: "person", shape: "rectangle", size: 30 },
-            { id: "3", name: "Carol", type: "organization", shape: "square", size: 20 }
+            { id: "3", name: "Acme Corp", type: "organization", shape: "square", size: 20 }
         ],
         links: [
             { source: "1", target: "2", label: "friends", weight: 2, line_type: "solid" },
@@ -93,7 +59,7 @@ const graph = new GraphNetwork('container-id', {
 });
 ```
 
-## 📖 API Reference
+## API Reference
 
 ### Constructor Options
 
@@ -104,26 +70,26 @@ interface GraphNetworkOptions {
         links: LinkData[];
     };
     config?: {
-        // Physics Configuration
+        // Physics
         damping?: number;              // Velocity damping (0.35-1.0, default: 0.95)
         repulsionStrength?: number;    // Node repulsion force (default: 6500)
         attractionStrength?: number;   // Link attraction force (default: 0.001)
         groupingStrength?: number;     // Type-based grouping force (default: 0.001)
-        
-        // Interaction Configuration  
+
+        // Interaction
         zoomSensitivity?: number;      // Mouse wheel sensitivity (default: 1.01)
         filterDepth?: number;          // Connection depth for filtering (default: 1)
-        
-        // UI Configuration
-        showControls?: boolean;        // Show zoom/control buttons (default: true)
-        showLegend?: boolean;          // Show node type legend (default: true)
-        showTitle?: boolean;           // Show graph title (default: true)
-        showBreadcrumbs?: boolean;     // Show navigation breadcrumbs (default: true)
-        
-        // Theming Configuration
+
+        // UI
+        showControls?: boolean;        // Zoom/control buttons (default: true)
+        showLegend?: boolean;          // Node type legend (default: true)
+        showTitle?: boolean;           // Graph title (default: true)
+        showBreadcrumbs?: boolean;     // Navigation breadcrumbs (default: true)
+
+        // Theming
         theme?: 'dark' | 'light';     // Visual theme (default: 'dark')
         title?: string;                // Graph title text
-        showGrid?: boolean;            // Show background grid (default: true)
+        showGrid?: boolean;            // Background grid (default: true)
     };
 }
 ```
@@ -134,7 +100,7 @@ interface GraphNetworkOptions {
 interface NodeData {
     id: string;                       // Unique identifier
     name: string;                     // Display name
-    type?: string;                    // Type for styling/grouping (fully configurable)
+    type?: string;                    // Type for styling/grouping
     shape?: 'circle' | 'rectangle' | 'square' | 'triangle';
     size?: number;                    // Size in pixels
     [key: string]: any;              // Custom properties
@@ -174,42 +140,14 @@ graph.resetFilter();                  // Show all nodes
 // Theming
 graph.setTheme('light' | 'dark');    // Change theme
 graph.toggleTheme();                  // Switch between themes
-graph.configureGrid(gridConfig);     // Customize background grid
 
 // Cleanup
 graph.destroy();                      // Clean up resources
 ```
 
-### Advanced Theming
-
-```javascript
-// Configure custom themes
-graph.setTheme({
-    name: 'custom',
-    colors: {
-        background: '#1a1a2e',
-        foreground: '#e94560',
-        primary: '#0f3460',
-        secondary: '#16213e'
-    },
-    nodeStyles: {
-        // Dynamic node type styling - no hardcoded types!
-        'user': { fill: '#4CAF50', stroke: '#2E7D32' },
-        'admin': { fill: '#FF9800', stroke: '#F57C00' },
-        'system': { fill: '#2196F3', stroke: '#1976D2' }
-    },
-    canvas: {
-        showGrid: true,
-        gridColor: 'rgba(233, 69, 96, 0.1)',
-        gridSize: 40
-    }
-});
-```
-
 ### Event System
 
 ```javascript
-// Listen for events
 graph.on('nodeDoubleClick', (data) => {
     console.log('Node double-clicked:', data.node);
 });
@@ -222,111 +160,43 @@ graph.on('filtered', (data) => {
     console.log(`Showing ${data.visibleNodes.length} nodes`);
 });
 
-// Available events
-'nodeMouseDown' | 'nodeDoubleClick' | 'filtered' | 'filterReset' |
-'themeChanged' | 'zoom' | 'resize' | 'reset' | 'nodeAdded' |
-'nodeRemoved' | 'fitted' | 'destroyed'
+// Available events:
+// nodeMouseDown, nodeDoubleClick, filtered, filterReset,
+// themeChanged, zoom, resize, reset, nodeAdded,
+// nodeRemoved, fitted, destroyed
 ```
 
-## 📱 Mobile Support
+## Mobile Support
 
-Full touch gesture support with mobile-optimized UI:
+Full touch gesture support with responsive UI:
 
-### Touch Gestures
-- **Drag background**: Pan the graph
-- **Drag nodes**: Move individual nodes  
-- **Double-tap node**: Filter to show connections
-- **Double-tap background**: Reset filter
-- **Pinch/spread**: Zoom in/out
-- **Tap controls**: Use floating action buttons
+| Gesture | Action |
+|---------|--------|
+| Drag background | Pan |
+| Drag node | Move node |
+| Double-tap node | Filter to connections |
+| Double-tap background | Reset filter |
+| Pinch/spread | Zoom |
 
-### Mobile HTML Setup
-```html
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-```
-
-## 🎨 Styling & Customization
-
-The library uses CSS custom properties for comprehensive theming:
-
-```css
-:root {
-    /* Colors */
-    --graph-bg-primary: #1a1a1a;
-    --graph-text-primary: #f0f0f0;
-    --graph-border-color: rgba(255, 255, 255, 0.1);
-    
-    /* Grid */
-    --graph-grid-color: rgba(255, 165, 0, 0.1);
-    --graph-grid-size: 30px;
-    
-    /* Controls */
-    --graph-control-bg: rgba(42, 42, 42, 0.9);
-    --graph-control-border: 1px solid #444;
-}
-
-[data-theme="light"] {
-    --graph-bg-primary: #fafafa;
-    --graph-text-primary: #1a1a1a;
-    --graph-grid-color: rgba(0, 100, 200, 0.1);
-}
-```
-
-## 🏗️ Architecture
-
-Built with a clean, modular architecture featuring focused components:
-
-- **TypeScript-first** with strict typing and comprehensive definitions
-- **Zero dependencies** - pure JavaScript and SVG
-- **Event-driven design** with decoupled component communication
-- **Dependency injection** for flexible service management
-- **100% test coverage** with integration and performance benchmarks
-- **Modern patterns**: Factory, Observer, Command, and State Machine
-
-See [Architecture Documentation](./docs/ARCHITECTURE.md) for detailed technical information.
-
-## 🌐 Browser Support
+## Browser Support
 
 - **Desktop**: Chrome 60+, Firefox 55+, Safari 12+, Edge 79+
 - **Mobile**: iOS Safari 12+, Chrome Mobile 60+, Samsung Internet 8+
 
-## 📈 Performance
-
-- **Efficient rendering**: SVG-based with minimal DOM manipulation
-- **Smart physics**: Adaptive simulation that stops when stable
-- **Memory management**: Proper cleanup and event listener removal
-- **Small bundle**: ~30KB gzipped with zero dependencies
-
-## 🔗 Examples
-
-- **[Basic Example](./examples/basic.html)**: Simple network with default styling
-- **[Advanced Example](./examples/advanced.html)**: Complex network with custom themes
-- **[Mobile Demo](./examples/mobile.html)**: Touch-optimized interface
-
-## 📝 Development
+## Development
 
 ```bash
 npm install         # Install dependencies
-npm run dev         # Start development server (localhost:8080)
-npm run build       # Build for production
-npm run test        # Run test suite
+npm run dev         # Dev server at localhost:8080
+npm run build       # Production build
+npm test            # Run test suite
 npm run lint        # Check code quality
 ```
 
-## 🤝 Contributing
+## Contributing
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`) 
-5. Open a Pull Request
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for development setup, testing, and PR guidelines.
 
-## 📄 License
+## License
 
-MIT © [Contributors](https://github.com/darinc/svg-graph-network/contributors)
-
----
-
-**An educational example of clean TypeScript architecture and modern development practices.**
+MIT © [Darin Chambers](https://github.com/darinc)

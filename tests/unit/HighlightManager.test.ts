@@ -180,20 +180,6 @@ describe('HighlightManager', () => {
             expect(mockEdgeElement.setAttribute).toHaveBeenCalledWith('stroke', '#00ff00');
             expect(mockEdgeElement.setAttribute).toHaveBeenCalledWith('stroke-width', '6'); // pathWidth + 1
         });
-
-        // Skipped: animatePathFlow uses recursive requestAnimationFrame which
-        // causes infinite recursion when both rAF and setTimeout are mocked to run immediately
-        test.skip('should handle path flow animation', () => {
-            const mockEdgeElement = mockElements.get('edge-edge1')!;
-
-            highlightManager.highlightPath('node1', 'node2', {
-                showFlow: true,
-                flowSpeed: 2,
-                duration: 1000
-            });
-
-            expect(mockEdgeElement.classList.add).toHaveBeenCalledWith('graph-highlight-animated');
-        });
     });
 
     describe('Neighbor Highlighting', () => {
@@ -410,52 +396,6 @@ describe('HighlightManager', () => {
             );
 
             consoleWarnSpy.mockRestore();
-        });
-    });
-
-    describe('Animation Management', () => {
-        // Skipped: recursive rAF + immediate setTimeout mock causes infinite recursion
-        test.skip('should manage path flow animations', () => {
-            return new Promise<void>(resolve => {
-                const mockEdgeElement = mockElements.get('edge-edge1')!;
-
-                highlightManager.highlightPath('node1', 'node2', {
-                    showFlow: true,
-                    flowSpeed: 1,
-                    duration: 100 // Short duration for test
-                });
-
-                // Animation should start
-                expect(mockEdgeElement.classList.add).toHaveBeenCalledWith(
-                    'graph-highlight-animated'
-                );
-
-                // Check that stroke-dashoffset is being updated
-                setTimeout(() => {
-                    expect(mockEdgeElement.style.strokeDashoffset).toEqual(expect.any(String));
-                    resolve();
-                }, 50);
-            });
-        });
-
-        // Skipped: recursive rAF + immediate setTimeout mock causes infinite recursion
-        test.skip('should clean up animations on clear', () => {
-            // Mock requestAnimationFrame and cancelAnimationFrame
-            const originalRAF = global.requestAnimationFrame;
-            const originalCAF = global.cancelAnimationFrame;
-            const cancelSpy = jest.fn();
-
-            global.requestAnimationFrame = jest.fn(() => 123);
-            global.cancelAnimationFrame = cancelSpy;
-
-            highlightManager.highlightPath('node1', 'node2', { showFlow: true });
-            highlightManager.clearHighlights();
-
-            // Should cancel animations
-            expect(cancelSpy).toHaveBeenCalled();
-
-            global.requestAnimationFrame = originalRAF;
-            global.cancelAnimationFrame = originalCAF;
         });
     });
 

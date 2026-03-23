@@ -52,14 +52,12 @@ class Logger {
 
     error(message: string, ...args: unknown[]): void {
         if (this.shouldLog(LogLevel.ERROR)) {
-            // eslint-disable-next-line no-console
             console.error(...this.formatMessage('ERROR', message, ...args));
         }
     }
 
     warn(message: string, ...args: unknown[]): void {
         if (this.shouldLog(LogLevel.WARN)) {
-            // eslint-disable-next-line no-console
             console.warn(...this.formatMessage('WARN', message, ...args));
         }
     }

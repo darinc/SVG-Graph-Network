@@ -55,7 +55,8 @@
     "docs:serve": "npm run docs && npx http-server docs/api -p 8080 -o",
     "docs:watch": "typedoc --watch",
     "size": "size-limit",
-    "size:ci": "size-limit"
+    "size:ci": "size-limit",
+    "prepublishOnly": "npm run build && npm test"
   },
   "keywords": [
     "graph",

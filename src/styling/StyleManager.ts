@@ -141,6 +141,8 @@ export class StyleManager implements IStyleManager {
         const targets = this.resolveElementSelector(elements);
 
         for (const { id, type } of targets) {
+            // Clear DOM attributes before deleting the stored reference
+            this.clearElementStyle(id, type);
             if (type === 'node') {
                 this.nodeStyles.delete(id);
                 this.nodeStates.set(id, 'normal');
@@ -148,7 +150,6 @@ export class StyleManager implements IStyleManager {
                 this.edgeStyles.delete(id);
                 this.edgeStates.set(id, 'normal');
             }
-            this.clearElementStyle(id, type);
         }
     }
 
