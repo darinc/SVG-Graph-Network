@@ -4,19 +4,19 @@
 
     <!-- Main page -->
     <url>
-        <loc>https://darinc.github.io/SVG-Graph-Network/</loc>
+        <loc>https://darinc.github.io/svgnet/</loc>
         <lastmod>2024-09-18</lastmod>
         <changefreq>weekly</changefreq>
         <priority>1.0</priority>
         <image:image>
-            <image:loc>https://darinc.github.io/SVG-Graph-Network/assets/svgnet.png</image:loc>
+            <image:loc>https://darinc.github.io/svgnet/assets/svgnet.png</image:loc>
             <image:caption>SVG Graph Network - Interactive graph visualization</image:caption>
         </image:image>
     </url>
 
     <!-- API Documentation -->
     <url>
-        <loc>https://darinc.github.io/SVG-Graph-Network/api/</loc>
+        <loc>https://darinc.github.io/svgnet/api/</loc>
         <lastmod>2024-09-18</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
@@ -24,28 +24,28 @@
 
     <!-- Examples -->
     <url>
-        <loc>https://darinc.github.io/SVG-Graph-Network/examples/basic.html</loc>
+        <loc>https://darinc.github.io/svgnet/examples/basic.html</loc>
         <lastmod>2024-09-18</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
 
     <url>
-        <loc>https://darinc.github.io/SVG-Graph-Network/examples/advanced.html</loc>
+        <loc>https://darinc.github.io/svgnet/examples/advanced.html</loc>
         <lastmod>2024-09-18</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
 
     <url>
-        <loc>https://darinc.github.io/SVG-Graph-Network/examples/halfviz.html</loc>
+        <loc>https://darinc.github.io/svgnet/examples/halfviz.html</loc>
         <lastmod>2024-09-18</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
 
     <url>
-        <loc>https://darinc.github.io/SVG-Graph-Network/examples/dependency-graph.html</loc>
+        <loc>https://darinc.github.io/svgnet/examples/dependency-graph.html</loc>
         <lastmod>2024-09-18</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>

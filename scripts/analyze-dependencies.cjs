@@ -5,7 +5,7 @@
  *
  * Analyzes TypeScript files in the src directory to build a dependency graph
  * showing import relationships between modules. Outputs data suitable for
- * visualization with the SVG-Graph-Network library.
+ * visualization with the svgnet library.
  */
 
 const fs = require('fs');

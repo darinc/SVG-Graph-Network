@@ -1,13 +1,13 @@
 # SVG Graph Network
 
-[![CI](https://github.com/darinc/SVG-Graph-Network/actions/workflows/ci.yml/badge.svg)](https://github.com/darinc/SVG-Graph-Network/actions/workflows/ci.yml)
+[![CI](https://github.com/darinc/svgnet/actions/workflows/ci.yml/badge.svg)](https://github.com/darinc/svgnet/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/svgnet.svg)](https://www.npmjs.com/package/svgnet)
 [![bundle size](https://img.shields.io/bundlephobia/minzip/svgnet)](https://bundlephobia.com/package/svgnet)
-[![license](https://img.shields.io/npm/l/svgnet.svg)](https://github.com/darinc/SVG-Graph-Network/blob/main/LICENSE)
+[![license](https://img.shields.io/npm/l/svgnet.svg)](https://github.com/darinc/svgnet/blob/main/LICENSE)
 
 A zero-dependency, TypeScript-first graph visualization library. Force-directed layouts, dark/light theming, mobile touch gestures, and crisp SVG rendering — all in ~23KB gzipped.
 
-**[Live Demo](https://darinc.github.io/SVG-Graph-Network/)** | **[API Docs](./docs/API.md)** | **[Examples](./docs/EXAMPLES.md)**
+**[Live Demo](https://darinc.github.io/svgnet/)** | **[API Docs](./docs/API.md)** | **[Examples](./docs/EXAMPLES.md)**
 
 ## Why SVG Graph Network?
 

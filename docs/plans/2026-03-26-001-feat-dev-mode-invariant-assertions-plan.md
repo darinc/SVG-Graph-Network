@@ -76,7 +76,7 @@ Create `src/utils/devAssert.ts`:
 export function devAssert(condition: boolean, message: string): asserts condition {
     if (__DEV__) {
         if (!condition) {
-            throw new Error(`[SVG-Graph-Network] Assertion failed: ${message}`);
+            throw new Error(`[svgnet] Assertion failed: ${message}`);
         }
     }
 }

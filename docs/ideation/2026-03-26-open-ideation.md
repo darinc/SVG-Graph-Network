@@ -4,7 +4,7 @@ topic: open-ideation
 focus: open-ended
 ---
 
-# Ideation: SVG-Graph-Network Open Improvement Sweep
+# Ideation: svgnet Open Improvement Sweep
 
 ## Codebase Context
 

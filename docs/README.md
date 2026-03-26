@@ -4,7 +4,7 @@ This directory contains the GitHub Pages setup for the SVG Graph Network library
 
 ## 🌐 Live Site
 
-Visit the live site at: [https://darinc.github.io/SVG-Graph-Network/](https://darinc.github.io/SVG-Graph-Network/)
+Visit the live site at: [https://darinc.github.io/svgnet/](https://darinc.github.io/svgnet/)
 
 ## 📁 Structure
 
@@ -122,10 +122,10 @@ The visualization demonstrates many library features:
 
 ## 🔗 Links
 
-- [Main Site](https://darinc.github.io/SVG-Graph-Network/)
-- [Module Dependencies](https://darinc.github.io/SVG-Graph-Network/modules.html)
-- [API Documentation](https://darinc.github.io/SVG-Graph-Network/api/)
-- [GitHub Repository](https://github.com/darinc/SVG-Graph-Network)
+- [Main Site](https://darinc.github.io/svgnet/)
+- [Module Dependencies](https://darinc.github.io/svgnet/modules.html)
+- [API Documentation](https://darinc.github.io/svgnet/api/)
+- [GitHub Repository](https://github.com/darinc/svgnet)
 
 ## 📈 Statistics
 
