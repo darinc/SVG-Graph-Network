@@ -1,330 +1,88 @@
-# SVG Graph Network - Architecture Documentation
+# SVG Graph Network - Architecture
 
-## 🏗️ Architecture Overview
+## Overview
 
-This document provides a comprehensive overview of the SVG Graph Network library architecture, showcasing the modern, maintainable modular design that powers this professional-grade visualization library.
+`GraphNetwork` is the top-level orchestrator. It directly instantiates all subsystems via constructor wiring and coordinates them through callbacks. There is no dependency injection container or event bus — communication flows through direct method calls and callback objects.
 
-## 🎯 Architecture Highlights
+## Component Architecture
 
-### Current Design
-```
-Modular Architecture with focused components:
-├── Core Coordinators
-├── Rendering Components
-├── Interaction Components
-└── Core Services
+### GraphNetwork (`src/GraphNetwork.ts`)
 
-Key Features:
-✅ Clean separation of concerns
-✅ Single Responsibility Principle compliance
-✅ Dependency Injection throughout
-✅ Event-Driven Architecture
-✅ 100% test coverage
-✅ TypeScript strict mode
-```
+The main entry point (~3,400 lines). Owns all subsystem instances, the animation loop, and the public CRUD/query API. Instantiates subsystems in `initializeModules()` and drives the render loop via `requestAnimationFrame`.
 
-## 🔧 Component Architecture
+### Physics (`src/physics/`)
 
-### Main Orchestration Layer
+- **PhysicsEngine** — Force calculations: repulsion (O(n²) pairwise), attraction (per-link), grouping (per-type). Returns `SimulationMetrics` including `totalEnergy` and `maxForce`.
+- **PhysicsManager** — Simulation lifecycle: start/stop/pause/resume, configuration management.
 
-#### GraphNetwork
-**Location**: `/src/GraphNetwork.ts`
-**Purpose**: Main coordinator using dependency injection
+The animation loop in `GraphNetwork.animate()` uses **adaptive cooldown**: when `PhysicsEngine.isInEquilibrium()` detects low energy/force, physics drops to a ~2fps watchdog tick. Interaction (drag, data change, filter reset) calls `wakePhysics()` to resume full simulation.
 
-```typescript
-class GraphNetwork<T> {
-    // Uses modular services for specific concerns
-    private physics: PhysicsEngine | null = null;
-    private renderer: SVGRenderer | null = null;
-    private ui: UIManager | null = null;
-    private events: EventManager<T> | null = null;
+### Rendering (`src/rendering/`)
 
-    // Advanced managers for styling & interaction
-    private selectionManager: SelectionManager | null = null;
-    private styleManager: StyleManager | null = null;
-    private highlightManager: HighlightManager | null = null;
-    private cameraController: CameraController | null = null;
-    private themeManager: ThemeManager | null = null;
-}
-```
+- **SVGRenderer** — Creates and manages all SVG DOM elements. Layers: links (bottom) → nodes → edge labels (top). Applies CSS transforms for pan/zoom.
+- **NodeShapeFactory** — Factory pattern for node shapes (circle, rectangle, square, triangle).
 
-**Key Benefits**:
-- Clean service delegation and orchestration
-- Dependency injection enables loose coupling
-- Clear separation of data, physics, rendering, and events
-- Event-driven communication between components
+**Viewport culling**: Each frame, `getViewportBoundsInGraphSpace()` computes the visible area. Nodes outside this area get `display: none`, skipping expensive DOM attribute writes. Links where both endpoints are off-screen are also hidden. A 100-unit padding margin prevents visible popping at edges.
 
-#### DependencyContainer
-**Location**: `/src/core/DependencyContainer.ts`  
-**Purpose**: Service registration and lifecycle management
+### Interaction (`src/interaction/`)
 
-```typescript
-export const SERVICE_TOKENS = {
-    GRAPH_DATA_MANAGER: Symbol('IGraphDataManager'),
-    PHYSICS_MANAGER: Symbol('IPhysicsManager'),
-    RENDERING_COORDINATOR: Symbol('IRenderingCoordinator'),
-    EVENT_MANAGER: Symbol('IEventManager'),
-    THEME_MANAGER: Symbol('IThemeManager')
-} as const;
-```
+- **EventManager** — Coordinates mouse and touch handlers. Receives callbacks from `GraphNetwork` for node operations (drag, click, filter).
+- **MouseInteractionHandler** — Mouse events: drag, pan, wheel zoom.
+- **TouchInteractionHandler** — Touch events with a state machine pattern: single-finger pan/drag, two-finger pinch-to-zoom, double-tap detection.
+- **TransformManager** — Viewport transform operations (zoom to point, pan).
+- **InteractionEventEmitter** — Internal event system for interaction handlers.
 
-**Benefits**:
-- Enables dependency injection pattern
-- Simplifies testing with mock services
-- Provides clear service boundaries
-- Supports service lifecycle management
+**Coordinate conversion** is centralized in `src/interaction/utils/coordinates.ts`:
+- `screenToGraph(clientX, clientY, svgRect, transform)` — screen → graph coordinates
+- `screenToContainer(clientX, clientY, svgRect)` — screen → container-relative coordinates
 
-### Rendering System
+### UI (`src/ui/`)
 
-#### SVGRenderer
-**Location**: `/src/rendering/SVGRenderer.ts`
-**Purpose**: Coordinates focused rendering components
+**UIManager** delegates to focused sub-managers:
+- **UIControlsManager** — Zoom buttons, theme toggle, settings toggle
+- **UILegendManager** — Node type/shape legend
+- **UIBreadcrumbsManager** — Filter navigation breadcrumbs
+- **UITitleManager** — Graph title display
+- **UISettingsManager** — Physics control sliders, settings panel
 
-**Core Components**:
-- **SVGDOMManager**: DOM structure and container management
-- **NodeElementManager**: Node visual elements and lifecycle
-- **LinkElementManager**: Link/edge visual elements and positioning
-- **NodeShapeFactory**: Shape creation with clean factory pattern
+### Theming (`src/theming/`)
 
-```typescript
-class SVGRenderer<T> {
-    private domManager: SVGDOMManager;
-    private nodeManager: NodeElementManager<T>;
-    private linkManager: LinkElementManager<T>;
-    private themeManager: ThemeManager;
+- **ThemeManager** — Dark/light themes, CSS custom properties, visual state management (hover, selected, active).
+- **AutoColorGenerator** — Automatic HSL color assignment for node types.
 
-    // Clean component delegation
-    render(nodes, links, filteredNodes, forceUpdate) {
-        this.nodeManager.updateNodePositions(filteredNodes);
-        this.linkManager.updateLinkPositions(filteredNodes);
-    }
-}
-```
+### Other Subsystems
 
-#### NodeShapeFactory Pattern
-**Location**: `/src/rendering/NodeShapeFactory.ts`
-**Design**: Clean factory pattern for shape creation
-```typescript
-class NodeShapeFactory {
-    createShape(node: Node<T>) {
-        const creator = this.shapeCreators.get(node.getShape());
-        return creator ? creator.create(node) : this.createDefaultCircle(node);
-    }
-}
-```
+- **CameraController** (`src/camera/`) — Programmatic viewport control: focus on nodes, fit-to-view, animated transitions with easing.
+- **HighlightManager** (`src/highlighting/`) — Path, neighbor, and focus highlighting with depth-based styling.
+- **SelectionManager** (`src/selection/`) — Node/edge selection state with single/multi modes.
+- **StyleManager** (`src/styling/`) — Runtime style application and visual state management.
+- **GraphErrors** (`src/errors/`) — Typed error classes: `NodeNotFoundError`, `EdgeExistsError`, etc.
 
-### Interaction System
+## Dev-Mode Assertions
 
-#### EventManager
-**Location**: `/src/interaction/EventManager.ts`
-**Purpose**: Coordinates specialized interaction handlers
+A compile-time `__DEV__` flag (Webpack DefinePlugin) enables invariant assertions that are dead-code-eliminated from production builds. The `devAssert()` utility (`src/utils/devAssert.ts`) targets 4 known silent-failure patterns:
 
-**Core Components**:
-- **MouseInteractionHandler**: Mouse events, dragging, wheel zoom
-- **TouchInteractionHandler**: Touch gestures, pinch-to-zoom
-- **TransformManager**: Viewport transform operations
-- **InteractionEventEmitter**: Event system with error handling
-- **CoordinateConverter**: Screen ↔ SVG coordinate conversions
+1. NaN/Infinity positions and velocities in `PhysicsEngine.updatePositions()`
+2. Missing DOM elements before mutation in `SVGRenderer.updateNodePositions()`
+3. Null subsystems at animation start in `GraphNetwork.startAnimation()`
+4. Missing event callbacks in `EventManager.initialize()`
 
-```typescript
-class EventManager<T> {
-    private mouseHandler: MouseInteractionHandler<T>;
-    private touchHandler: TouchInteractionHandler<T>;
-    private transformManager: TransformManager;
-    private eventEmitter: InteractionEventEmitter<T>;
-    private coordinateConverter: CoordinateConverter;
+## Design Patterns
 
-    // Clean component delegation
-    initialize(svg, nodes, callbacks) {
-        this.mouseHandler.initialize(svg, nodes);
-        this.touchHandler.initialize(svg, nodes);
-        this.transformManager.initialize(svg);
-    }
-}
-```
+| Pattern | Implementation |
+|---------|---------------|
+| **Factory** | `NodeShapeFactory` for node shape creation |
+| **State Machine** | `TouchInteractionHandler` for gesture recognition |
+| **Composition** | `UIManager` composes 5 sub-managers; `EventManager` composes mouse/touch handlers |
+| **Callback Delegation** | `GraphNetwork` passes callback objects to subsystems for cross-cutting operations |
 
-#### Touch Interaction Design
-**Location**: `/src/interaction/handlers/TouchInteractionHandler.ts`
-**Pattern**: State machine pattern for clean touch handling
-```typescript
-private handleTouchMove(e: TouchEvent): void {
-    const handler = this.getTouchMoveHandler(e.touches);
-    handler?.(e.touches);
-}
+## Testing
 
-private getTouchMoveHandler(touches: TouchList) {
-    // State machine approach reduces complexity
-    if (touches.length === 1 && this.state.isDragging) 
-        return this.handleTouchNodeDrag;
-    if (touches.length === 1 && this.state.isPanning)
-        return this.handleTouchPan;  
-    if (touches.length === 2 && this.state.isPinching)
-        return this.handleTouchPinch;
-    return null;
-}
-```
+- **Unit tests** (`tests/unit/`) — Each subsystem tested independently
+- **Integration tests** (`tests/integration/`) — Cross-subsystem behavior (selection + highlighting, styling + data changes)
+- **Setup** — `tests/setup.ts` mocks browser APIs (requestAnimationFrame, DOM, console)
+- **Config** — `jest.config.cjs` with `__DEV__: true` in globals
 
-### Core Services
+## Build
 
-#### PhysicsManager & PhysicsEngine
-**Locations**: 
-- `/src/physics/PhysicsManager.ts` - Coordinator
-- `/src/physics/PhysicsEngine.ts` - Core calculations
-
-**Separation of Concerns**:
-- **PhysicsManager**: Simulation lifecycle, configuration, metrics
-- **PhysicsEngine**: Force calculations, position integration, physics math
-
-#### EventBus System
-**Location**: `/src/events/EventBus.ts`  
-**Purpose**: Global event communication enabling loose coupling
-
-```typescript
-export class EventBus {
-    // Enables decoupled communication between components
-    emit(event: string, data: any): void
-    on(event: string, callback: Function): void
-    off(event: string, callback: Function): void
-}
-```
-
-**Benefits**:
-- Components don't directly reference each other
-- Easy to add new event listeners
-- Comprehensive error handling
-- Performance monitoring built-in
-
-#### ThemeManager
-**Location**: `/src/theming/ThemeManager.ts`  
-**Purpose**: Centralized theming with visual state management
-
-**Features**:
-- Dynamic theme switching (dark/light)
-- Visual state tracking (hover, selected, active)
-- CSS custom property integration
-- Canvas and grid theming
-
-## 🎯 Design Patterns Implemented
-
-### 1. Dependency Injection
-- **Container**: `DependencyContainer` manages service lifecycle
-- **Benefits**: Loose coupling, easier testing, flexible configuration
-- **Usage**: All coordinators receive dependencies via constructor injection
-
-### 2. Factory Pattern
-- **Implementation**: `NodeShapeFactory` for shape creation
-- **Benefits**: Easy to add new shapes, centralized creation logic, clean extensibility
-
-### 3. Observer Pattern  
-- **Implementation**: `EventBus` and `InteractionEventEmitter`
-- **Benefits**: Decoupled communication, reactive architecture
-- **Usage**: Theme changes, data updates, user interactions
-
-### 4. Command Pattern
-- **Implementation**: `RenderingCoordinator` manages render pipeline
-- **Benefits**: Centralized rendering control, performance optimization
-- **Features**: Batched updates, frame rate optimization
-
-### 5. Composition over Inheritance
-- **Implementation**: All coordinators compose focused components
-- **Benefits**: Flexible architecture, easier testing, clear boundaries
-- **Example**: `EventManager` composes 5 specialized handlers
-
-### 6. State Machine Pattern
-- **Implementation**: Touch interaction handling
-- **Benefits**: Clear state transitions, easier debugging, maintainable logic
-
-## 📊 Testing Architecture
-
-### Component Testing Strategy
-Each focused component has comprehensive unit tests:
-
-```
-tests/
-├── unit/
-│   ├── GraphNetwork.test.ts
-│   ├── rendering/SVGRenderer.test.ts
-│   ├── interaction/EventManager.test.ts
-│   ├── physics/PhysicsManager.test.ts
-│   └── core/DependencyContainer.test.ts
-├── integration/
-│   └── Phase5Integration.test.ts
-└── e2e/
-    └── complete-workflow.test.ts
-```
-
-### Testing Benefits
-- **Isolated testing**: Each component tested independently  
-- **Mock services**: Easy mocking with dependency injection
-- **Integration tests**: Verify component interactions
-- **100% coverage**: All components have comprehensive test coverage
-
-## 🚀 Performance Optimizations
-
-### Rendering Performance
-- **Batched updates**: `RenderingCoordinator` batches DOM changes
-- **Selective rendering**: Only update changed elements
-- **Transform optimization**: Hardware-accelerated CSS transforms
-
-### Memory Management  
-- **Event cleanup**: All components properly clean up event listeners
-- **Reference management**: Avoid memory leaks in component lifecycle
-- **Service disposal**: `DependencyContainer` manages service cleanup
-
-### Physics Optimization
-- **Adaptive simulation**: Physics stops when graph is stable
-- **Force calculation batching**: Efficient force integration
-- **Spatial optimization**: Future enhancement for large graphs
-
-## 🔮 Future Enhancements
-
-### Planned Improvements
-1. **UIManager Enhancements**: Additional feature development
-2. **WebGL Renderer**: For large graph performance
-3. **Web Workers**: Physics simulation in background thread
-4. **Spatial Indexing**: For graphs with 1000+ nodes
-5. **Plugin System**: Extensible architecture for custom components
-
-### Extension Points
-- **Custom shapes**: Easy to add via `NodeShapeFactory`
-- **Custom interactions**: New handlers in `EventManager`
-- **Custom physics**: Additional force types in `PhysicsEngine`
-- **Custom themes**: Extended theming via `ThemeManager`
-
-## 📈 Quality & Characteristics
-
-### Architecture Quality
-```
-Design Principles:
-├── Single Responsibility: ✅ All components focused
-├── Dependency Injection: ✅ Loose coupling throughout
-├── Event-Driven: ✅ Clean component communication
-└── Factory Patterns: ✅ Extensible shape system
-
-Code Quality:
-├── Test Coverage: 100%
-├── TypeScript: Strict mode
-├── ESLint: Zero violations
-└── Performance: Optimized rendering pipeline
-```
-
-### Key Strengths
-- **Single Responsibility**: Each class has one clear purpose
-- **Loose Coupling**: Components interact via interfaces/events
-- **High Cohesion**: Related functionality grouped together
-- **Easy Testing**: Mock services, isolated components
-- **Clear Boundaries**: Well-defined component responsibilities
-
-## 🎓 Learning Resources
-
-### Key Design Patterns Implemented
-1. **Focused Components**: Single-responsibility modules for maintainability
-2. **Dependency Injection**: Loose coupling throughout the architecture
-3. **Factory Pattern**: Clean shape creation and extensibility
-4. **State Machine**: Clear interaction state management
-5. **Event-Driven Architecture**: Decoupled component communication
-6. **Observer Pattern**: Reactive theming and state updates
-
----
-
-This architecture represents a **professional-grade codebase** ready for enterprise development, with excellent maintainability, testability, and extensibility built into every component.
+Webpack produces 3 bundles in production (UMD, ESM, CJS). The `__DEV__` flag is `true` in dev, `false` in production. Bundle size is enforced by `size-limit` in CI (35KB gzip budget).

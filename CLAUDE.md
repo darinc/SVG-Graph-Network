@@ -29,9 +29,9 @@ npm run docs           # Generate TypeDoc API docs
 
 **Core subsystems:**
 
-- **Physics** (`src/physics/`) — Force simulation: repulsion, attraction, grouping forces. `PhysicsEngine` calculates forces, `PhysicsManager` manages simulation lifecycle. Completely isolated from rendering.
-- **Rendering** (`src/rendering/`) — SVG DOM management. `SVGRenderer` and `NodeShapeFactory`. Layers: links (bottom) → nodes → edge labels (top).
-- **Interaction** (`src/interaction/`) — Mouse/touch event handling, coordinate conversion (screen ↔ SVG), viewport transforms. Touch uses a state machine pattern for gestures.
+- **Physics** (`src/physics/`) — Force simulation: repulsion, attraction, grouping forces. `PhysicsEngine` calculates forces, `PhysicsManager` manages simulation lifecycle. Completely isolated from rendering. Adaptive cooldown drops to ~2fps when equilibrium is detected, wakes on interaction.
+- **Rendering** (`src/rendering/`) — SVG DOM management. `SVGRenderer` and `NodeShapeFactory`. Layers: links (bottom) → nodes → edge labels (top). Viewport culling hides off-screen elements to reduce DOM writes on large graphs.
+- **Interaction** (`src/interaction/`) — Mouse/touch event handling, viewport transforms. Touch uses a state machine pattern for gestures. Coordinate conversion is centralized in `src/interaction/utils/coordinates.ts` (`screenToGraph`, `screenToContainer`).
 - **UI** (`src/ui/`) — Controls, legend, breadcrumbs, title, settings panels via sub-managers under `UIManager`.
 - **Theming** (`src/theming/`) — Dark/light themes, CSS custom properties, `AutoColorGenerator` for node type colors.
 - **Highlighting** (`src/highlighting/`) — Path, neighbor, and focus highlighting with visual states.
@@ -65,6 +65,10 @@ CSS is extracted only in the UMD build; ESM/CJS use null-loader for CSS.
 - Strict mode enabled, target ES2020
 - Decorators + reflect-metadata enabled
 - Incremental builds via `.tsbuildinfo`
+
+## Dev-Mode Assertions
+
+A compile-time `__DEV__` flag (via Webpack DefinePlugin) enables invariant assertions that throw in dev builds and are dead-code-eliminated from production. `devAssert(condition, message)` in `src/utils/devAssert.ts` is the single assertion primitive. Assertions target: NaN physics positions, missing DOM elements after recreation, null subsystems at animation start, and empty event callbacks. `npm run dev` activates assertions; production bundles contain zero assertion code.
 
 ## Pre-commit Hooks
 
