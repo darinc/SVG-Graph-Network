@@ -150,6 +150,8 @@ export class GraphNetwork<T extends NodeData = NodeData> {
     private lastFrameTime: number = 0;
     private frameCount: number = 0;
     private fps: number = 0;
+    private isPhysicsCooledDown: boolean = false;
+    private cooldownFrameSkip: number = 0;
 
     // Module instances
     private physics: PhysicsEngine | null = null;
@@ -296,7 +298,10 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             getNodeElements: () =>
                 (this.renderer?.getNodeElements() as ReadonlyMap<Node<T>, any>) || new Map(),
             fixNode: (node: Node<T>) => node.fix(),
-            unfixNode: (node: Node<T>) => node.unfix(),
+            unfixNode: (node: Node<T>) => {
+                node.unfix();
+                this.wakePhysics();
+            },
             filterByNode: (nodeId: string) => {
                 // If double-clicking the same filtered node, reset to all
                 if (this.currentFilterNodeId === nodeId) {
@@ -476,6 +481,18 @@ export class GraphNetwork<T extends NodeData = NodeData> {
     }
 
     /**
+     * Wake physics from cooldown when graph state changes
+     * (node add/remove, data change, drag, filter reset, etc.)
+     * @private
+     */
+    private wakePhysics(): void {
+        if (this.isPhysicsCooledDown) {
+            this.isPhysicsCooledDown = false;
+            this.cooldownFrameSkip = 0;
+        }
+    }
+
+    /**
      * Main animation loop - coordinates physics and rendering
      * @private
      */
@@ -497,8 +514,19 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             return;
         }
 
-        // Run physics simulation (unless panning)
+        // Run physics simulation (unless panning or cooled down)
         if (!this.events?.isPanning()) {
+            // When cooled down, only check every 30 frames (~2fps at 60fps)
+            if (this.isPhysicsCooledDown) {
+                this.cooldownFrameSkip++;
+                if (this.cooldownFrameSkip < 30) {
+                    this.lastFrameTime = currentTime;
+                    this.animationFrame = requestAnimationFrame(() => this.animate());
+                    return;
+                }
+                this.cooldownFrameSkip = 0;
+            }
+
             const physicsLinks = PhysicsEngine.createLinks(
                 this.links.map(link => ({
                     source: link.source.getId(),
@@ -508,8 +536,20 @@ export class GraphNetwork<T extends NodeData = NodeData> {
                 this.nodes
             );
 
-            this.physics.updateForces(this.nodes, physicsLinks, this.filteredNodes);
+            const metrics = this.physics.updateForces(this.nodes, physicsLinks, this.filteredNodes);
             this.physics.updatePositions(this.nodes, this.filteredNodes);
+
+            // Check for equilibrium to enable cooldown
+            if (this.physics.isInEquilibrium(metrics)) {
+                if (!this.isPhysicsCooledDown) {
+                    this.isPhysicsCooledDown = true;
+                    this.logger.debug('Physics reached equilibrium — entering cooldown');
+                }
+            } else if (this.isPhysicsCooledDown) {
+                this.isPhysicsCooledDown = false;
+                this.cooldownFrameSkip = 0;
+                this.logger.debug('Physics exited equilibrium — resuming full simulation');
+            }
         }
 
         // Render current state
@@ -594,6 +634,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
 
         this.filteredNodes = null;
         this.currentFilterNodeId = null;
+        this.wakePhysics();
         this.updateGraphView();
 
         const breadcrumbPath: BreadcrumbItem[] = [{ name: 'All Nodes' }];
@@ -633,6 +674,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             node.resetPosition(containerWidth, containerHeight);
         });
 
+        this.wakePhysics();
         this.logger.debug(`Reset positions for ${this.nodes.size} nodes`);
     }
 
