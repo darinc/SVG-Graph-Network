@@ -161,10 +161,10 @@ export class SVGRenderer {
         this.nodeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
         this.nodeGroup.classList.add('nodes');
 
-        // Add groups to transform group in correct order (links, labels, nodes)
+        // Add groups to transform group in correct order (links, nodes, labels)
         this.transformGroup.appendChild(this.linkGroup);
-        this.transformGroup.appendChild(this.labelGroup);
         this.transformGroup.appendChild(this.nodeGroup);
+        this.transformGroup.appendChild(this.labelGroup);
 
         this.svg.appendChild(this.transformGroup);
 
