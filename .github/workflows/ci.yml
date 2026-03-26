@@ -55,6 +55,9 @@ jobs:
     - name: Build project
       run: npm run build
 
+    - name: Check bundle sizes
+      run: npm run size
+
     - name: Verify build artifacts
       run: |
         ls -la dist/
