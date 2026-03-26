@@ -64,7 +64,7 @@ focus: open-ended
 **Downsides:** Edge rendering for links that cross the viewport boundary needs special handling. Culling logic adds per-frame overhead that must be cheaper than the DOM writes it saves.
 **Confidence:** 70%
 **Complexity:** Medium
-**Status:** Unexplored
+**Status:** Explored — implemented 2026-03-26 (viewport bounds culling with 100-unit padding)
 
 ### 7. Coordinate System Consolidation
 **Description:** Three independent implementations convert screen-to-SVG coordinates: `SVGRenderer.screenToSVG()`, `CoordinateConverter` (standalone file), and inline math in `TouchInteractionHandler`. Consolidate into a single `CoordinateSystem` service that owns all transforms (`screenToSVG`, `svgToPhysics`, `physicsToScreen`).
@@ -100,3 +100,4 @@ focus: open-ended
 - 2026-03-26: Implemented #1 (CI size gate) and #3 (dead code removal)
 - 2026-03-26: Implemented #2 (dev-mode invariant assertions)
 - 2026-03-26: Implemented #4 (adaptive physics cooldown)
+- 2026-03-26: Implemented #6 (viewport culling)
