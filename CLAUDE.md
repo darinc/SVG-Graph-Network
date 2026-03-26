@@ -25,22 +25,20 @@ npm run docs           # Generate TypeDoc API docs
 
 ## Architecture
 
-**Orchestration pattern:** `GraphNetwork` is the top-level orchestrator that composes all subsystems via dependency injection. Components communicate through `EventBus` (global pub/sub).
+**Orchestration pattern:** `GraphNetwork` is the top-level orchestrator that composes all subsystems. It directly instantiates and coordinates each subsystem via constructor wiring and callback-based communication.
 
 **Core subsystems:**
 
 - **Physics** (`src/physics/`) — Force simulation: repulsion, attraction, grouping forces. `PhysicsEngine` calculates forces, `PhysicsManager` manages simulation lifecycle. Completely isolated from rendering.
-- **Rendering** (`src/rendering/`) — SVG DOM management. `SVGRenderer` coordinates `NodeElementManager`, `LinkElementManager`, and `NodeShapeFactory`. Layers: links (bottom) → nodes → edge labels (top).
+- **Rendering** (`src/rendering/`) — SVG DOM management. `SVGRenderer` and `NodeShapeFactory`. Layers: links (bottom) → nodes → edge labels (top).
 - **Interaction** (`src/interaction/`) — Mouse/touch event handling, coordinate conversion (screen ↔ SVG), viewport transforms. Touch uses a state machine pattern for gestures.
 - **UI** (`src/ui/`) — Controls, legend, breadcrumbs, title, settings panels via sub-managers under `UIManager`.
 - **Theming** (`src/theming/`) — Dark/light themes, CSS custom properties, `AutoColorGenerator` for node type colors.
 - **Highlighting** (`src/highlighting/`) — Path, neighbor, and focus highlighting with visual states.
 - **Camera** (`src/camera/`) — Viewport pan/zoom via `CameraController`.
-- **Events** (`src/events/`) — `EventBus` for centralized pub/sub between modules.
 - **Selection** (`src/selection/`) — `SelectionManager` for node/edge selection state.
 - **Styling** (`src/styling/`) — `StyleManager` for runtime style application.
 - **Errors** (`src/errors/`) — Typed error classes (`NodeNotFoundError`, `EdgeExistsError`, etc.).
-- **Core** (`src/core/`) — `DependencyContainer` (service registry), `GraphDataManager` (CRUD), `GraphAnimationController` (render loop).
 
 **Public API** is defined in `src/index.ts`: default export is `GraphNetwork`, with named exports for `Vector`, `Node`, `AutoColorGenerator`, and all TypeScript types. Changes to exports affect the package's public surface.
 
@@ -65,7 +63,7 @@ CSS is extracted only in the UMD build; ESM/CJS use null-loader for CSS.
 ## TypeScript
 
 - Strict mode enabled, target ES2020
-- Decorators + reflect-metadata enabled (used for DI)
+- Decorators + reflect-metadata enabled
 - Incremental builds via `.tsbuildinfo`
 
 ## Pre-commit Hooks
