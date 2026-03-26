@@ -1,6 +1,6 @@
-# SVG Graph Network - GitHub Pages
+# svgnet - GitHub Pages
 
-This directory contains the GitHub Pages setup for the SVG Graph Network library, showcasing an interactive visualization of the library's module dependencies.
+This directory contains the GitHub Pages setup for the svgnet library, showcasing an interactive visualization of the library's module dependencies.
 
 ## 🌐 Live Site
 
@@ -140,4 +140,4 @@ This analysis helps developers understand the codebase structure and identify po
 
 ---
 
-*This GitHub Pages site serves as both documentation and a live demonstration of the SVG Graph Network library's capabilities.*
+*This GitHub Pages site serves as both documentation and a live demonstration of the svgnet library's capabilities.*

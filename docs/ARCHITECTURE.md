@@ -1,4 +1,4 @@
-# SVG Graph Network - Architecture
+# svgnet - Architecture
 
 ## Overview
 
