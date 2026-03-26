@@ -5,6 +5,7 @@ import { ThemeManager, VisualState } from '../theming/ThemeManager';
 import { NodeShapeFactory } from './NodeShapeFactory';
 import { createLogger } from '../utils/Logger';
 import { devAssert } from '../utils/devAssert';
+import { screenToGraph } from '../interaction/utils/coordinates';
 
 /**
  * Link representation for rendering
@@ -862,10 +863,8 @@ export class SVGRenderer {
         if (!this.svg) return new Vector(screenX, screenY);
 
         const rect = this.svg.getBoundingClientRect();
-        const svgX = (screenX - rect.left - this.transformState.x) / this.transformState.scale;
-        const svgY = (screenY - rect.top - this.transformState.y) / this.transformState.scale;
-
-        return new Vector(svgX, svgY);
+        const pos = screenToGraph(screenX, screenY, rect, this.transformState);
+        return new Vector(pos.x, pos.y);
     }
 
     /**

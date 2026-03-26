@@ -13,6 +13,7 @@ import { Node } from '../../Node';
 import { Vector } from '../../Vector';
 import { NodeData, Position, InteractionConfig } from '../../types/index';
 import { EventManagerCallbacks } from '../EventManager';
+import { screenToGraph, screenToContainer } from '../utils/coordinates';
 
 export interface TouchTarget<T extends NodeData = NodeData> {
     type: 'node' | 'background';
@@ -232,13 +233,11 @@ export class TouchInteractionHandler<T extends NodeData = NodeData> {
         if (!this.svg || !this.state.dragNode) return;
 
         const rect = this.svg.getBoundingClientRect();
-        const newX =
-            (touch.clientX - rect.left - this.transformState.x) / this.transformState.scale;
-        const newY = (touch.clientY - rect.top - this.transformState.y) / this.transformState.scale;
+        const graphPos = screenToGraph(touch.clientX, touch.clientY, rect, this.transformState);
 
         const oldPosition = this.state.dragNode.position.clone();
-        this.state.dragNode.position.x = newX;
-        this.state.dragNode.position.y = newY;
+        this.state.dragNode.position.x = graphPos.x;
+        this.state.dragNode.position.y = graphPos.y;
 
         this.callbacks.showTooltip?.(this.state.dragNode, {
             x: touch.clientX + 10,
@@ -247,12 +246,12 @@ export class TouchInteractionHandler<T extends NodeData = NodeData> {
 
         this.eventEmitter.emit('nodeDrag', {
             node: this.state.dragNode,
-            position: { x: newX, y: newY },
+            position: { x: graphPos.x, y: graphPos.y },
             startPosition: this.state.dragStartPosition || {
                 x: oldPosition.x,
                 y: oldPosition.y
             },
-            delta: new Vector(newX - oldPosition.x, newY - oldPosition.y)
+            delta: new Vector(graphPos.x - oldPosition.x, graphPos.y - oldPosition.y)
         });
     }
 
@@ -306,12 +305,13 @@ export class TouchInteractionHandler<T extends NodeData = NodeData> {
 
             // Zoom towards pinch center
             const rect = this.svg.getBoundingClientRect();
-            const pinchX = currentCenterX - rect.left;
-            const pinchY = currentCenterY - rect.top;
+            const pinchCenter = screenToContainer(currentCenterX, currentCenterY, rect);
 
             const actualScaleChange = newScale / this.transformState.scale;
-            this.transformState.x = pinchX - (pinchX - this.transformState.x) * actualScaleChange;
-            this.transformState.y = pinchY - (pinchY - this.transformState.y) * actualScaleChange;
+            this.transformState.x =
+                pinchCenter.x - (pinchCenter.x - this.transformState.x) * actualScaleChange;
+            this.transformState.y =
+                pinchCenter.y - (pinchCenter.y - this.transformState.y) * actualScaleChange;
             this.transformState.scale = newScale;
 
             this.callbacks.updateTransform?.(
@@ -325,7 +325,7 @@ export class TouchInteractionHandler<T extends NodeData = NodeData> {
                 x: this.transformState.x,
                 y: this.transformState.y,
                 delta: scaleChange,
-                center: { x: pinchX, y: pinchY }
+                center: { x: pinchCenter.x, y: pinchCenter.y }
             });
         }
 

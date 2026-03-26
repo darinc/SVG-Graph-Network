@@ -13,6 +13,7 @@ import { Node } from '../../Node';
 import { Vector } from '../../Vector';
 import { NodeData, Position, InteractionConfig } from '../../types/index';
 import { EventManagerCallbacks } from '../EventManager';
+import { screenToGraph, screenToContainer } from '../utils/coordinates';
 
 export interface MouseInteractionState<T extends NodeData = NodeData> {
     isDragging: boolean;
@@ -186,12 +187,11 @@ export class MouseInteractionHandler<T extends NodeData = NodeData> {
         if (!this.svg || !this.state.dragNode) return;
 
         const rect = this.svg.getBoundingClientRect();
-        const newX = (e.clientX - rect.left - this.transformState.x) / this.transformState.scale;
-        const newY = (e.clientY - rect.top - this.transformState.y) / this.transformState.scale;
+        const graphPos = screenToGraph(e.clientX, e.clientY, rect, this.transformState);
 
         const oldPosition = this.state.dragNode.position.clone();
-        this.state.dragNode.position.x = newX;
-        this.state.dragNode.position.y = newY;
+        this.state.dragNode.position.x = graphPos.x;
+        this.state.dragNode.position.y = graphPos.y;
 
         this.callbacks.showTooltip?.(this.state.dragNode, {
             x: e.clientX + 10,
@@ -200,12 +200,12 @@ export class MouseInteractionHandler<T extends NodeData = NodeData> {
 
         this.eventEmitter.emit('nodeDrag', {
             node: this.state.dragNode,
-            position: { x: newX, y: newY },
+            position: { x: graphPos.x, y: graphPos.y },
             startPosition: this.state.dragStartPosition || {
                 x: oldPosition.x,
                 y: oldPosition.y
             },
-            delta: new Vector(newX - oldPosition.x, newY - oldPosition.y)
+            delta: new Vector(graphPos.x - oldPosition.x, graphPos.y - oldPosition.y)
         });
     }
 
@@ -265,8 +265,7 @@ export class MouseInteractionHandler<T extends NodeData = NodeData> {
         if (!this.svg) return;
 
         const rect = this.svg.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
+        const containerPos = screenToContainer(e.clientX, e.clientY, rect);
 
         const zoomDelta =
             e.deltaY > 0 ? 1 / this.config.zoomSensitivity : this.config.zoomSensitivity;
@@ -274,8 +273,10 @@ export class MouseInteractionHandler<T extends NodeData = NodeData> {
 
         // Zoom towards mouse position
         const scaleChange = newScale / this.transformState.scale;
-        this.transformState.x = mouseX - (mouseX - this.transformState.x) * scaleChange;
-        this.transformState.y = mouseY - (mouseY - this.transformState.y) * scaleChange;
+        this.transformState.x =
+            containerPos.x - (containerPos.x - this.transformState.x) * scaleChange;
+        this.transformState.y =
+            containerPos.y - (containerPos.y - this.transformState.y) * scaleChange;
         this.transformState.scale = newScale;
 
         this.callbacks.updateTransform?.(
@@ -289,7 +290,7 @@ export class MouseInteractionHandler<T extends NodeData = NodeData> {
             x: this.transformState.x,
             y: this.transformState.y,
             delta: zoomDelta,
-            center: { x: mouseX, y: mouseY }
+            center: { x: containerPos.x, y: containerPos.y }
         });
     }
 
