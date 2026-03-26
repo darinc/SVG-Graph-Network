@@ -1,6 +1,11 @@
 module.exports = {
   // Test environment
   testEnvironment: 'jsdom',
+
+  // Define __DEV__ for dev-mode assertions in tests
+  globals: {
+    __DEV__: true
+  },
   
   // Module file extensions for importing
   moduleFileExtensions: ['ts', 'js', 'json'],

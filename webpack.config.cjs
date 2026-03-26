@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
@@ -25,6 +26,11 @@ const sharedConfig = {
       }
     ]
   },
+  plugins: [
+    new webpack.DefinePlugin({
+      __DEV__: !isProduction
+    })
+  ],
   resolve: {
     extensions: ['.ts', '.js']
   }
@@ -58,6 +64,7 @@ const umdConfig = {
     ]
   },
   plugins: [
+    ...sharedConfig.plugins,
     ...(isProduction ? [
       new MiniCssExtractPlugin({
         filename: 'svg-graph-network.css'

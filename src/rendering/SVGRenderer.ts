@@ -4,6 +4,7 @@ import { NodeData, LinkData, TransformState, SVGElements, Bounds } from '../type
 import { ThemeManager, VisualState } from '../theming/ThemeManager';
 import { NodeShapeFactory } from './NodeShapeFactory';
 import { createLogger } from '../utils/Logger';
+import { devAssert } from '../utils/devAssert';
 
 /**
  * Link representation for rendering
@@ -229,6 +230,11 @@ export class SVGRenderer {
         if (!this.linkGroup || !this.labelGroup || !this.nodeGroup) {
             this.createSVGContainer();
         }
+
+        devAssert(
+            this.linkGroup !== null && this.nodeGroup !== null && this.labelGroup !== null,
+            'SVG layer groups are null after createSVGContainer()'
+        );
 
         this.clearElements();
 
@@ -600,8 +606,15 @@ export class SVGRenderer {
         nodes: Map<string, Node<T>>,
         filteredNodes: Set<string> | null = null
     ): void {
+        const hasCreatedElements = this.nodeElements.size > 0;
         Array.from(nodes.values()).forEach(node => {
             const elements = this.nodeElements.get(node);
+            if (hasCreatedElements) {
+                devAssert(
+                    elements !== undefined,
+                    `Node "${node.data.id}" has no DOM element — elements may have been lost after DOM recreation`
+                );
+            }
             if (elements) {
                 elements.group.setAttribute(
                     'transform',

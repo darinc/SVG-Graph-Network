@@ -50,6 +50,7 @@ import {
     FocusOptions
 } from './types/styling';
 import { createLogger, LogLevel } from './utils/Logger';
+import { devAssert } from './utils/devAssert';
 
 /** Escape HTML special characters to prevent XSS in innerHTML contexts. */
 function escapeHtml(str: string): string {
@@ -447,6 +448,10 @@ export class GraphNetwork<T extends NodeData = NodeData> {
      */
     startAnimation(): void {
         if (this.isAnimating) return;
+
+        devAssert(this.physics !== null, 'Cannot start animation: PhysicsEngine not initialized');
+        devAssert(this.renderer !== null, 'Cannot start animation: SVGRenderer not initialized');
+        devAssert(this.events !== null, 'Cannot start animation: EventManager not initialized');
 
         this.isAnimating = true;
         this.lastFrameTime = performance.now();

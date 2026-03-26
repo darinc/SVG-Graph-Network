@@ -1,6 +1,7 @@
 import { Vector } from '../Vector';
 import { Node } from '../Node';
 import { PhysicsConfig, NodeData } from '../types/index';
+import { devAssert } from '../utils/devAssert';
 
 /**
  * Physics simulation result containing force and energy metrics
@@ -122,6 +123,15 @@ export class PhysicsEngine {
 
             // Use the Node's built-in physics integration
             node.updatePosition(deltaTime, this.config.damping);
+
+            devAssert(
+                Number.isFinite(node.position.x) && Number.isFinite(node.position.y),
+                `Node "${node.data.id}" has NaN/Infinity position after physics update: (${node.position.x}, ${node.position.y})`
+            );
+            devAssert(
+                Number.isFinite(node.velocity.x) && Number.isFinite(node.velocity.y),
+                `Node "${node.data.id}" has NaN/Infinity velocity: (${node.velocity.x}, ${node.velocity.y})`
+            );
         });
     }
 

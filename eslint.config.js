@@ -31,7 +31,8 @@ export default [
         clearTimeout: 'readonly',
         clearInterval: 'readonly',
         URL: 'readonly',
-        performance: 'readonly'
+        performance: 'readonly',
+        __DEV__: 'readonly'
       }
     },
     plugins: {

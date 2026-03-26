@@ -2,6 +2,7 @@ import { Node } from '../Node';
 import { Vector } from '../Vector';
 import { NodeData, TransformState, InteractionConfig, Position } from '../types/index';
 import { createLogger } from '../utils/Logger';
+import { devAssert } from '../utils/devAssert';
 
 /**
  * Event callback signatures
@@ -202,6 +203,16 @@ export class EventManager<T extends NodeData = NodeData> {
         this.svg = svg;
         this.nodes = nodes;
         this.callbacks = callbacks;
+
+        devAssert(
+            svg !== null && svg !== undefined,
+            'EventManager.initialize() called with null/undefined SVG element'
+        );
+        devAssert(
+            typeof callbacks.getNodeElements === 'function',
+            'EventManager.initialize() called without getNodeElements callback — node events will be silently ignored'
+        );
+
         this.setupEventListeners();
     }
 
