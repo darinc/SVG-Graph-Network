@@ -48,7 +48,7 @@ focus: open-ended
 **Downsides:** Edge cases around re-activation timing (drag start must immediately resume full-speed physics).
 **Confidence:** 80%
 **Complexity:** Medium
-**Status:** Unexplored
+**Status:** Explored — implemented 2026-03-26 (cooldown at equilibrium, wake on interaction/data changes)
 
 ### 5. Cross-Subsystem Contract Tests via EventBus
 **Description:** Write a small test harness that mounts a real EventBus, fires events from one subsystem (e.g., interaction emits `node:click`), and asserts side effects in consuming subsystems (highlighting, selection, UI). 10-15 contract tests covering the critical event paths.
@@ -99,3 +99,4 @@ focus: open-ended
 - 2026-03-26: Initial open-ended ideation — 38 raw ideas generated across 5 frames, deduped to 25 unique + 3 cross-cutting combos, 7 survivors after adversarial filtering
 - 2026-03-26: Implemented #1 (CI size gate) and #3 (dead code removal)
 - 2026-03-26: Implemented #2 (dev-mode invariant assertions)
+- 2026-03-26: Implemented #4 (adaptive physics cooldown)
