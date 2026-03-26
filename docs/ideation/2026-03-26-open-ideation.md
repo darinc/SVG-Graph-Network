@@ -72,7 +72,7 @@ focus: open-ended
 **Downsides:** Requires touching interaction, rendering, and physics integration points. Risk of the exact regression pattern documented in the knowledge base.
 **Confidence:** 65%
 **Complexity:** Medium
-**Status:** Unexplored
+**Status:** Explored — implemented 2026-03-26 (shared coordinates.ts, deleted dead CoordinateConverter)
 
 ## Rejection Summary
 
@@ -101,3 +101,4 @@ focus: open-ended
 - 2026-03-26: Implemented #2 (dev-mode invariant assertions)
 - 2026-03-26: Implemented #4 (adaptive physics cooldown)
 - 2026-03-26: Implemented #6 (viewport culling)
+- 2026-03-26: Implemented #7 (coordinate system consolidation)
