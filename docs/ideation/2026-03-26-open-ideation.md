@@ -32,7 +32,7 @@ focus: open-ended
 **Downsides:** Requires discipline to add assertions as new code is written. Initial pass is ~2-3 hours.
 **Confidence:** 85%
 **Complexity:** Low-Medium
-**Status:** Unexplored
+**Status:** Explored — implemented 2026-03-26 (__DEV__ flag + devAssert + 4 assertion sites)
 
 ### 3. Delete Dead Infrastructure (DI Container, Rendering Sub-Managers, EventBus Wiring)
 **Description:** `DependencyContainer`, `GraphDataManager`, `GraphAnimationController`, `RenderingCoordinator`, `NodeElementManager`, `LinkElementManager`, and `SVGDOMManager` exist with full implementations but are never imported by any live code path. Delete them. This removes ~2,000+ lines of dead code and eliminates the "which architecture is real?" confusion.
@@ -98,3 +98,4 @@ focus: open-ended
 ## Session Log
 - 2026-03-26: Initial open-ended ideation — 38 raw ideas generated across 5 frames, deduped to 25 unique + 3 cross-cutting combos, 7 survivors after adversarial filtering
 - 2026-03-26: Implemented #1 (CI size gate) and #3 (dead code removal)
+- 2026-03-26: Implemented #2 (dev-mode invariant assertions)
