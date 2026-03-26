@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AutoColor Feature Test</title>
-    <link rel="stylesheet" href="dist/svg-graph-network.css">
+    <link rel="stylesheet" href="dist/svgnet.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -71,7 +71,7 @@
         <div id="graph-container"></div>
     </div>
 
-    <script src="dist/svg-graph-network.min.js"></script>
+    <script src="dist/svgnet.min.js"></script>
     <script>
         // Test data with custom node types (same as the client's data)
         const testData = {
@@ -94,7 +94,7 @@
         };
 
         // Initialize graph with autoColor enabled (default)
-        const graph = new SVGGraphNetwork('graph-container', {
+        const graph = new SVGNet('graph-container', {
             data: testData,
             config: {
                 theme: 'dark',

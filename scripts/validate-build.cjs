@@ -20,10 +20,10 @@ const EXPECTED_EXPORTS = ['GraphNetwork', 'Vector', 'Node', 'AutoColorGenerator'
 
 // Build files to validate
 const BUILD_FILES = {
-  umd: 'svg-graph-network.min.js',
-  esm: 'svg-graph-network.esm.js',
-  cjs: 'svg-graph-network.cjs',
-  css: 'svg-graph-network.css',
+  umd: 'svgnet.min.js',
+  esm: 'svgnet.esm.js',
+  cjs: 'svgnet.cjs',
+  css: 'svgnet.css',
   types: 'index.d.ts'
 };
 
@@ -183,10 +183,10 @@ function validateUMD() {
       logWarning('Missing AMD detection pattern');
     }
 
-    if (content.includes('SVGGraphNetwork')) {
-      logSuccess('Global name "SVGGraphNetwork" present');
+    if (content.includes('SVGNet')) {
+      logSuccess('Global name "SVGNet" present');
     } else {
-      logError('Global name "SVGGraphNetwork" not found');
+      logError('Global name "SVGNet" not found');
     }
 
     // Check it's minified (no excessive whitespace)

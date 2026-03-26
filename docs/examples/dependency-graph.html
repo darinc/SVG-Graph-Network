@@ -4,7 +4,7 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>SVG Graph Network - Module Dependencies</title>
-        <link rel="stylesheet" href="../assets/svg-graph-network.css" />
+        <link rel="stylesheet" href="../assets/svgnet.css" />
         <style>
             * {
                 margin: 0;
@@ -471,20 +471,20 @@
                     window.location.hostname === '127.0.0.1'
                 ) {
                     // Development: Use webpack-served bundle
-                    script.src = '/svg-graph-network.js';
+                    script.src = '/svgnet.js';
                 } else {
                     // Production: Use relative path to assets (up one directory from examples/)
-                    script.src = '../assets/svg-graph-network.js';
+                    script.src = '../assets/svgnet.js';
                 }
                 script.onload = function () {
-                    console.log('SVGGraphNetwork script loaded successfully');
+                    console.log('SVGNet script loaded successfully');
                     // Trigger initialization if it's waiting
                     if (window.initDependencyGraph) {
                         window.initDependencyGraph();
                     }
                 };
                 script.onerror = function () {
-                    console.error('Failed to load SVGGraphNetwork script from:', script.src);
+                    console.error('Failed to load SVGNet script from:', script.src);
                 };
                 document.head.appendChild(script);
             })();
@@ -507,7 +507,7 @@
                     createCategoryFilters();
 
                     // Initialize graph with light theme
-                    graph = new SVGGraphNetwork('graph-container', {
+                    graph = new SVGNet('graph-container', {
                         config: {
                             theme: 'light',
                             showLegend: true
@@ -929,9 +929,9 @@
             // Make initializeGraph available globally for script onload handler
             window.initDependencyGraph = initializeGraph;
 
-            // Initialize when page loads, but only if SVGGraphNetwork is already available
+            // Initialize when page loads, but only if SVGNet is already available
             window.addEventListener('load', function () {
-                if (typeof SVGGraphNetwork !== 'undefined') {
+                if (typeof SVGNet !== 'undefined') {
                     initializeGraph();
                 }
                 // If not loaded, the script onload handler will call initDependencyGraph()

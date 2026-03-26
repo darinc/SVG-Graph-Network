@@ -203,7 +203,7 @@ The second assertion catches the documented bug pattern where `eventCallbacks` d
 3. `npm run build` — production build succeeds
 4. `npm run size` — bundle sizes unchanged (dead-code elimination working)
 5. Manual: add `devAssert(false, 'test')` in any file, run `npm run dev`, confirm error thrown in browser
-6. Manual: confirm the `devAssert(false, 'test')` string does NOT appear in `dist/svg-graph-network.min.js`
+6. Manual: confirm the `devAssert(false, 'test')` string does NOT appear in `dist/svgnet.min.js`
 
 ## Sources
 

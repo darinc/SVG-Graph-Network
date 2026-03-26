@@ -61,10 +61,10 @@ jobs:
     - name: Verify build artifacts
       run: |
         ls -la dist/
-        test -f dist/svg-graph-network.min.js && echo "✓ UMD build"
-        test -f dist/svg-graph-network.esm.js && echo "✓ ESM build"
-        test -f dist/svg-graph-network.cjs && echo "✓ CJS build"
-        test -f dist/svg-graph-network.css && echo "✓ CSS"
+        test -f dist/svgnet.min.js && echo "✓ UMD build"
+        test -f dist/svgnet.esm.js && echo "✓ ESM build"
+        test -f dist/svgnet.cjs && echo "✓ CJS build"
+        test -f dist/svgnet.css && echo "✓ CSS"
         test -f dist/index.d.ts && echo "✓ TypeScript declarations"
 
   format-check:

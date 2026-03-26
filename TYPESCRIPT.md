@@ -5,7 +5,7 @@ Complete guide for using SVG Graph Network with TypeScript, including all availa
 ## Installation & Setup
 
 ```bash
-npm install svg-graph-network
+npm install svgnet
 ```
 
 The library includes comprehensive TypeScript definitions out of the box - no additional `@types` packages needed.
@@ -20,7 +20,7 @@ import GraphNetwork, {
     LinkData, 
     GraphData, 
     GraphConfig 
-} from 'svg-graph-network';
+} from 'svgnet';
 
 // Define your data with proper typing
 const nodes: NodeData[] = [
@@ -70,7 +70,7 @@ const graph = new GraphNetwork('container-id', {
 ### 2. Custom Node Types with Type Safety
 
 ```typescript
-import { NodeData } from 'svg-graph-network';
+import { NodeData } from 'svgnet';
 
 // Extend NodeData for your specific use case
 interface CustomNodeData extends NodeData {
@@ -130,7 +130,7 @@ import {
     NodeEvent, 
     ThemeEvent, 
     FilterEvent 
-} from 'svg-graph-network';
+} from 'svgnet';
 
 // Strongly typed event handlers
 const handleNodeClick: EventCallback<NodeEvent> = (event) => {
@@ -168,7 +168,7 @@ import {
     NodeStyleConfig, 
     EdgeStyleConfig,
     CanvasConfig 
-} from 'svg-graph-network';
+} from 'svgnet';
 
 // Define strongly-typed custom theme
 const customTheme: ThemeConfig = {
@@ -245,7 +245,7 @@ import GraphNetwork, {
     GraphConfig,
     EventCallback,
     NodeEvent 
-} from 'svg-graph-network';
+} from 'svgnet';
 
 // Generic wrapper for different data types
 class TypedGraphNetwork<TNode extends NodeData, TLink extends LinkData> {
@@ -330,7 +330,7 @@ import {
     PhysicsConfig, 
     UIConfig, 
     InteractionConfig 
-} from 'svg-graph-network';
+} from 'svgnet';
 
 class GraphConfigBuilder {
     private config: Partial<GraphConfig> = {};
@@ -392,7 +392,7 @@ import GraphNetwork, {
     GraphData, 
     ThemeConfig,
     NodeEvent 
-} from 'svg-graph-network';
+} from 'svgnet';
 
 interface GraphComponentProps {
     data: GraphData;
@@ -531,7 +531,7 @@ const App: React.FC = () => {
 ### 1. Type Guards
 
 ```typescript
-import { NodeData, LinkData, GraphEvent, NodeEvent } from 'svg-graph-network';
+import { NodeData, LinkData, GraphEvent, NodeEvent } from 'svgnet';
 
 // Type guard for node events
 function isNodeEvent(event: GraphEvent): event is NodeEvent {
@@ -555,7 +555,7 @@ graph.on('*', (event: GraphEvent) => {
 ### 2. Utility Types
 
 ```typescript
-import { NodeData, LinkData } from 'svg-graph-network';
+import { NodeData, LinkData } from 'svgnet';
 
 // Extract node types from your data
 type ExtractNodeTypes<T extends NodeData> = T['type'];
@@ -578,7 +578,7 @@ const nodeStyles: NodeTypeMap = {
 ### 3. Configuration Validation
 
 ```typescript
-import { GraphConfig } from 'svg-graph-network';
+import { GraphConfig } from 'svgnet';
 
 // Validate configuration at compile time
 function createValidatedConfig(config: GraphConfig): GraphConfig {
@@ -637,7 +637,7 @@ import {
     NodeValidationError, 
     EdgeValidationError,
     NodeNotFoundError 
-} from 'svg-graph-network';
+} from 'svgnet';
 
 try {
     graph.addNode(nodeData);
@@ -655,7 +655,7 @@ try {
 ### 3. Performance Optimization
 
 ```typescript
-import { BulkUpdateOptions } from 'svg-graph-network';
+import { BulkUpdateOptions } from 'svgnet';
 
 // Batch operations for better performance
 const batchOptions: BulkUpdateOptions = {

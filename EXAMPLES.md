@@ -367,7 +367,7 @@ graph.on('themeChanged', (data) => {
 #### React Integration
 ```jsx
 import React, { useEffect, useRef } from 'react';
-import GraphNetwork from 'svg-graph-network';
+import GraphNetwork from 'svgnet';
 
 const GraphComponent = ({ data, onNodeSelect }) => {
     const containerRef = useRef();
@@ -403,7 +403,7 @@ const GraphComponent = ({ data, onNodeSelect }) => {
 </template>
 
 <script>
-import GraphNetwork from 'svg-graph-network';
+import GraphNetwork from 'svgnet';
 
 export default {
     props: ['graphData'],

@@ -43,9 +43,9 @@ const umdConfig = {
   entry: './src/index.ts',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: isProduction ? 'svg-graph-network.min.js' : 'svg-graph-network.js',
+    filename: isProduction ? 'svgnet.min.js' : 'svgnet.js',
     library: {
-      name: 'SVGGraphNetwork',
+      name: 'SVGNet',
       type: 'umd',
       export: 'default'
     },
@@ -67,7 +67,7 @@ const umdConfig = {
     ...sharedConfig.plugins,
     ...(isProduction ? [
       new MiniCssExtractPlugin({
-        filename: 'svg-graph-network.css'
+        filename: 'svgnet.css'
       })
     ] : [])
   ]
@@ -83,7 +83,7 @@ const esmConfig = {
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'svg-graph-network.esm.js',
+    filename: 'svgnet.esm.js',
     library: {
       type: 'module'
     },
@@ -108,7 +108,7 @@ const cjsConfig = {
   entry: './src/index.ts',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'svg-graph-network.cjs',
+    filename: 'svgnet.cjs',
     library: {
       type: 'commonjs2'
     },

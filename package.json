@@ -1,30 +1,30 @@
 {
-  "name": "svg-graph-network",
+  "name": "svgnet",
   "version": "0.2.0",
   "description": "Modern SVG graph visualization library with advanced theming, mobile-first design, and customizable physics simulation. Features dynamic node/edge styling, touch optimization, and zero dependencies.",
   "type": "module",
-  "main": "dist/svg-graph-network.cjs",
-  "module": "dist/svg-graph-network.esm.js",
-  "browser": "dist/svg-graph-network.min.js",
+  "main": "dist/svgnet.cjs",
+  "module": "dist/svgnet.esm.js",
+  "browser": "dist/svgnet.min.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "import": {
         "types": "./dist/index.d.ts",
-        "default": "./dist/svg-graph-network.esm.js"
+        "default": "./dist/svgnet.esm.js"
       },
       "require": {
         "types": "./dist/index.d.ts",
-        "default": "./dist/svg-graph-network.cjs"
+        "default": "./dist/svgnet.cjs"
       },
-      "browser": "./dist/svg-graph-network.min.js",
-      "default": "./dist/svg-graph-network.esm.js"
+      "browser": "./dist/svgnet.min.js",
+      "default": "./dist/svgnet.esm.js"
     },
-    "./css": "./dist/svg-graph-network.css",
+    "./css": "./dist/svgnet.css",
     "./package.json": "./package.json"
   },
-  "jsdelivr": "dist/svg-graph-network.min.js",
-  "unpkg": "dist/svg-graph-network.min.js",
+  "jsdelivr": "dist/svgnet.min.js",
+  "unpkg": "dist/svgnet.min.js",
   "sideEffects": [
     "**/*.css"
   ],
@@ -88,12 +88,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/darinc/svg-graph-network.git"
+    "url": "https://github.com/darinc/svgnet.git"
   },
   "bugs": {
-    "url": "https://github.com/darinc/svg-graph-network/issues"
+    "url": "https://github.com/darinc/svgnet/issues"
   },
-  "homepage": "https://darinc.github.io/svg-graph-network/",
+  "homepage": "https://darinc.github.io/svgnet/",
   "devDependencies": {
     "@babel/core": "^7.28.4",
     "@babel/preset-env": "^7.28.3",
@@ -157,23 +157,23 @@
   "size-limit": [
     {
       "name": "UMD (minified)",
-      "path": "dist/svg-graph-network.min.js",
+      "path": "dist/svgnet.min.js",
       "limit": "120 KB"
     },
     {
       "name": "UMD (gzipped)",
-      "path": "dist/svg-graph-network.min.js",
+      "path": "dist/svgnet.min.js",
       "gzip": true,
       "limit": "35 KB"
     },
     {
       "name": "ESM (minified)",
-      "path": "dist/svg-graph-network.esm.js",
+      "path": "dist/svgnet.esm.js",
       "limit": "120 KB"
     },
     {
       "name": "ESM (gzipped)",
-      "path": "dist/svg-graph-network.esm.js",
+      "path": "dist/svgnet.esm.js",
       "gzip": true,
       "limit": "35 KB"
     }

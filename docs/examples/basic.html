@@ -10,7 +10,7 @@
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <title>Basic Graph Network Example</title>
-        <link rel="stylesheet" href="../assets/svg-graph-network.css" />
+        <link rel="stylesheet" href="../assets/svgnet.css" />
         <style>
             body {
                 margin: 0;
@@ -110,13 +110,13 @@
                     window.location.hostname === '127.0.0.1'
                 ) {
                     // Development: Use webpack-served bundle
-                    script.src = '/svg-graph-network.js';
+                    script.src = '/svgnet.js';
                 } else {
                     // Production: Use relative path to assets
-                    script.src = '../assets/svg-graph-network.js';
+                    script.src = '../assets/svgnet.js';
                 }
                 script.onload = function () {
-                    console.log('SVGGraphNetwork script loaded successfully');
+                    console.log('SVGNet script loaded successfully');
                     // Small delay to ensure global variable is available
                     setTimeout(function () {
                         if (window.initializeWhenReady) {
@@ -125,7 +125,7 @@
                     }, 10);
                 };
                 script.onerror = function () {
-                    console.error('Failed to load SVGGraphNetwork script from:', script.src);
+                    console.error('Failed to load SVGNet script from:', script.src);
                 };
                 document.head.appendChild(script);
             })();

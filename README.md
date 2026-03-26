@@ -1,9 +1,9 @@
 # SVG Graph Network
 
 [![CI](https://github.com/darinc/SVG-Graph-Network/actions/workflows/ci.yml/badge.svg)](https://github.com/darinc/SVG-Graph-Network/actions/workflows/ci.yml)
-[![npm version](https://img.shields.io/npm/v/svg-graph-network.svg)](https://www.npmjs.com/package/svg-graph-network)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/svg-graph-network)](https://bundlephobia.com/package/svg-graph-network)
-[![license](https://img.shields.io/npm/l/svg-graph-network.svg)](https://github.com/darinc/SVG-Graph-Network/blob/main/LICENSE)
+[![npm version](https://img.shields.io/npm/v/svgnet.svg)](https://www.npmjs.com/package/svgnet)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/svgnet)](https://bundlephobia.com/package/svgnet)
+[![license](https://img.shields.io/npm/l/svgnet.svg)](https://github.com/darinc/SVG-Graph-Network/blob/main/LICENSE)
 
 A zero-dependency, TypeScript-first graph visualization library. Force-directed layouts, dark/light theming, mobile touch gestures, and crisp SVG rendering — all in ~23KB gzipped.
 
@@ -23,20 +23,20 @@ A zero-dependency, TypeScript-first graph visualization library. Force-directed 
 ### Installation
 
 ```bash
-npm install svg-graph-network
+npm install svgnet
 ```
 
 Or via CDN:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/svg-graph-network/dist/svg-graph-network.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/svg-graph-network/dist/svg-graph-network.css">
+<script src="https://cdn.jsdelivr.net/npm/svgnet/dist/svgnet.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/svgnet/dist/svgnet.css">
 ```
 
 ### Basic Usage
 
 ```javascript
-import GraphNetwork from 'svg-graph-network';
+import GraphNetwork from 'svgnet';
 
 const graph = new GraphNetwork('container-id', {
     data: {

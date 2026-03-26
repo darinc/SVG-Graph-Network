@@ -10,7 +10,7 @@ commits: [c590417e, 621ee58f, 0b5ccae5, 1669574b]
 
 ## Problem
 
-GitHub Pages examples showed blank pages with "Can't find variable: SVGGraphNetwork" errors. The library loaded but no graph appeared. Required four separate commits over two days to fully resolve.
+GitHub Pages examples showed blank pages with "Can't find variable: SVGNet" errors. The library loaded but no graph appeared. Required four separate commits over two days to fully resolve.
 
 ## Root Cause
 
@@ -18,7 +18,7 @@ A chain of three entangled issues:
 
 1. **`document.write` blocked in production:** Examples used `document.write` to conditionally load scripts. Modern browsers and CSPs block this for dynamically inserted scripts, causing silent load failures on GitHub Pages.
 2. **Async script loading race condition:** After replacing `document.write` with `createElement/appendChild`, the library loaded asynchronously but example JS ran synchronously, referencing the global before the library loaded.
-3. **Wrong global variable name:** Examples referenced `SVGGraphNetwork` but webpack's `output.library` exported `GraphNetwork` (or vice versa during the alignment process).
+3. **Wrong global variable name:** Examples referenced `SVGNet` but webpack's `output.library` exported `GraphNetwork` (or vice versa during the alignment process).
 
 ## Solution
 

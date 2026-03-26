@@ -60,8 +60,8 @@ jobs:
 
         # Copy built library assets
         mkdir -p gh-pages/assets
-        cp dist/svg-graph-network.min.js gh-pages/assets/svg-graph-network.js
-        cp dist/svg-graph-network.css gh-pages/assets/
+        cp dist/svgnet.min.js gh-pages/assets/svgnet.js
+        cp dist/svgnet.css gh-pages/assets/
 
         # Update example HTML files to use correct library path
         sed -i 's|../dist/|../assets/|g' gh-pages/examples/*.html

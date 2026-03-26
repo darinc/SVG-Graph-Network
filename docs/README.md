@@ -17,9 +17,9 @@ docs/
 │   ├── advanced.html      # Advanced features example
 │   └── *.js               # JavaScript files for examples
 ├── assets/                # Built assets
-│   ├── svg-graph-network.js    # Built library (minified)
-│   ├── svg-graph-network.png   # Image for twitter card
-│   ├── svg-graph-network.css   # Library styles
+│   ├── svgnet.js    # Built library (minified)
+│   ├── svgnet.png   # Image for twitter card
+│   ├── svgnet.css   # Library styles
 │   └── modules-data.json       # Generated dependency data
 ├── api/                   # TypeDoc generated API documentation
 └── README.md             # This file
