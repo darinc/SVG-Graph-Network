@@ -489,11 +489,52 @@ export class SVGRenderer {
         // Synchronize background transform if enabled
         this.updateBackgroundTransform();
 
+        // Compute viewport bounds in graph space for culling
+        const viewportBounds = this.getViewportBoundsInGraphSpace();
+
         // Update link positions
-        this.updateLinkPositions(links, filteredNodes);
+        this.updateLinkPositions(links, filteredNodes, viewportBounds);
 
         // Update node positions and visibility
-        this.updateNodePositions(nodes, filteredNodes);
+        this.updateNodePositions(nodes, filteredNodes, viewportBounds);
+    }
+
+    /**
+     * Compute the visible viewport rectangle in graph coordinate space.
+     * Used for culling off-screen nodes and links to reduce DOM writes.
+     * @private
+     */
+    private getViewportBoundsInGraphSpace(): {
+        minX: number;
+        maxX: number;
+        minY: number;
+        maxY: number;
+    } | null {
+        if (!this.svg) return null;
+        const rect = this.svg.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return null;
+
+        const scale = this.transformState.scale;
+        const padding = 100; // Extra margin in graph units to avoid popping at edges
+        const minX = -this.transformState.x / scale - padding;
+        const minY = -this.transformState.y / scale - padding;
+        const maxX = minX + rect.width / scale + padding * 2;
+        const maxY = minY + rect.height / scale + padding * 2;
+
+        return { minX, maxX, minY, maxY };
+    }
+
+    /**
+     * Check if a point is within the viewport bounds (with margin).
+     * @private
+     */
+    private isInViewport(
+        x: number,
+        y: number,
+        bounds: { minX: number; maxX: number; minY: number; maxY: number } | null
+    ): boolean {
+        if (!bounds) return true; // No bounds available, render everything
+        return x >= bounds.minX && x <= bounds.maxX && y >= bounds.minY && y <= bounds.maxY;
     }
 
     /**
@@ -502,11 +543,33 @@ export class SVGRenderer {
      */
     private updateLinkPositions<T extends NodeData>(
         links: RenderLink<T>[],
-        filteredNodes: Set<string> | null = null
+        filteredNodes: Set<string> | null = null,
+        viewportBounds: { minX: number; maxX: number; minY: number; maxY: number } | null = null
     ): void {
         links.forEach(link => {
             const elements = this.linkElements.get(link);
             if (!elements) return;
+
+            // Viewport culling: hide links where both endpoints are off-screen
+            const sourceInView = this.isInViewport(
+                link.source.position.x,
+                link.source.position.y,
+                viewportBounds
+            );
+            const targetInView = this.isInViewport(
+                link.target.position.x,
+                link.target.position.y,
+                viewportBounds
+            );
+            if (!sourceInView && !targetInView) {
+                elements.linkEl.style.display = 'none';
+                elements.labelText.style.display = 'none';
+                elements.labelBackground.style.display = 'none';
+                return;
+            }
+            elements.linkEl.style.display = '';
+            elements.labelText.style.display = '';
+            elements.labelBackground.style.display = '';
 
             // Handle filtering visibility for links
             const isVisible =
@@ -604,7 +667,8 @@ export class SVGRenderer {
      */
     private updateNodePositions<T extends NodeData>(
         nodes: Map<string, Node<T>>,
-        filteredNodes: Set<string> | null = null
+        filteredNodes: Set<string> | null = null,
+        viewportBounds: { minX: number; maxX: number; minY: number; maxY: number } | null = null
     ): void {
         const hasCreatedElements = this.nodeElements.size > 0;
         Array.from(nodes.values()).forEach(node => {
@@ -616,6 +680,18 @@ export class SVGRenderer {
                 );
             }
             if (elements) {
+                // Viewport culling: hide off-screen nodes to reduce DOM writes
+                const inViewport = this.isInViewport(
+                    node.position.x,
+                    node.position.y,
+                    viewportBounds
+                );
+                if (!inViewport) {
+                    elements.group.style.display = 'none';
+                    return;
+                }
+                elements.group.style.display = '';
+
                 elements.group.setAttribute(
                     'transform',
                     `translate(${node.position.x},${node.position.y})`
