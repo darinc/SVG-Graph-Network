@@ -1,6 +1,6 @@
 {
   "name": "svgnet",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Modern SVG graph visualization library with advanced theming, mobile-first design, and customizable physics simulation. Features dynamic node/edge styling, touch optimization, and zero dependencies.",
   "type": "module",
   "main": "dist/SVGnet.cjs",

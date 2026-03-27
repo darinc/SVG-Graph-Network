@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-03-27
+
 ### Added
 - Graph state serialization via `exportState()` / `importState()` for persisting layouts across sessions
 - Custom node shape registration via `registerShape(name, creator)` with `INodeShapeFactory` interface
