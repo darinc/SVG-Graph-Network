@@ -433,6 +433,25 @@ export class GraphNetwork<T extends NodeData = NodeData> {
     }
 
     /**
+     * Sync the highlight manager's graph adjacency structure for pathfinding.
+     * Must be called after any data change (setData, addNode, addLink, removeNode, removeLink).
+     */
+    private syncHighlightGraph(): void {
+        if (!this.highlightManager) return;
+
+        const defaultDirected = this.config.defaultDirected ?? true;
+        const nodeIds = Array.from(this.nodes.keys());
+        const edgeData = Array.from(this.edges.values()).map(e => ({
+            id: e.id!,
+            source: e.source,
+            target: e.target,
+            directed: e.directed ?? defaultDirected
+        }));
+
+        this.highlightManager.updateGraphStructure(nodeIds, edgeData);
+    }
+
+    /**
      * Update physics configuration and notify physics engine
      * @param key - Configuration key
      * @param value - New value
@@ -1040,6 +1059,8 @@ export class GraphNetwork<T extends NodeData = NodeData> {
 
             this.logger.debug(`Added node "${nodeData.name}" (${nodeData.id})`);
 
+            this.syncHighlightGraph();
+
             // Emit enhanced event
             this.emit('nodeAdded', {
                 node,
@@ -1128,6 +1149,8 @@ export class GraphNetwork<T extends NodeData = NodeData> {
                     `GraphNetwork: Deleted node "${nodeId}" and ${connectedLinks.length} connected edges`
                 );
             }
+
+            this.syncHighlightGraph();
 
             // Emit enhanced events
             this.emit('nodeRemoved', {
@@ -1285,6 +1308,8 @@ export class GraphNetwork<T extends NodeData = NodeData> {
                 );
             }
 
+            this.syncHighlightGraph();
+
             // Emit enhanced event
             this.emit('linkAdded', {
                 linkData: { ...edgeData },
@@ -1388,6 +1413,8 @@ export class GraphNetwork<T extends NodeData = NodeData> {
                 );
             }
 
+            this.syncHighlightGraph();
+
             // Emit enhanced event
             this.emit('linkRemoved', {
                 linkData: { ...edgeData },
@@ -1447,6 +1474,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         }
 
         if (removed) {
+            this.syncHighlightGraph();
             this.emit('linkRemoved', {
                 linkData: { source: sourceId, target: targetId },
                 type: 'linkRemoved',
@@ -2157,6 +2185,9 @@ export class GraphNetwork<T extends NodeData = NodeData> {
                     groupingStrength: this.config.groupingStrength
                 });
             }
+
+            // Update highlight manager's graph structure for pathfinding
+            this.syncHighlightGraph();
 
             // Start animation if not already running
             if (!this.isAnimating) {

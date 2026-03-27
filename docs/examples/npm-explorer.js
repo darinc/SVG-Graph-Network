@@ -312,12 +312,12 @@ function toggleVulnerabilities() {
 
     if (vulnMode) {
         btn.classList.add('active');
-        btn.textContent = 'Hide Vulnerabilities';
+        btn.textContent = 'Hide Known CVEs';
         graph.clearHighlights();
         showVulnerabilities();
     } else {
         btn.classList.remove('active');
-        btn.textContent = 'Show Vulnerabilities';
+        btn.textContent = 'Show Known CVEs';
         clearVulnerabilities();
     }
 }
