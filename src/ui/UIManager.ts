@@ -509,7 +509,7 @@ export class UIManager {
                 key: 'repulsionStrength',
                 label: 'Repulsion',
                 min: 0,
-                max: 20,
+                max: 30,
                 step: 0.5,
                 value: 13,
                 description: 'Node repulsion force'

@@ -546,19 +546,26 @@ export class HighlightManager implements IHighlightManager {
         type: 'node' | 'edge',
         style: HighlightStyle
     ): void {
-        const element = document.getElementById(`${type}-${elementId}`);
+        const element = document.querySelector(`[data-id="${elementId}"]`) as HTMLElement | null;
         if (!element) return;
+
+        // For nodes, the data-id is on the <g> group — target the shape child for fill/stroke.
+        // For edges, the data-id is on the <line> element itself.
+        const target =
+            type === 'node'
+                ? (element.firstElementChild as HTMLElement | null) || element
+                : element;
 
         // Apply highlight styles
         if (style.color) {
             if (type === 'node') {
-                element.setAttribute('fill', style.color);
+                target.setAttribute('fill', style.color);
             }
-            element.setAttribute('stroke', style.color);
+            target.setAttribute('stroke', style.color);
         }
 
         if (style.strokeWidth) {
-            element.setAttribute('stroke-width', String(style.strokeWidth));
+            target.setAttribute('stroke-width', String(style.strokeWidth));
         }
 
         if (style.opacity !== undefined) {
@@ -587,8 +594,8 @@ export class HighlightManager implements IHighlightManager {
     /**
      * Clear highlight from DOM element
      */
-    private clearElementHighlight(elementId: string, type: 'node' | 'edge'): void {
-        const element = document.getElementById(`${type}-${elementId}`);
+    private clearElementHighlight(elementId: string, _type: 'node' | 'edge'): void {
+        const element = document.querySelector(`[data-id="${elementId}"]`) as HTMLElement | null;
         if (!element) return;
 
         // Remove highlight classes

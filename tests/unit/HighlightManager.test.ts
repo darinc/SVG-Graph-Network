@@ -5,21 +5,26 @@
 import { HighlightManager } from '../../src/highlighting/HighlightManager';
 import { HighlightEvent, HighlightStyle } from '../../src/types/styling';
 
-// Mock DOM elements and getElementById
+// Mock DOM elements and querySelector
 const mockElements = new Map<string, HTMLElement>();
 
-const originalGetElementById = document.getElementById;
+const originalQuerySelector = document.querySelector.bind(document);
 beforeAll(() => {
-    document.getElementById = jest.fn((id: string) => {
-        return mockElements.get(id) || null;
-    });
+    document.querySelector = jest.fn((selector: string) => {
+        // Parse data-id attribute selector: [data-id="value"]
+        const match = selector.match(/\[data-id="(.+?)"\]/);
+        if (match) {
+            return mockElements.get(match[1]) || null;
+        }
+        return originalQuerySelector(selector);
+    }) as any;
 });
 
 afterAll(() => {
-    document.getElementById = originalGetElementById;
+    document.querySelector = originalQuerySelector;
 });
 
-const createMockElement = (id: string): HTMLElement => {
+const createMockElement = (id: string, isNode = false): HTMLElement => {
     const element = {
         setAttribute: jest.fn(),
         removeAttribute: jest.fn(),
@@ -31,8 +36,18 @@ const createMockElement = (id: string): HTMLElement => {
             setProperty: jest.fn(),
             removeProperty: jest.fn(),
             strokeDashoffset: ''
-        }
+        },
+        firstElementChild: null as any
     } as any;
+
+    // For node groups, create a child shape element that receives fill/stroke
+    if (isNode) {
+        const shapeChild = {
+            setAttribute: jest.fn(),
+            removeAttribute: jest.fn()
+        } as any;
+        element.firstElementChild = shapeChild;
+    }
 
     mockElements.set(id, element);
     return element;
@@ -71,12 +86,12 @@ describe('HighlightManager', () => {
         // Setup graph structure
         highlightManager.updateGraphStructure(sampleNodes, sampleEdges);
 
-        // Create mock DOM elements
+        // Create mock DOM elements — keyed by data-id values
         sampleNodes.forEach(nodeId => {
-            createMockElement(`node-${nodeId}`);
+            createMockElement(nodeId, true);
         });
         sampleEdges.forEach(edge => {
-            createMockElement(`edge-${edge.id}`);
+            createMockElement(edge.id);
         });
     });
 
@@ -126,12 +141,13 @@ describe('HighlightManager', () => {
         });
 
         test('should apply default styles when none provided', () => {
-            const mockElement = mockElements.get('node-node1')!;
+            const mockElement = mockElements.get('node1')!;
+            const shapeChild = mockElement.firstElementChild;
 
             highlightManager.highlightNode('node1');
 
-            expect(mockElement.setAttribute).toHaveBeenCalledWith('stroke', '#3b82f6');
-            expect(mockElement.setAttribute).toHaveBeenCalledWith('stroke-width', '2');
+            expect(shapeChild.setAttribute).toHaveBeenCalledWith('stroke', '#3b82f6');
+            expect(shapeChild.setAttribute).toHaveBeenCalledWith('stroke-width', '2');
             expect(mockElement.setAttribute).toHaveBeenCalledWith('opacity', '1');
         });
     });
@@ -167,8 +183,9 @@ describe('HighlightManager', () => {
         });
 
         test('should apply path-specific styles', () => {
-            const mockNodeElement = mockElements.get('node-node1')!;
-            const mockEdgeElement = mockElements.get('edge-edge1')!;
+            const mockNodeElement = mockElements.get('node1')!;
+            const nodeShape = mockNodeElement.firstElementChild!;
+            const mockEdgeElement = mockElements.get('edge1')!;
 
             highlightManager.highlightPath('node1', 'node2', {
                 pathColor: '#00ff00',
@@ -176,7 +193,7 @@ describe('HighlightManager', () => {
                 showFlow: false
             });
 
-            expect(mockNodeElement.setAttribute).toHaveBeenCalledWith('stroke', '#00ff00');
+            expect(nodeShape.setAttribute).toHaveBeenCalledWith('stroke', '#00ff00');
             expect(mockEdgeElement.setAttribute).toHaveBeenCalledWith('stroke', '#00ff00');
             expect(mockEdgeElement.setAttribute).toHaveBeenCalledWith('stroke-width', '6'); // pathWidth + 1
         });
@@ -205,8 +222,8 @@ describe('HighlightManager', () => {
         });
 
         test('should apply depth-based styling', () => {
-            const mockNode2Element = mockElements.get('node-node2')!;
-            const mockNode3Element = mockElements.get('node-node3')!;
+            const mockNode2Element = mockElements.get('node2')!;
+            const mockNode3Element = mockElements.get('node3')!;
 
             highlightManager.highlightNeighbors('node1', {
                 depth: 2,
@@ -214,9 +231,15 @@ describe('HighlightManager', () => {
                 fadeByDistance: true
             });
 
-            // node2 is depth 1, node3 is depth 2
-            expect(mockNode2Element.setAttribute).toHaveBeenCalledWith('stroke', '#ff0000');
-            expect(mockNode3Element.setAttribute).toHaveBeenCalledWith('stroke', '#00ff00');
+            // node2 is depth 1, node3 is depth 2 — stroke is applied to firstElementChild
+            expect(mockNode2Element.firstElementChild!.setAttribute).toHaveBeenCalledWith(
+                'stroke',
+                '#ff0000'
+            );
+            expect(mockNode3Element.firstElementChild!.setAttribute).toHaveBeenCalledWith(
+                'stroke',
+                '#00ff00'
+            );
         });
 
         test('should include edge highlighting when requested', () => {
@@ -230,7 +253,7 @@ describe('HighlightManager', () => {
         });
 
         test('should handle fade by distance', () => {
-            const mockNode2Element = mockElements.get('node-node2')!;
+            const mockNode2Element = mockElements.get('node2')!;
 
             highlightManager.highlightNeighbors('node1', {
                 depth: 2,
@@ -260,20 +283,23 @@ describe('HighlightManager', () => {
         });
 
         test('should apply connection styles', () => {
-            const mockNodeElement = mockElements.get('node-node1')!;
-            const mockEdgeElement = mockElements.get('edge-edge1')!;
+            const mockNodeElement = mockElements.get('node1')!;
+            const mockEdgeElement = mockElements.get('edge1')!;
 
             const style: HighlightStyle = { color: '#ff00ff', strokeWidth: 4 };
             highlightManager.highlightConnections('node1', style);
 
-            expect(mockNodeElement.setAttribute).toHaveBeenCalledWith('stroke', '#ff00ff');
+            expect(mockNodeElement.firstElementChild!.setAttribute).toHaveBeenCalledWith(
+                'stroke',
+                '#ff00ff'
+            );
             expect(mockEdgeElement.setAttribute).toHaveBeenCalledWith('stroke', '#ff00ff');
         });
     });
 
     describe('Highlight Clearing', () => {
         test('should clear specific node highlight', () => {
-            const mockElement = mockElements.get('node-node1')!;
+            const mockElement = mockElements.get('node1')!;
             highlightManager.highlightNode('node1');
             mockCallback.mockClear();
 
@@ -320,7 +346,8 @@ describe('HighlightManager', () => {
 
     describe('DOM Interaction', () => {
         test('should apply highlight styles to DOM elements', () => {
-            const mockElement = mockElements.get('node-node1')!;
+            const mockElement = mockElements.get('node1')!;
+            const shapeChild = mockElement.firstElementChild!;
 
             highlightManager.highlightNode('node1', {
                 color: '#ff0000',
@@ -331,9 +358,9 @@ describe('HighlightManager', () => {
                 pulse: true
             });
 
-            expect(mockElement.setAttribute).toHaveBeenCalledWith('fill', '#ff0000');
-            expect(mockElement.setAttribute).toHaveBeenCalledWith('stroke', '#ff0000');
-            expect(mockElement.setAttribute).toHaveBeenCalledWith('stroke-width', '5');
+            expect(shapeChild.setAttribute).toHaveBeenCalledWith('fill', '#ff0000');
+            expect(shapeChild.setAttribute).toHaveBeenCalledWith('stroke', '#ff0000');
+            expect(shapeChild.setAttribute).toHaveBeenCalledWith('stroke-width', '5');
             expect(mockElement.setAttribute).toHaveBeenCalledWith('opacity', '0.8');
             expect(mockElement.classList.add).toHaveBeenCalledWith('graph-highlight-animated');
             expect(mockElement.classList.add).toHaveBeenCalledWith('graph-highlight-glow');
@@ -351,7 +378,7 @@ describe('HighlightManager', () => {
         });
 
         test('should set z-index via CSS custom property', () => {
-            const mockElement = mockElements.get('node-node1')!;
+            const mockElement = mockElements.get('node1')!;
 
             highlightManager.highlightNode('node1', { zIndex: 100 });
 
@@ -420,13 +447,14 @@ describe('HighlightManager', () => {
         });
 
         test('should merge styles with defaults', () => {
-            const mockElement = mockElements.get('node-node1')!;
+            const mockElement = mockElements.get('node1')!;
+            const shapeChild = mockElement.firstElementChild!;
 
             highlightManager.highlightNode('node1', { color: '#ff0000' });
 
             // Should apply custom color but use default values for other properties
-            expect(mockElement.setAttribute).toHaveBeenCalledWith('stroke', '#ff0000');
-            expect(mockElement.setAttribute).toHaveBeenCalledWith('stroke-width', '2'); // default
+            expect(shapeChild.setAttribute).toHaveBeenCalledWith('stroke', '#ff0000');
+            expect(shapeChild.setAttribute).toHaveBeenCalledWith('stroke-width', '2'); // default
             expect(mockElement.setAttribute).toHaveBeenCalledWith('opacity', '1'); // default
         });
 

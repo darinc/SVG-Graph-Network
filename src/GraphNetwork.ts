@@ -433,6 +433,25 @@ export class GraphNetwork<T extends NodeData = NodeData> {
     }
 
     /**
+     * Sync the highlight manager's graph adjacency structure for pathfinding.
+     * Must be called after any data change (setData, addNode, addLink, removeNode, removeLink).
+     */
+    private syncHighlightGraph(): void {
+        if (!this.highlightManager) return;
+
+        const defaultDirected = this.config.defaultDirected ?? true;
+        const nodeIds = Array.from(this.nodes.keys());
+        const edgeData = Array.from(this.edges.values()).map(e => ({
+            id: e.id!,
+            source: e.source,
+            target: e.target,
+            directed: e.directed ?? defaultDirected
+        }));
+
+        this.highlightManager.updateGraphStructure(nodeIds, edgeData);
+    }
+
+    /**
      * Update physics configuration and notify physics engine
      * @param key - Configuration key
      * @param value - New value
@@ -524,51 +543,62 @@ export class GraphNetwork<T extends NodeData = NodeData> {
 
         // Run physics simulation (unless panning or cooled down)
         if (!this.events?.isPanning()) {
-            // When cooled down, only check every 30 frames (~2fps at 60fps)
+            // When cooled down, skip physics but still render every frame
+            // so that zoom/pan transforms remain smooth.
+            let skipPhysics = false;
             if (this.isPhysicsCooledDown) {
                 this.cooldownFrameSkip++;
                 if (this.cooldownFrameSkip < 30) {
-                    this.lastFrameTime = currentTime;
-                    this.animationFrame = requestAnimationFrame(() => this.animate());
-                    return;
+                    skipPhysics = true;
+                } else {
+                    this.cooldownFrameSkip = 0;
                 }
-                this.cooldownFrameSkip = 0;
             }
 
-            const physicsLinks = PhysicsEngine.createLinks(
-                this.links.map(link => ({
-                    source: link.source.getId(),
-                    target: link.target.getId(),
-                    weight: link.weight
-                })),
-                this.nodes
-            );
+            if (!skipPhysics) {
+                const physicsLinks = PhysicsEngine.createLinks(
+                    this.links.map(link => ({
+                        source: link.source.getId(),
+                        target: link.target.getId(),
+                        weight: link.weight
+                    })),
+                    this.nodes
+                );
 
-            let metrics;
-            if (this.layoutStrategy) {
-                metrics = this.layoutStrategy.tick(this.nodes, physicsLinks, this.filteredNodes);
-            } else {
-                metrics = this.physics.updateForces(this.nodes, physicsLinks, this.filteredNodes);
-                this.physics.updatePositions(this.nodes, this.filteredNodes);
-            }
-
-            // Check for equilibrium to enable cooldown
-            const isStable = this.layoutStrategy
-                ? this.layoutStrategy.isStable(metrics)
-                : this.physics.isInEquilibrium(metrics);
-            if (isStable) {
-                if (!this.isPhysicsCooledDown) {
-                    this.isPhysicsCooledDown = true;
-                    this.logger.debug('Physics reached equilibrium — entering cooldown');
+                let metrics;
+                if (this.layoutStrategy) {
+                    metrics = this.layoutStrategy.tick(
+                        this.nodes,
+                        physicsLinks,
+                        this.filteredNodes
+                    );
+                } else {
+                    metrics = this.physics.updateForces(
+                        this.nodes,
+                        physicsLinks,
+                        this.filteredNodes
+                    );
+                    this.physics.updatePositions(this.nodes, this.filteredNodes);
                 }
-            } else if (this.isPhysicsCooledDown) {
-                this.isPhysicsCooledDown = false;
-                this.cooldownFrameSkip = 0;
-                this.logger.debug('Physics exited equilibrium — resuming full simulation');
+
+                // Check for equilibrium to enable cooldown
+                const isStable = this.layoutStrategy
+                    ? this.layoutStrategy.isStable(metrics)
+                    : this.physics.isInEquilibrium(metrics);
+                if (isStable) {
+                    if (!this.isPhysicsCooledDown) {
+                        this.isPhysicsCooledDown = true;
+                        this.logger.debug('Physics reached equilibrium — entering cooldown');
+                    }
+                } else if (this.isPhysicsCooledDown) {
+                    this.isPhysicsCooledDown = false;
+                    this.cooldownFrameSkip = 0;
+                    this.logger.debug('Physics exited equilibrium — resuming full simulation');
+                }
             }
         }
 
-        // Render current state
+        // Always render so zoom/pan transforms stay smooth during cooldown
         this.renderer?.render(this.nodes, this.links, this.filteredNodes);
 
         this.lastFrameTime = currentTime;
@@ -1040,6 +1070,8 @@ export class GraphNetwork<T extends NodeData = NodeData> {
 
             this.logger.debug(`Added node "${nodeData.name}" (${nodeData.id})`);
 
+            this.syncHighlightGraph();
+
             // Emit enhanced event
             this.emit('nodeAdded', {
                 node,
@@ -1128,6 +1160,8 @@ export class GraphNetwork<T extends NodeData = NodeData> {
                     `GraphNetwork: Deleted node "${nodeId}" and ${connectedLinks.length} connected edges`
                 );
             }
+
+            this.syncHighlightGraph();
 
             // Emit enhanced events
             this.emit('nodeRemoved', {
@@ -1285,6 +1319,8 @@ export class GraphNetwork<T extends NodeData = NodeData> {
                 );
             }
 
+            this.syncHighlightGraph();
+
             // Emit enhanced event
             this.emit('linkAdded', {
                 linkData: { ...edgeData },
@@ -1388,6 +1424,8 @@ export class GraphNetwork<T extends NodeData = NodeData> {
                 );
             }
 
+            this.syncHighlightGraph();
+
             // Emit enhanced event
             this.emit('linkRemoved', {
                 linkData: { ...edgeData },
@@ -1447,6 +1485,7 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         }
 
         if (removed) {
+            this.syncHighlightGraph();
             this.emit('linkRemoved', {
                 linkData: { source: sourceId, target: targetId },
                 type: 'linkRemoved',
@@ -2157,6 +2196,9 @@ export class GraphNetwork<T extends NodeData = NodeData> {
                     groupingStrength: this.config.groupingStrength
                 });
             }
+
+            // Update highlight manager's graph structure for pathfinding
+            this.syncHighlightGraph();
 
             // Start animation if not already running
             if (!this.isAnimating) {
