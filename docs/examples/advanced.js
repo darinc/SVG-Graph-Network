@@ -562,8 +562,8 @@ async function initializeGraph() {
             showTitle: true,
             showBreadcrumbs: true,
             damping: 0.95,
-            repulsionStrength: 6500,
-            attractionStrength: 0.001,
+            repulsionStrength: 10000,
+            attractionStrength: 0.0004,
             filterDepth: 1
         }
     });

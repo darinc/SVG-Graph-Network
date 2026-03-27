@@ -741,6 +741,34 @@
 
                         <div
                             class="example-card fade-in"
+                            onclick="window.location.href='examples/npm-explorer.html'"
+                            style="cursor: pointer"
+                        >
+                            <div class="example-preview">
+                                <i class="fab fa-npm" style="font-size: 3rem"></i>
+                            </div>
+                            <div class="example-content">
+                                <h3 class="example-title">npm Dependency Explorer</h3>
+                                <p class="example-description">
+                                    Visualize npm package dependencies with path tracing,
+                                    vulnerability overlays, and interactive filtering. A real-world
+                                    showcase of directed graphs.
+                                </p>
+                                <div class="example-links">
+                                    <a
+                                        href="examples/npm-explorer.html"
+                                        class="btn btn-primary btn-small"
+                                        onclick="event.stopPropagation();"
+                                    >
+                                        <i class="fas fa-external-link-alt"></i>
+                                        View Demo
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div
+                            class="example-card fade-in"
                             onclick="window.location.href='examples/basic.html'"
                             style="cursor: pointer"
                         >
@@ -841,6 +869,7 @@
                 <div class="footer-section">
                     <h3>Examples</h3>
                     <ul>
+                        <li><a href="examples/npm-explorer.html">npm Dependency Explorer</a></li>
                         <li><a href="examples/dependency-graph.html">Module Dependencies</a></li>
                         <li><a href="examples/basic.html">Basic Network</a></li>
                         <li><a href="examples/advanced.html">Advanced Features</a></li>
