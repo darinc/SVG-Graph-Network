@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-03-27
+
+### Changed
+- CI test matrix reduced from Node 18/20/22 to Node 22.x only (faster CI)
+- Minimum Node.js engine bumped from >= 18.0.0 to >= 20.0.0 (Node 18 EOL)
+
 ## [0.4.0] - 2026-03-27
 
 ### Added
