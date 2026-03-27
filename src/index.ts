@@ -92,3 +92,9 @@ export type {
 
 // Export shape factory types for custom shape registration
 export type { INodeShapeFactory, ShapeResult } from './rendering/NodeShapeFactory';
+
+// Export layout strategy types for pluggable layouts
+export type { LayoutStrategy } from './physics/LayoutStrategy';
+export { StaticLayout } from './physics/LayoutStrategy';
+export { ForceDirectedLayout } from './physics/ForceDirectedLayout';
+export type { SimulationMetrics } from './physics/PhysicsEngine';

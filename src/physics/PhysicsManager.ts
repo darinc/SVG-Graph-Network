@@ -8,6 +8,8 @@
 import { PhysicsEngine, PhysicsLink } from './PhysicsEngine';
 import { Node } from '../Node';
 import { NodeData, PhysicsConfig } from '../types/index';
+import { LayoutStrategy } from './LayoutStrategy';
+import { ForceDirectedLayout } from './ForceDirectedLayout';
 
 /**
  * Graph link with source/target node references
@@ -39,11 +41,13 @@ export interface RawLinkData {
  */
 export class PhysicsManager<T extends NodeData = NodeData> {
     private engine: PhysicsEngine;
+    private layout: LayoutStrategy<T>;
     private isSimulating = false;
     private isPaused = false;
 
-    constructor(config: Partial<PhysicsConfig> = {}) {
+    constructor(config: Partial<PhysicsConfig> = {}, layout?: LayoutStrategy<T>) {
         this.engine = new PhysicsEngine(config);
+        this.layout = layout ?? new ForceDirectedLayout<T>(config);
     }
 
     /**

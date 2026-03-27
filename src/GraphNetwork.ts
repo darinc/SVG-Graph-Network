@@ -75,6 +75,8 @@ export interface GraphNetworkOptions {
     theme?: 'light' | 'dark';
     /** Enable debug logging */
     debug?: boolean;
+    /** Custom layout strategy (replaces default force-directed physics) */
+    layout?: import('./physics/LayoutStrategy').LayoutStrategy;
 }
 
 /**
@@ -154,6 +156,9 @@ export class GraphNetwork<T extends NodeData = NodeData> {
     private isPhysicsCooledDown: boolean = false;
     private cooldownFrameSkip: number = 0;
 
+    // Layout strategy (when provided, replaces direct PhysicsEngine usage in animate loop)
+    private layoutStrategy: import('./physics/LayoutStrategy').LayoutStrategy<T> | null = null;
+
     // Module instances
     private physics: PhysicsEngine | null = null;
     private renderer: SVGRenderer | null = null;
@@ -195,6 +200,8 @@ export class GraphNetwork<T extends NodeData = NodeData> {
         this.containerId = containerId;
         this.container = this.findContainer(containerId);
         this.debug = options.debug || false;
+        this.layoutStrategy =
+            (options.layout as import('./physics/LayoutStrategy').LayoutStrategy<T>) ?? null;
 
         // Configure logging level based on debug flag
         if (this.debug) {
@@ -537,11 +544,19 @@ export class GraphNetwork<T extends NodeData = NodeData> {
                 this.nodes
             );
 
-            const metrics = this.physics.updateForces(this.nodes, physicsLinks, this.filteredNodes);
-            this.physics.updatePositions(this.nodes, this.filteredNodes);
+            let metrics;
+            if (this.layoutStrategy) {
+                metrics = this.layoutStrategy.tick(this.nodes, physicsLinks, this.filteredNodes);
+            } else {
+                metrics = this.physics.updateForces(this.nodes, physicsLinks, this.filteredNodes);
+                this.physics.updatePositions(this.nodes, this.filteredNodes);
+            }
 
             // Check for equilibrium to enable cooldown
-            if (this.physics.isInEquilibrium(metrics)) {
+            const isStable = this.layoutStrategy
+                ? this.layoutStrategy.isStable(metrics)
+                : this.physics.isInEquilibrium(metrics);
+            if (isStable) {
                 if (!this.isPhysicsCooledDown) {
                     this.isPhysicsCooledDown = true;
                     this.logger.debug('Physics reached equilibrium — entering cooldown');
