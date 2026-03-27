@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-03-27
+
+### Added
+- System dark/light mode auto-detection via `prefers-color-scheme` media query (falls back to dark if unavailable)
+- Screenshot added to README
+
+### Changed
+- Consolidated theme toggle and settings caret into a single gear button (⚙️)
+- Theme toggle moved inside settings panel as a "Light / Dark" toggle switch
+- All control button backgrounds changed from green (#38A169) to theme-aware colors (`--bg-primary` with border)
+- Settings panel no longer has section headings — cleaner minimal layout
+- Default physics tuning: Repulsion 7.5 (was 13), Attraction 12.6 (was 10)
+- Default title changed from "Graph Network" to "SVGnet"
+- Gear icon stays static regardless of panel open/close state
+
+### Removed
+- Standalone theme toggle button from controls bar
+- `--button-primary` and `--button-primary-hover` CSS custom properties
+- `'theme'` option from `setControlEnabled()` / `isControlEnabled()` / `getButton()` (internal API)
+
 ## [0.3.0] - 2026-03-27
 
 ### Added
