@@ -369,7 +369,7 @@ export class HighlightManager implements IHighlightManager {
      */
     updateGraphStructure(
         nodes: string[],
-        edges: Array<{ id: string; source: string; target: string }>
+        edges: Array<{ id: string; source: string; target: string; directed?: boolean }>
     ): void {
         this.graphAdjacency = {
             nodeToEdges: new Map(),
@@ -394,9 +394,11 @@ export class HighlightManager implements IHighlightManager {
             this.graphAdjacency.nodeToEdges.get(source)?.push(edgeId);
             this.graphAdjacency.nodeToEdges.get(target)?.push(edgeId);
 
-            // Add to adjacency list (undirected graph)
+            // Add to adjacency list (directed: one-way; undirected: both ways)
             this.graphAdjacency.adjacency.get(source)?.add(target);
-            this.graphAdjacency.adjacency.get(target)?.add(source);
+            if (!edge.directed) {
+                this.graphAdjacency.adjacency.get(target)?.add(source);
+            }
         }
     }
 

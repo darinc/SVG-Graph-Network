@@ -42,6 +42,8 @@ export interface LinkData {
     line_type?: 'solid' | 'dashed' | 'dotted';
     /** Color of the edge */
     color?: string;
+    /** Whether this edge is directed (shows arrowhead). Falls back to GraphConfig.defaultDirected */
+    directed?: boolean;
     /** Allow additional custom properties */
     [key: string]: any;
 }
@@ -108,6 +110,8 @@ export interface InteractionConfig {
  * Complete graph configuration combining all aspects
  */
 export interface GraphConfig extends PhysicsConfig, UIConfig, InteractionConfig {
+    /** Default directed state for edges without an explicit directed property (default: true) */
+    defaultDirected?: boolean;
     /** Allow additional configuration properties */
     [key: string]: any;
 }

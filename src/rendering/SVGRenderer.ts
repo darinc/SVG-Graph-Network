@@ -52,6 +52,8 @@ export interface RendererConfig {
     fontSize?: number;
     /** Enable debug mode */
     debug?: boolean;
+    /** Default directed state for edges (default: true to preserve existing behavior) */
+    defaultDirected?: boolean;
 }
 
 /**
@@ -112,6 +114,7 @@ export class SVGRenderer {
             fontFamily: 'Arial',
             fontSize: 14,
             debug: false,
+            defaultDirected: true,
             ...config
         };
     }
@@ -256,7 +259,11 @@ export class SVGRenderer {
         links.forEach(link => {
             const linkEl = document.createElementNS('http://www.w3.org/2000/svg', 'line');
             linkEl.classList.add('link');
-            linkEl.setAttribute('marker-end', `url(#arrowhead-${this.containerId})`);
+            // Apply arrowhead based on per-edge directed flag or global default
+            const isDirected = link.data?.directed ?? this.config.defaultDirected;
+            if (isDirected) {
+                linkEl.setAttribute('marker-end', `url(#arrowhead-${this.containerId})`);
+            }
             linkEl.setAttribute('data-id', `${link.source.getId()}-${link.target.getId()}`);
 
             // Apply theme-based edge styling
