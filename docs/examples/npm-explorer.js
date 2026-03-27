@@ -237,8 +237,8 @@ let clickTimeout = null;
 function setupClickDetection() {
     graph.on('nodeMouseDown', function (event) {
         mouseDownState = {
-            nodeId: event.node.id,
-            nodeType: event.node.type,
+            nodeId: event.node.data.id,
+            nodeType: event.node.data.type,
             x: event.position.x,
             y: event.position.y,
             time: Date.now()
