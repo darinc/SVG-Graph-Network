@@ -214,6 +214,16 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             ...options.config
         };
 
+        // Auto-detect system theme preference if user didn't explicitly set one
+        if (!options.config?.theme) {
+            try {
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                this.config.theme = prefersDark ? 'dark' : 'light';
+            } catch {
+                // matchMedia not available (e.g., SSR/jsdom) — keep default
+            }
+        }
+
         this.logger.info('Initializing with config:', this.config);
 
         // Setup container
