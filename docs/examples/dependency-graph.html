@@ -3,8 +3,8 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>svgnet — Module Dependencies</title>
-        <link rel="stylesheet" href="../assets/svgnet.css" />
+        <title>SVGnet — Module Dependencies</title>
+        <link rel="stylesheet" href="../assets/SVGnet.css" />
         <style>
             * {
                 margin: 0;
@@ -341,9 +341,9 @@
     </head>
     <body>
         <div class="header">
-            <h1>svgnet — Module Dependencies</h1>
+            <h1>SVGnet — Module Dependencies</h1>
             <p>
-                Interactive visualization of TypeScript module relationships in the svgnet library
+                Interactive visualization of TypeScript module relationships in the SVGnet library
             </p>
         </div>
 
@@ -470,10 +470,10 @@
                     window.location.hostname === '127.0.0.1'
                 ) {
                     // Development: Use webpack-served bundle
-                    script.src = '/svgnet.js';
+                    script.src = '/SVGnet.js';
                 } else {
                     // Production: Use relative path to assets (up one directory from examples/)
-                    script.src = '../assets/svgnet.js';
+                    script.src = '../assets/SVGnet.js';
                 }
                 script.onload = function () {
                     console.log('SVGNet script loaded successfully');

@@ -71,16 +71,16 @@ jobs:
         ls -la dist/
 
         # Check UMD build
-        test -f dist/svgnet.min.js && echo "✓ UMD build exists"
+        test -f dist/SVGnet.min.js && echo "✓ UMD build exists"
 
         # Check ESM build
-        test -f dist/svgnet.esm.js && echo "✓ ESM build exists"
+        test -f dist/SVGnet.esm.js && echo "✓ ESM build exists"
 
         # Check CJS build
-        test -f dist/svgnet.cjs && echo "✓ CJS build exists"
+        test -f dist/SVGnet.cjs && echo "✓ CJS build exists"
 
         # Check CSS
-        test -f dist/svgnet.css && echo "✓ CSS exists"
+        test -f dist/SVGnet.css && echo "✓ CSS exists"
 
         # Check TypeScript declarations
         test -f dist/index.d.ts && echo "✓ TypeScript declarations exist"
@@ -127,10 +127,10 @@ jobs:
       with:
         generate_release_notes: true
         files: |
-          dist/svgnet.min.js
-          dist/svgnet.esm.js
-          dist/svgnet.cjs
-          dist/svgnet.css
+          dist/SVGnet.min.js
+          dist/SVGnet.esm.js
+          dist/SVGnet.cjs
+          dist/SVGnet.css
 
   notify:
     name: Post-publish notification
@@ -144,8 +144,8 @@ jobs:
         if [ "${{ needs.publish.result }}" == "success" ]; then
           echo "✅ npm publish successful!"
           echo "📦 Package: https://www.npmjs.com/package/svgnet"
-          echo "🌐 CDN (jsDelivr): https://cdn.jsdelivr.net/npm/svgnet/dist/svgnet.min.js"
-          echo "🌐 CDN (unpkg): https://unpkg.com/svgnet/dist/svgnet.min.js"
+          echo "🌐 CDN (jsDelivr): https://cdn.jsdelivr.net/npm/svgnet/dist/SVGnet.min.js"
+          echo "🌐 CDN (unpkg): https://unpkg.com/svgnet/dist/SVGnet.min.js"
         else
           echo "❌ npm publish failed!"
           exit 1

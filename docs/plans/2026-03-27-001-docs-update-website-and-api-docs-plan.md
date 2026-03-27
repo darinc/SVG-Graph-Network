@@ -20,7 +20,7 @@ Add all new features to the Unreleased section:
 - `registerShape()` + `INodeShapeFactory` / `ShapeResult` exports
 - `LinkData.directed` + `GraphConfig.defaultDirected`
 - `LayoutStrategy` interface + `ForceDirectedLayout` + `StaticLayout`
-- Also: viewport culling, adaptive physics cooldown, dev-mode assertions, coordinate consolidation, dead code removal, CI size gate, project rename to svgnet
+- Also: viewport culling, adaptive physics cooldown, dev-mode assertions, coordinate consolidation, dead code removal, CI size gate, project rename to SVGnet
 
 ### Unit 2: API.md
 

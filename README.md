@@ -1,15 +1,15 @@
-# SVG Graph Network
+# SVG Net
 
-[![CI](https://github.com/darinc/svgnet/actions/workflows/ci.yml/badge.svg)](https://github.com/darinc/svgnet/actions/workflows/ci.yml)
+[![CI](https://github.com/darinc/SVGnet/actions/workflows/ci.yml/badge.svg)](https://github.com/darinc/SVGnet/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/svgnet.svg)](https://www.npmjs.com/package/svgnet)
 [![bundle size](https://img.shields.io/bundlephobia/minzip/svgnet)](https://bundlephobia.com/package/svgnet)
-[![license](https://img.shields.io/npm/l/svgnet.svg)](https://github.com/darinc/svgnet/blob/main/LICENSE)
+[![license](https://img.shields.io/npm/l/svgnet.svg)](https://github.com/darinc/SVGnet/blob/main/LICENSE)
 
 A zero-dependency, TypeScript-first graph visualization library. Force-directed layouts, dark/light theming, mobile touch gestures, and crisp SVG rendering — all in ~23KB gzipped.
 
-**[Live Demo](https://darinc.github.io/svgnet/)** | **[API Docs](./docs/API.md)** | **[Examples](./docs/EXAMPLES.md)**
+**[Live Demo](https://darinc.github.io/SVGnet/)** | **[API Docs](./docs/API.md)** | **[Examples](./docs/EXAMPLES.md)**
 
-## Why SVG Graph Network?
+## Why SVG Net?
 
 - **Zero dependencies** — No transitive supply chain. One `npm install`, nothing else.
 - **5 lines to a working graph** — Opinionated defaults so you skip the boilerplate. D3 is a toolkit; this is a solution.
@@ -33,8 +33,8 @@ npm install svgnet
 Or via CDN:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/svgnet/dist/svgnet.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/svgnet/dist/svgnet.css">
+<script src="https://cdn.jsdelivr.net/npm/svgnet/dist/SVGnet.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/svgnet/dist/SVGnet.css">
 ```
 
 ### Basic Usage

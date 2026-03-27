@@ -20,10 +20,10 @@ const EXPECTED_EXPORTS = ['GraphNetwork', 'Vector', 'Node', 'AutoColorGenerator'
 
 // Build files to validate
 const BUILD_FILES = {
-  umd: 'svgnet.min.js',
-  esm: 'svgnet.esm.js',
-  cjs: 'svgnet.cjs',
-  css: 'svgnet.css',
+  umd: 'SVGnet.min.js',
+  esm: 'SVGnet.esm.js',
+  cjs: 'SVGnet.cjs',
+  css: 'SVGnet.css',
   types: 'index.d.ts'
 };
 

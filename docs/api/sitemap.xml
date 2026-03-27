@@ -1,211 +1,247 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/index.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/index.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/modules.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/modules.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/hierarchy.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/hierarchy.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/classes/GraphNetwork.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/classes/GraphNetwork.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/classes/Node.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/classes/Node.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/classes/Vector.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/classes/Vector.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/NodeStyleConfig.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/classes/ForceDirectedLayout.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/EdgeStyleConfig.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/LayoutStrategy.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/CanvasConfig.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/classes/StaticLayout.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/StateStyles.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/SimulationMetrics.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/ColorScheme.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/ShapeResult.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/ThemeConfig.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/INodeShapeFactory.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/types/VisualState.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/AutoColorConfig.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/NodeData.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/classes/AutoColorGenerator.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/LinkData.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/NodeStyleConfig.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/GraphData.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/EdgeStyleConfig.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/PhysicsConfig.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/CanvasConfig.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/UIConfig.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/StateStyles.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/InteractionConfig.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/ColorScheme.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/GraphConfig.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/ThemeConfig.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/Position.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/types/VisualState.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/TransformState.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/Position.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/Bounds.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/NodeData.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/BaseEvent.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/LinkData.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/NodeEvent.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/GraphData.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/LinkEvent.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/PhysicsConfig.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/ViewEvent.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/UIConfig.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/FilterEvent.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/InteractionConfig.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/DataEvent.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/GraphConfig.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/ThemeEvent.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/TransformState.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/types/GraphEvent.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/Bounds.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/types/EventCallback.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/GraphState.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/types/Callback.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/BaseEvent.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/types/ParameterCallback.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/NodeEvent.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/types/EventType.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/LinkEvent.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/types/ConfigUpdate.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/ViewEvent.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/types/NodeUpdate.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/FilterEvent.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/types/LinkUpdate.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/DataEvent.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/EdgeData.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/ThemeEvent.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/NodeCreationOptions.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/types/GraphEvent.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/EdgeCreationOptions.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/types/EventCallback.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/DeletionOptions.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/types/Callback.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/BulkUpdateOptions.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/types/ParameterCallback.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/DataReplacementOptions.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/types/EventType.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/DataMergeOptions.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/types/ConfigUpdate.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/SVGElements.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/types/NodeUpdate.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/UIElements.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/types/LinkUpdate.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/NodeStyles.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/EdgeData.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/EdgeStyles.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/NodeCreationOptions.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/StyleObject.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/EdgeCreationOptions.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/types/ElementSelector.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/DeletionOptions.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 	<url>
-		<loc>https://darinc.github.io/svg-graph-network/interfaces/HighlightStyle.html</loc>
-		<lastmod>2025-09-17T20:57:27.991Z</lastmod>
+		<loc>https://darinc.github.io/SVGnet/interfaces/BulkUpdateOptions.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
+	</url>
+	<url>
+		<loc>https://darinc.github.io/SVGnet/interfaces/DataReplacementOptions.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
+	</url>
+	<url>
+		<loc>https://darinc.github.io/SVGnet/interfaces/DataMergeOptions.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
+	</url>
+	<url>
+		<loc>https://darinc.github.io/SVGnet/interfaces/SVGElements.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
+	</url>
+	<url>
+		<loc>https://darinc.github.io/SVGnet/interfaces/UIElements.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
+	</url>
+	<url>
+		<loc>https://darinc.github.io/SVGnet/interfaces/NodeStyles.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
+	</url>
+	<url>
+		<loc>https://darinc.github.io/SVGnet/interfaces/EdgeStyles.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
+	</url>
+	<url>
+		<loc>https://darinc.github.io/SVGnet/interfaces/StyleObject.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
+	</url>
+	<url>
+		<loc>https://darinc.github.io/SVGnet/types/ElementSelector.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
+	</url>
+	<url>
+		<loc>https://darinc.github.io/SVGnet/interfaces/HighlightStyle.html</loc>
+		<lastmod>2026-03-27T13:54:47.440Z</lastmod>
 	</url>
 </urlset>

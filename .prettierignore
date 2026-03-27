@@ -8,7 +8,7 @@ coverage/
 package-lock.json
 
 # Built/generated assets in docs directory
-docs/assets/svgnet.js
-docs/assets/svgnet.css
+docs/assets/SVGnet.js
+docs/assets/SVGnet.css
 docs/assets/modules-data.json
 docs/api/

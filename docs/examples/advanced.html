@@ -10,7 +10,7 @@
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <title>Advanced Graph Network Example - European Diplomatic Networks</title>
-        <link rel="stylesheet" href="../assets/svgnet.css" />
+        <link rel="stylesheet" href="../assets/SVGnet.css" />
         <style>
             body {
                 margin: 0;
@@ -112,10 +112,10 @@
                     window.location.hostname === '127.0.0.1'
                 ) {
                     // Development: Use webpack-served bundle
-                    script.src = '/svgnet.js';
+                    script.src = '/SVGnet.js';
                 } else {
                     // Production: Use relative path to assets
-                    script.src = '../assets/svgnet.js';
+                    script.src = '../assets/SVGnet.js';
                 }
                 script.onload = function () {
                     console.log('SVGNet script loaded successfully');

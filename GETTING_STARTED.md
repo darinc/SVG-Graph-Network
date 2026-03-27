@@ -8,8 +8,8 @@ This guide will help you get up and running with SVG Graph Network in just a few
 Add these lines to your HTML:
 
 ```html
-<link rel="stylesheet" href="https://unpkg.com/svgnet/dist/svgnet.css">
-<script src="https://unpkg.com/svgnet/dist/svgnet.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/svgnet/dist/SVGnet.css">
+<script src="https://unpkg.com/svgnet/dist/SVGnet.min.js"></script>
 ```
 
 ### Option 2: NPM
@@ -104,6 +104,6 @@ const graph = new GraphNetwork('container', {
 
 ## Need Help?
 
-- 🐛 [Report bugs](https://github.com/darinc/svgnet/issues)
-- 💬 [Ask questions](https://github.com/darinc/svgnet/discussions)
+- 🐛 [Report bugs](https://github.com/darinc/SVGnet/issues)
+- 💬 [Ask questions](https://github.com/darinc/SVGnet/discussions)
 - 📖 [Read full docs](README.md)

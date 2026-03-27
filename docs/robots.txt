@@ -7,7 +7,7 @@ Allow: /api/
 Allow: /assets/
 
 # Sitemap location
-Sitemap: https://darinc.github.io/SVG-Graph-Network/sitemap.xml
+Sitemap: https://darinc.github.io/SVGnet/sitemap.xml
 
 # Crawl delay (optional, helps with server load)
 Crawl-delay: 1

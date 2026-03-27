@@ -19,7 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Centralized coordinate conversion (`screenToGraph`, `screenToContainer`)
 
 ### Changed
-- Project renamed from `svg-graph-network` to `svgnet` (npm package, UMD global `SVGNet`)
+- Project renamed from `svg-graph-network` to `SVGnet` (npm package `svgnet`, UMD global `SVGNet`)
+- GitHub repo renamed from `darinc/SVG-Graph-Network` to `darinc/SVGnet`
+- Build output files renamed: `SVGnet.min.js`, `SVGnet.esm.js`, `SVGnet.cjs`, `SVGnet.css`
+- GitHub Pages URL updated to `darinc.github.io/SVGnet/`
 - `NodeData.shape` widened from literal union to `string` to support custom shapes
 - README rewritten for library adoption (removed "educational only" positioning)
 - LICENSE copyright updated to Darin Chambers

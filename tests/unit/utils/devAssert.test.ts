@@ -7,7 +7,7 @@ describe('devAssert', () => {
 
     test('should throw when condition is false in dev mode', () => {
         expect(() => devAssert(false, 'test failure')).toThrow(
-            '[svgnet] Assertion failed: test failure'
+            '[SVGnet] Assertion failed: test failure'
         );
     });
 

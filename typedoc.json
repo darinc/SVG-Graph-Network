@@ -1,5 +1,5 @@
 {
-  "name": "SVG Graph Network API Documentation",
+  "name": "SVGnet API Documentation",
   "entryPoints": ["src/index.ts"],
   "out": "docs/api",
   "theme": "default",
@@ -54,16 +54,16 @@
   },
   "searchInComments": true,
   "cleanOutputDir": true,
-  "titleLink": "https://github.com/darinc/svgnet",
+  "titleLink": "https://github.com/darinc/SVGnet",
   "navigationLinks": {
-    "GitHub": "https://github.com/darinc/svgnet",
+    "GitHub": "https://github.com/darinc/SVGnet",
     "NPM": "https://www.npmjs.com/package/svgnet"
   },
   "sidebarLinks": {
-    "Examples": "https://github.com/darinc/svgnet/tree/main/examples",
-    "Contributing": "https://github.com/darinc/svgnet/blob/main/CONTRIBUTING.md"
+    "Examples": "https://github.com/darinc/SVGnet/tree/main/examples",
+    "Contributing": "https://github.com/darinc/SVGnet/blob/main/CONTRIBUTING.md"
   },
-  "hostedBaseUrl": "https://darinc.github.io/svgnet/",
+  "hostedBaseUrl": "https://darinc.github.io/SVGnet/",
   "githubPages": true,
   "hideGenerator": false,
   "navigation": {

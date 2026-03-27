@@ -101,7 +101,7 @@ Per institutional learnings: any user-supplied text in tooltips must be escaped 
 **Files:** `docs/examples/npm-explorer.html`, `docs/examples/npm-explorer.js`
 
 1. Create `npm-explorer.html` following the established demo pattern:
-   - Standard meta tags, CSS link to `../assets/svgnet.css`
+   - Standard meta tags, CSS link to `../assets/SVGnet.css`
    - Dynamic script loader (dev vs production detection)
    - Layout: sidebar with stats/controls + main graph area (similar to existing `dependency-graph.html`)
    - Instruction overlay panel (dismissible)

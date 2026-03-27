@@ -47,9 +47,9 @@ npm run docs           # Generate TypeDoc API docs
 ## Build
 
 Webpack produces three bundles simultaneously in production:
-- **UMD** (`dist/svgnet.min.js` + `.css`) — browser global `SVGNet`
-- **ESM** (`dist/svgnet.esm.js`) — tree-shakeable
-- **CJS** (`dist/svgnet.cjs`) — Node.js
+- **UMD** (`dist/SVGnet.min.js` + `.css`) — browser global `SVGNet`
+- **ESM** (`dist/SVGnet.esm.js`) — tree-shakeable
+- **CJS** (`dist/SVGnet.cjs`) — Node.js
 
 CSS is extracted only in the UMD build; ESM/CJS use null-loader for CSS.
 

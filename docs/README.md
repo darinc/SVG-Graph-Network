@@ -1,10 +1,10 @@
-# svgnet - GitHub Pages
+# SVGnet - GitHub Pages
 
-This directory contains the GitHub Pages setup for the svgnet library, showcasing an interactive visualization of the library's module dependencies.
+This directory contains the GitHub Pages setup for the SVGnet library, showcasing an interactive visualization of the library's module dependencies.
 
 ## 🌐 Live Site
 
-Visit the live site at: [https://darinc.github.io/svgnet/](https://darinc.github.io/svgnet/)
+Visit the live site at: [https://darinc.github.io/SVGnet/](https://darinc.github.io/SVGnet/)
 
 ## 📁 Structure
 
@@ -17,9 +17,9 @@ docs/
 │   ├── advanced.html      # Advanced features example
 │   └── *.js               # JavaScript files for examples
 ├── assets/                # Built assets
-│   ├── svgnet.js    # Built library (minified)
-│   ├── svgnet.png   # Image for twitter card
-│   ├── svgnet.css   # Library styles
+│   ├── SVGnet.js    # Built library (minified)
+│   ├── SVGnet.png   # Image for twitter card
+│   ├── SVGnet.css   # Library styles
 │   └── modules-data.json       # Generated dependency data
 ├── api/                   # TypeDoc generated API documentation
 └── README.md             # This file
@@ -122,10 +122,10 @@ The visualization demonstrates many library features:
 
 ## 🔗 Links
 
-- [Main Site](https://darinc.github.io/svgnet/)
-- [Module Dependencies](https://darinc.github.io/svgnet/modules.html)
-- [API Documentation](https://darinc.github.io/svgnet/api/)
-- [GitHub Repository](https://github.com/darinc/svgnet)
+- [Main Site](https://darinc.github.io/SVGnet/)
+- [Module Dependencies](https://darinc.github.io/SVGnet/modules.html)
+- [API Documentation](https://darinc.github.io/SVGnet/api/)
+- [GitHub Repository](https://github.com/darinc/SVGnet)
 
 ## 📈 Statistics
 
@@ -140,4 +140,4 @@ This analysis helps developers understand the codebase structure and identify po
 
 ---
 
-*This GitHub Pages site serves as both documentation and a live demonstration of the svgnet library's capabilities.*
+*This GitHub Pages site serves as both documentation and a live demonstration of the SVGnet library's capabilities.*

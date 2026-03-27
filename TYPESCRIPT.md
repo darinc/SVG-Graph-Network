@@ -754,4 +754,4 @@ const links: LinkData[] = [
 ];
 ```
 
-This comprehensive TypeScript guide ensures you can leverage the full power of static typing while using the svgnet library.
+This comprehensive TypeScript guide ensures you can leverage the full power of static typing while using the SVGnet library.

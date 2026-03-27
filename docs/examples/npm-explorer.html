@@ -8,8 +8,8 @@
         />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <title>svgnet — npm Dependency Explorer</title>
-        <link rel="stylesheet" href="../assets/svgnet.css" />
+        <title>SVGnet — npm Dependency Explorer</title>
+        <link rel="stylesheet" href="../assets/SVGnet.css" />
         <style>
             * {
                 margin: 0;
@@ -340,7 +340,7 @@
     <body>
         <div class="header">
             <h1><span>npm</span> Dependency Explorer</h1>
-            <p>Interactive visualization of package dependencies — built with svgnet</p>
+            <p>Interactive visualization of package dependencies — built with SVGnet</p>
         </div>
 
         <div class="container">
@@ -459,9 +459,9 @@
                     window.location.hostname === 'localhost' ||
                     window.location.hostname === '127.0.0.1'
                 ) {
-                    script.src = '/svgnet.js';
+                    script.src = '/SVGnet.js';
                 } else {
-                    script.src = '../assets/svgnet.js';
+                    script.src = '../assets/SVGnet.js';
                 }
                 script.onload = function () {
                     console.log('SVGNet script loaded successfully');

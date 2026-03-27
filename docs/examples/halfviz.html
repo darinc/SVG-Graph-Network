@@ -10,7 +10,7 @@
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <title>Halfviz-Style Interactive Graph</title>
-        <link rel="stylesheet" href="../assets/svgnet.css" />
+        <link rel="stylesheet" href="../assets/SVGnet.css" />
         <style>
             @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500&display=swap');
 
@@ -330,10 +330,10 @@ NodeC{fill:#4ecdc4,stroke:#26a69a}</pre
                     window.location.hostname === '127.0.0.1'
                 ) {
                     // Development: Use webpack-served bundle
-                    script.src = '/svgnet.js';
+                    script.src = '/SVGnet.js';
                 } else {
                     // Production: Use relative path to assets
-                    script.src = '../assets/svgnet.js';
+                    script.src = '../assets/SVGnet.js';
                 }
                 script.onload = function () {
                     console.log('SVGNet script loaded successfully');

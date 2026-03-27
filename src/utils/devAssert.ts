@@ -5,7 +5,7 @@
 export function devAssert(condition: boolean, message: string): asserts condition {
     if (__DEV__) {
         if (!condition) {
-            throw new Error(`[svgnet] Assertion failed: ${message}`);
+            throw new Error(`[SVGnet] Assertion failed: ${message}`);
         }
     }
 }

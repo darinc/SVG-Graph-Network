@@ -1,4 +1,4 @@
-# svgnet - Architecture
+# SVGnet - Architecture
 
 ## Overview
 

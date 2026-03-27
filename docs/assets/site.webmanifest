@@ -1,8 +1,8 @@
 {
-    "name": "SVG Graph Network",
-    "short_name": "GraphNetwork",
+    "name": "SVGnet",
+    "short_name": "SVGnet",
     "description": "Interactive graph visualization library",
-    "start_url": "/SVG-Graph-Network/",
+    "start_url": "/SVGnet/",
     "display": "standalone",
     "background_color": "#667eea",
     "theme_color": "#667eea",
