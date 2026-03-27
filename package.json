@@ -3,35 +3,34 @@
   "version": "0.2.0",
   "description": "Modern SVG graph visualization library with advanced theming, mobile-first design, and customizable physics simulation. Features dynamic node/edge styling, touch optimization, and zero dependencies.",
   "type": "module",
-  "main": "dist/svgnet.cjs",
-  "module": "dist/svgnet.esm.js",
-  "browser": "dist/svgnet.min.js",
+  "main": "dist/SVGnet.cjs",
+  "module": "dist/SVGnet.esm.js",
+  "browser": "dist/SVGnet.min.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "import": {
         "types": "./dist/index.d.ts",
-        "default": "./dist/svgnet.esm.js"
+        "default": "./dist/SVGnet.esm.js"
       },
       "require": {
         "types": "./dist/index.d.ts",
-        "default": "./dist/svgnet.cjs"
+        "default": "./dist/SVGnet.cjs"
       },
-      "browser": "./dist/svgnet.min.js",
-      "default": "./dist/svgnet.esm.js"
+      "browser": "./dist/SVGnet.min.js",
+      "default": "./dist/SVGnet.esm.js"
     },
-    "./css": "./dist/svgnet.css",
+    "./css": "./dist/SVGnet.css",
     "./package.json": "./package.json"
   },
-  "jsdelivr": "dist/svgnet.min.js",
-  "unpkg": "dist/svgnet.min.js",
+  "jsdelivr": "dist/SVGnet.min.js",
+  "unpkg": "dist/SVGnet.min.js",
   "sideEffects": [
     "**/*.css"
   ],
   "files": [
     "dist",
     "src",
-    "examples",
     "README.md",
     "LICENSE"
   ],
@@ -88,12 +87,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/darinc/svgnet.git"
+    "url": "https://github.com/darinc/SVGnet.git"
   },
   "bugs": {
-    "url": "https://github.com/darinc/svgnet/issues"
+    "url": "https://github.com/darinc/SVGnet/issues"
   },
-  "homepage": "https://darinc.github.io/svgnet/",
+  "homepage": "https://darinc.github.io/SVGnet/",
   "devDependencies": {
     "@babel/core": "^7.28.4",
     "@babel/preset-env": "^7.28.3",
@@ -131,7 +130,7 @@
     "webpack-dev-server": "^5.2.2"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=18.0.0"
   },
   "browserslist": [
     "> 1%",
@@ -157,23 +156,23 @@
   "size-limit": [
     {
       "name": "UMD (minified)",
-      "path": "dist/svgnet.min.js",
+      "path": "dist/SVGnet.min.js",
       "limit": "120 KB"
     },
     {
       "name": "UMD (gzipped)",
-      "path": "dist/svgnet.min.js",
+      "path": "dist/SVGnet.min.js",
       "gzip": true,
       "limit": "35 KB"
     },
     {
       "name": "ESM (minified)",
-      "path": "dist/svgnet.esm.js",
+      "path": "dist/SVGnet.esm.js",
       "limit": "120 KB"
     },
     {
       "name": "ESM (gzipped)",
-      "path": "dist/svgnet.esm.js",
+      "path": "dist/SVGnet.esm.js",
       "gzip": true,
       "limit": "35 KB"
     }
