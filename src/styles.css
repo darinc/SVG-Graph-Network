@@ -11,8 +11,6 @@
     --text-secondary: #a0a0a0;
     --border-color: rgba(255, 255, 255, 0.1);
     --panel-bg: rgba(42, 42, 42, 0.9);
-    --button-primary: #38A169;
-    --button-primary-hover: #2F855A;
     --link-color: #4299E1;
 }
 
@@ -167,6 +165,70 @@
     font-size: 14px;
 }
 
+.graph-network-settings h4 {
+    margin: 0 0 8px 0;
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.graph-network-settings-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.graph-network-theme-switch {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 0;
+}
+
+.graph-network-theme-switch label {
+    font-size: 12px;
+    color: var(--text-primary);
+    cursor: pointer;
+    user-select: none;
+}
+
+.graph-network-theme-switch .toggle-track {
+    position: relative;
+    width: 36px;
+    height: 20px;
+    background: var(--text-secondary);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    flex-shrink: 0;
+}
+
+.graph-network-theme-switch .toggle-track.active {
+    background: var(--link-color);
+}
+
+.graph-network-theme-switch .toggle-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.2s ease;
+}
+
+.graph-network-theme-switch .toggle-track.active .toggle-thumb {
+    transform: translateX(16px);
+}
+
+.graph-network-settings-divider {
+    height: 1px;
+    background: var(--border-color);
+    margin: 4px 0;
+}
+
 .control-group {
     display: flex;
     flex-direction: column;
@@ -210,9 +272,9 @@
 /* UI Components - Buttons */
 .graph-network-reset-button {
     padding: 8px 15px;
-    background-color: var(--button-primary);
-    color: white;
-    border: none;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
     border-radius: 5px;
     cursor: pointer;
     font-weight: bold;
@@ -220,7 +282,7 @@
 }
 
 .graph-network-reset-button:hover {
-    background-color: var(--button-primary-hover);
+    background-color: var(--bg-secondary);
 }
 
 .graph-network-controls {
@@ -232,13 +294,12 @@
     z-index: 51;
 }
 
-.graph-network-settings-toggle, 
-.graph-network-theme-toggle {
-    background-color: var(--button-primary);
-    color: white;
+.graph-network-settings-toggle {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
     width: 40px;
     height: 40px;
-    border: none;
+    border: 1px solid var(--border-color);
     border-radius: 50%;
     display: flex;
     justify-content: center;
@@ -250,9 +311,8 @@
     transition: transform 0.3s ease, background-color 0.2s ease;
 }
 
-.graph-network-settings-toggle:hover, 
-.graph-network-theme-toggle:hover {
-    background-color: var(--button-primary-hover);
+.graph-network-settings-toggle:hover {
+    background-color: var(--bg-secondary);
     transform: scale(1.1);
 }
 
@@ -425,11 +485,11 @@
 
 .graph-network-zoom-button,
 .graph-network-reset-view-button {
-    background-color: var(--button-primary);
-    color: white;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
     width: 40px;
     height: 40px;
-    border: none;
+    border: 1px solid var(--border-color);
     border-radius: 50%;
     display: flex;
     justify-content: center;
@@ -445,14 +505,14 @@
 
 .graph-network-zoom-button:hover,
 .graph-network-reset-view-button:hover {
-    background-color: var(--button-primary-hover);
+    background-color: var(--bg-secondary);
     transform: scale(1.1);
 }
 
 .graph-network-zoom-button:active,
 .graph-network-reset-view-button:active {
     transform: scale(0.95);
-    background-color: #276749;
+    background-color: var(--bg-secondary);
 }
 
 .graph-network-zoom-in {
@@ -596,8 +656,7 @@
         gap: 8px;
     }
 
-    .graph-network-settings-toggle, 
-    .graph-network-theme-toggle {
+    .graph-network-settings-toggle {
         width: 36px;
         height: 36px;
         font-size: 16px;
@@ -674,8 +733,7 @@
         gap: 6px;
     }
 
-    .graph-network-settings-toggle, 
-    .graph-network-theme-toggle {
+    .graph-network-settings-toggle {
         width: 32px;
         height: 32px;
         font-size: 14px;

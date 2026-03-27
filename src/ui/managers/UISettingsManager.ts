@@ -10,6 +10,7 @@
  */
 export interface UISettingsConfig {
     showControls: boolean;
+    theme?: 'light' | 'dark';
 }
 
 /**
@@ -17,6 +18,7 @@ export interface UISettingsConfig {
  */
 export interface UISettingsCallbacks {
     onConfigChange?: (key: string, value: unknown) => void;
+    onToggleTheme?: () => void;
 }
 
 /**
@@ -45,6 +47,7 @@ export interface PhysicsControl {
  */
 export class UISettingsManager {
     private settingsPanel: HTMLElement | null = null;
+    private themeToggleTrack: HTMLElement | null = null;
     private readonly container: HTMLElement;
     private config: UISettingsConfig;
     private readonly callbacks: UISettingsCallbacks;
@@ -116,7 +119,8 @@ export class UISettingsManager {
         if (!this.config.showControls || this.settingsPanel) return;
 
         this.createSettingsPanel();
-        this.createPhysicsControls();
+        this.createThemeToggle();
+        this.createPhysicsSection();
         this.setupEventPrevention();
     }
 
@@ -129,7 +133,7 @@ export class UISettingsManager {
         this.setElementClass(this.settingsPanel, 'graph-network-settings');
 
         const title = document.createElement('h3');
-        title.textContent = 'Physics Settings';
+        title.textContent = 'Settings';
         this.settingsPanel.appendChild(title);
 
         this.container.appendChild(this.settingsPanel);
@@ -148,11 +152,69 @@ export class UISettingsManager {
     }
 
     /**
-     * Create physics control sliders
+     * Create theme toggle section
      * @private
      */
-    private createPhysicsControls(): void {
+    private createThemeToggle(): void {
         if (!this.settingsPanel) return;
+
+        // Appearance section heading
+        const heading = document.createElement('h4');
+        heading.textContent = 'Appearance';
+        this.settingsPanel.appendChild(heading);
+
+        const section = document.createElement('div');
+        this.setElementClass(section, 'graph-network-settings-section');
+
+        // Theme toggle switch
+        const toggleRow = document.createElement('div');
+        this.setElementClass(toggleRow, 'graph-network-theme-switch');
+
+        const label = document.createElement('label');
+        label.textContent = 'Dark Mode';
+
+        const track = document.createElement('div');
+        this.setElementClass(track, 'toggle-track');
+        if (this.config.theme === 'dark') {
+            track.classList.add('active');
+        }
+
+        const thumb = document.createElement('div');
+        this.setElementClass(thumb, 'toggle-thumb');
+        track.appendChild(thumb);
+
+        track.addEventListener('click', () => {
+            this.callbacks.onToggleTheme?.();
+        });
+
+        label.addEventListener('click', () => {
+            this.callbacks.onToggleTheme?.();
+        });
+
+        this.themeToggleTrack = track;
+
+        toggleRow.appendChild(label);
+        toggleRow.appendChild(track);
+        section.appendChild(toggleRow);
+        this.settingsPanel.appendChild(section);
+
+        // Divider
+        const divider = document.createElement('div');
+        this.setElementClass(divider, 'graph-network-settings-divider');
+        this.settingsPanel.appendChild(divider);
+    }
+
+    /**
+     * Create physics section with heading and sliders
+     * @private
+     */
+    private createPhysicsSection(): void {
+        if (!this.settingsPanel) return;
+
+        // Physics section heading
+        const heading = document.createElement('h4');
+        heading.textContent = 'Physics';
+        this.settingsPanel.appendChild(heading);
 
         this.defaultControls.forEach(control => {
             const controlDiv = this.createControlElement(control);
@@ -286,6 +348,20 @@ export class UISettingsManager {
             this.hide();
         } else {
             this.show();
+        }
+    }
+
+    /**
+     * Update theme toggle to reflect current theme
+     */
+    updateThemeToggle(theme: 'light' | 'dark'): void {
+        this.config.theme = theme;
+        if (this.themeToggleTrack) {
+            if (theme === 'dark') {
+                this.themeToggleTrack.classList.add('active');
+            } else {
+                this.themeToggleTrack.classList.remove('active');
+            }
         }
     }
 

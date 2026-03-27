@@ -3331,8 +3331,10 @@ export class GraphNetwork<T extends NodeData = NodeData> {
                 }
             }
 
-            // Update UI theme colors
+            // Update UI theme colors and toggle state
             if (this.ui) {
+                const themeName = typeof theme === 'string' ? theme : theme.name;
+                this.ui.updateThemeToggle(themeName as 'light' | 'dark');
                 this.ui.updateThemeColors(Array.from(this.nodes.values()));
             }
 
