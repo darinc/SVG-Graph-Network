@@ -358,11 +358,36 @@ function clearVulnerabilities() {
     hideStatus();
 }
 
+// Re-apply original colors directly to SVG elements without recreating the DOM.
+// setNodeTypeStyle() triggers a full re-render which resets the camera.
+var TYPE_STYLES = {
+    root: { fill: '#8b5cf6', stroke: '#7c3aed', strokeWidth: '3' },
+    direct: { fill: '#3b82f6', stroke: '#2563eb', strokeWidth: '2' },
+    dev: { fill: '#f59e0b', stroke: '#d97706', strokeWidth: '2' },
+    transitive: { fill: '#6b7280', stroke: '#4b5563', strokeWidth: '1' }
+};
+
 function restoreTypeStyles() {
-    graph.setNodeTypeStyle('root', { fill: '#8b5cf6', stroke: '#7c3aed', strokeWidth: 3 });
-    graph.setNodeTypeStyle('direct', { fill: '#3b82f6', stroke: '#2563eb', strokeWidth: 2 });
-    graph.setNodeTypeStyle('dev', { fill: '#f59e0b', stroke: '#d97706', strokeWidth: 2 });
-    graph.setNodeTypeStyle('transitive', { fill: '#6b7280', stroke: '#4b5563', strokeWidth: 1 });
+    var data = buildDataset();
+    data.nodes.forEach(function (n) {
+        var style = TYPE_STYLES[n.type];
+        if (!style) return;
+        var el = document.querySelector('[data-id="' + n.id + '"]');
+        if (!el || !el.firstElementChild) return;
+        var shape = el.firstElementChild;
+        shape.setAttribute('fill', style.fill);
+        shape.setAttribute('stroke', style.stroke);
+        shape.setAttribute('stroke-width', style.strokeWidth);
+    });
+    // Also restore edge colors
+    var container = document.getElementById('graph-container');
+    if (container) {
+        var lines = container.querySelectorAll('line.link');
+        lines.forEach(function (line) {
+            line.removeAttribute('stroke');
+            line.removeAttribute('stroke-width');
+        });
+    }
 }
 
 // --- Node Info Panel ---
