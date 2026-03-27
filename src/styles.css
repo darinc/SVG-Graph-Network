@@ -160,36 +160,18 @@
     transform: translateY(0);
 }
 
-.graph-network-settings h3 {
-    margin: 0 0 10px 0;
-    font-size: 14px;
-}
-
-.graph-network-settings h4 {
-    margin: 0 0 8px 0;
-    font-size: 12px;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.graph-network-settings-section {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
 
 .graph-network-theme-switch {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
+    gap: 8px;
     padding: 4px 0;
 }
 
-.graph-network-theme-switch label {
+.graph-network-theme-switch .toggle-label {
     font-size: 12px;
-    color: var(--text-primary);
-    cursor: pointer;
+    color: var(--text-secondary);
     user-select: none;
 }
 

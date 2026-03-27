@@ -70,7 +70,7 @@ export class UISettingsManager {
             min: 0,
             max: 30,
             step: 0.5,
-            value: 13,
+            value: 7.5,
             description: 'Node repulsion force'
         },
         {
@@ -79,7 +79,7 @@ export class UISettingsManager {
             min: 0,
             max: 20,
             step: 0.1,
-            value: 10,
+            value: 12.6,
             description: 'Link attraction force'
         },
         {
@@ -132,10 +132,6 @@ export class UISettingsManager {
         this.settingsPanel = document.createElement('div');
         this.setElementClass(this.settingsPanel, 'graph-network-settings');
 
-        const title = document.createElement('h3');
-        title.textContent = 'Settings';
-        this.settingsPanel.appendChild(title);
-
         this.container.appendChild(this.settingsPanel);
     }
 
@@ -158,20 +154,12 @@ export class UISettingsManager {
     private createThemeToggle(): void {
         if (!this.settingsPanel) return;
 
-        // Appearance section heading
-        const heading = document.createElement('h4');
-        heading.textContent = 'Appearance';
-        this.settingsPanel.appendChild(heading);
-
-        const section = document.createElement('div');
-        this.setElementClass(section, 'graph-network-settings-section');
-
-        // Theme toggle switch
         const toggleRow = document.createElement('div');
         this.setElementClass(toggleRow, 'graph-network-theme-switch');
 
-        const label = document.createElement('label');
-        label.textContent = 'Dark Mode';
+        const lightLabel = document.createElement('span');
+        this.setElementClass(lightLabel, 'toggle-label');
+        lightLabel.textContent = 'Light';
 
         const track = document.createElement('div');
         this.setElementClass(track, 'toggle-track');
@@ -183,20 +171,20 @@ export class UISettingsManager {
         this.setElementClass(thumb, 'toggle-thumb');
         track.appendChild(thumb);
 
-        track.addEventListener('click', () => {
-            this.callbacks.onToggleTheme?.();
-        });
+        const darkLabel = document.createElement('span');
+        this.setElementClass(darkLabel, 'toggle-label');
+        darkLabel.textContent = 'Dark';
 
-        label.addEventListener('click', () => {
+        track.addEventListener('click', () => {
             this.callbacks.onToggleTheme?.();
         });
 
         this.themeToggleTrack = track;
 
-        toggleRow.appendChild(label);
+        toggleRow.appendChild(lightLabel);
         toggleRow.appendChild(track);
-        section.appendChild(toggleRow);
-        this.settingsPanel.appendChild(section);
+        toggleRow.appendChild(darkLabel);
+        this.settingsPanel.appendChild(toggleRow);
 
         // Divider
         const divider = document.createElement('div');
@@ -210,11 +198,6 @@ export class UISettingsManager {
      */
     private createPhysicsSection(): void {
         if (!this.settingsPanel) return;
-
-        // Physics section heading
-        const heading = document.createElement('h4');
-        heading.textContent = 'Physics';
-        this.settingsPanel.appendChild(heading);
 
         this.defaultControls.forEach(control => {
             const controlDiv = this.createControlElement(control);
