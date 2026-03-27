@@ -282,6 +282,7 @@ function handleNodeClick(nodeId, nodeType) {
     if (vulnMode) return; // vuln overlay takes priority
 
     graph.clearHighlights();
+    restoreTypeStyles();
 
     if (nodeId === ROOT_ID) {
         showNodeInfoPanel(nodeId, nodeType);
@@ -351,7 +352,17 @@ function showVulnerabilities() {
 
 function clearVulnerabilities() {
     graph.clearHighlights();
+    // clearHighlights removes CSS classes but doesn't restore original colors,
+    // so re-apply type styles to reset node/edge appearance
+    restoreTypeStyles();
     hideStatus();
+}
+
+function restoreTypeStyles() {
+    graph.setNodeTypeStyle('root', { fill: '#8b5cf6', stroke: '#7c3aed', strokeWidth: 3 });
+    graph.setNodeTypeStyle('direct', { fill: '#3b82f6', stroke: '#2563eb', strokeWidth: 2 });
+    graph.setNodeTypeStyle('dev', { fill: '#f59e0b', stroke: '#d97706', strokeWidth: 2 });
+    graph.setNodeTypeStyle('transitive', { fill: '#6b7280', stroke: '#4b5563', strokeWidth: 1 });
 }
 
 // --- Node Info Panel ---
@@ -401,6 +412,7 @@ function clearAllHighlights() {
         toggleVulnerabilities();
     }
     graph.clearHighlights();
+    restoreTypeStyles();
     document.getElementById('node-info').style.display = 'none';
     hideStatus();
 }
