@@ -73,8 +73,8 @@ export class UIManager {
     private zoomInButton: HTMLButtonElement | null = null;
     private zoomOutButton: HTMLButtonElement | null = null;
     private resetButton: HTMLButtonElement | null = null;
-    private themeToggle: HTMLButtonElement | null = null;
     private settingsToggle: HTMLButtonElement | null = null;
+    private themeToggleTrack: HTMLElement | null = null;
 
     // Settings state
     private settingsVisible: boolean = false;
@@ -396,9 +396,6 @@ export class UIManager {
         this.createUtilityButtons();
 
         this.controls.appendChild(this.mobileControls);
-        if (this.themeToggle) {
-            this.controls.appendChild(this.themeToggle);
-        }
         if (this.settingsToggle) {
             this.controls.appendChild(this.settingsToggle);
         }
@@ -449,19 +446,11 @@ export class UIManager {
      * Create utility buttons (theme, settings)
      */
     private createUtilityButtons(): void {
-        // Theme toggle
-        this.themeToggle = document.createElement('button');
-        this.setElementClass(this.themeToggle, 'graph-network-theme-toggle');
-        this.themeToggle.textContent = this.config.theme === 'light' ? '🌙' : '🌞';
-        this.themeToggle.setAttribute('aria-label', 'Toggle theme');
-        this.themeToggle.addEventListener('click', () => {
-            this.callbacks.onToggleTheme?.();
-        });
-
-        // Settings toggle
+        // Settings toggle (gear icon)
         this.settingsToggle = document.createElement('button');
         this.setElementClass(this.settingsToggle, 'graph-network-settings-toggle');
-        this.settingsToggle.textContent = '^';
+        this.settingsToggle.textContent = '⚙️';
+        this.settingsToggle.setAttribute('aria-label', 'Open settings');
         this.settingsToggle.addEventListener('click', () => this.toggleSettings());
     }
 
@@ -474,11 +463,15 @@ export class UIManager {
         this.settingsPanel = document.createElement('div');
         this.setElementClass(this.settingsPanel, 'graph-network-settings');
 
-        const title = document.createElement('h3');
-        title.textContent = 'Physics Settings';
-        this.settingsPanel.appendChild(title);
+        // Theme toggle
+        this.createThemeToggleSection();
 
-        // Create physics control sliders
+        // Divider
+        const divider = document.createElement('div');
+        this.setElementClass(divider, 'graph-network-settings-divider');
+        this.settingsPanel.appendChild(divider);
+
+        // Physics control sliders
         this.createPhysicsControls();
 
         // Prevent settings panel from closing when clicked inside
@@ -511,7 +504,7 @@ export class UIManager {
                 min: 0,
                 max: 30,
                 step: 0.5,
-                value: 13,
+                value: 7.5,
                 description: 'Node repulsion force'
             },
             {
@@ -520,7 +513,7 @@ export class UIManager {
                 min: 0,
                 max: 20,
                 step: 0.1,
-                value: 10,
+                value: 12.6,
                 description: 'Link attraction force'
             },
             {
@@ -590,7 +583,7 @@ export class UIManager {
             this.settingsPanel.classList.remove('is-open');
         }
 
-        this.settingsToggle.textContent = this.settingsVisible ? 'v' : '^';
+        // Gear emoji stays static
     }
 
     /**
@@ -601,18 +594,59 @@ export class UIManager {
 
         this.settingsVisible = false;
         this.settingsPanel.classList.remove('is-open');
-        if (this.settingsToggle) {
-            this.settingsToggle.textContent = '^';
-        }
     }
 
     /**
-     * Update theme toggle button appearance
+     * Create theme toggle section inside settings panel
+     * @private
+     */
+    private createThemeToggleSection(): void {
+        if (!this.settingsPanel) return;
+
+        const toggleRow = document.createElement('div');
+        this.setElementClass(toggleRow, 'graph-network-theme-switch');
+
+        const lightLabel = document.createElement('span');
+        this.setElementClass(lightLabel, 'toggle-label');
+        lightLabel.textContent = 'Light';
+
+        const track = document.createElement('div');
+        this.setElementClass(track, 'toggle-track');
+        if (this.config.theme === 'dark') {
+            track.classList.add('active');
+        }
+
+        const thumb = document.createElement('div');
+        this.setElementClass(thumb, 'toggle-thumb');
+        track.appendChild(thumb);
+
+        const darkLabel = document.createElement('span');
+        this.setElementClass(darkLabel, 'toggle-label');
+        darkLabel.textContent = 'Dark';
+
+        track.addEventListener('click', () => {
+            this.callbacks.onToggleTheme?.();
+        });
+
+        this.themeToggleTrack = track;
+
+        toggleRow.appendChild(lightLabel);
+        toggleRow.appendChild(track);
+        toggleRow.appendChild(darkLabel);
+        this.settingsPanel.appendChild(toggleRow);
+    }
+
+    /**
+     * Update theme toggle to reflect current theme
      * @param theme - Current theme
      */
     updateThemeToggle(theme: 'light' | 'dark'): void {
-        if (this.themeToggle) {
-            this.themeToggle.textContent = theme === 'light' ? '🌙' : '🌞';
+        if (this.themeToggleTrack) {
+            if (theme === 'dark') {
+                this.themeToggleTrack.classList.add('active');
+            } else {
+                this.themeToggleTrack.classList.remove('active');
+            }
         }
     }
 
@@ -724,7 +758,7 @@ export class UIManager {
      * @param element - Element type to toggle
      * @param enabled - Whether to enable the element
      */
-    setElementEnabled(element: 'zoom' | 'reset' | 'theme' | 'settings', enabled: boolean): void {
+    setElementEnabled(element: 'zoom' | 'reset' | 'settings', enabled: boolean): void {
         switch (element) {
             case 'zoom':
                 if (this.zoomInButton) this.zoomInButton.disabled = !enabled;
@@ -732,9 +766,6 @@ export class UIManager {
                 break;
             case 'reset':
                 if (this.resetButton) this.resetButton.disabled = !enabled;
-                break;
-            case 'theme':
-                if (this.themeToggle) this.themeToggle.disabled = !enabled;
                 break;
             case 'settings':
                 if (this.settingsToggle) this.settingsToggle.disabled = !enabled;
@@ -825,8 +856,8 @@ export class UIManager {
         this.zoomInButton = null;
         this.zoomOutButton = null;
         this.resetButton = null;
-        this.themeToggle = null;
         this.settingsToggle = null;
+        this.themeToggleTrack = null;
     }
 
     /**

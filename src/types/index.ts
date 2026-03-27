@@ -481,8 +481,8 @@ export function isGraphData(data: any): data is GraphData {
 export const DEFAULT_CONFIG: GraphConfig = {
     // Physics
     damping: 0.95,
-    repulsionStrength: 6500,
-    attractionStrength: 0.001,
+    repulsionStrength: 3750,
+    attractionStrength: 0.00126,
     groupingStrength: 0.001,
 
     // Interaction
@@ -496,7 +496,7 @@ export const DEFAULT_CONFIG: GraphConfig = {
     showBreadcrumbs: true,
     theme: 'dark',
     autoColor: true,
-    title: 'Graph Network'
+    title: 'SVGnet'
 };
 
 /**

@@ -20,7 +20,6 @@ export interface UIControlsCallbacks {
     onZoomIn?: () => void;
     onZoomOut?: () => void;
     onResetView?: () => void;
-    onToggleTheme?: () => void;
     onToggleSettings?: () => void;
 }
 
@@ -43,7 +42,6 @@ export class UIControlsManager {
     private zoomInButton: HTMLButtonElement | null = null;
     private zoomOutButton: HTMLButtonElement | null = null;
     private resetButton: HTMLButtonElement | null = null;
-    private themeToggle: HTMLButtonElement | null = null;
     private settingsToggle: HTMLButtonElement | null = null;
 
     private readonly container: HTMLElement;
@@ -141,24 +139,15 @@ export class UIControlsManager {
     }
 
     /**
-     * Create utility buttons (theme, settings)
+     * Create utility buttons (settings gear)
      * @private
      */
     private createUtilityButtons(): void {
-        // Theme toggle
-        this.themeToggle = document.createElement('button');
-        this.setElementClass(this.themeToggle, 'graph-network-theme-toggle');
-        this.updateThemeToggleAppearance();
-        this.themeToggle.setAttribute('aria-label', 'Toggle theme');
-        this.themeToggle.addEventListener('click', () => {
-            this.callbacks.onToggleTheme?.();
-        });
-
-        // Settings toggle
+        // Settings toggle (gear icon)
         this.settingsToggle = document.createElement('button');
         this.setElementClass(this.settingsToggle, 'graph-network-settings-toggle');
-        this.settingsToggle.textContent = '^';
-        this.settingsToggle.setAttribute('aria-label', 'Toggle settings');
+        this.settingsToggle.textContent = '⚙️';
+        this.settingsToggle.setAttribute('aria-label', 'Open settings');
         this.settingsToggle.addEventListener('click', () => {
             this.callbacks.onToggleSettings?.();
         });
@@ -174,9 +163,6 @@ export class UIControlsManager {
         if (this.mobileControls) {
             this.controlsContainer.appendChild(this.mobileControls);
         }
-        if (this.themeToggle) {
-            this.controlsContainer.appendChild(this.themeToggle);
-        }
         if (this.settingsToggle) {
             this.controlsContainer.appendChild(this.settingsToggle);
         }
@@ -185,35 +171,16 @@ export class UIControlsManager {
     }
 
     /**
-     * Update theme toggle button appearance
-     * @private
+     * Update settings toggle state (gear stays static)
      */
-    private updateThemeToggleAppearance(): void {
-        if (!this.themeToggle) return;
-        this.themeToggle.textContent = this.config.theme === 'light' ? '🌙' : '🌞';
-    }
-
-    /**
-     * Update theme toggle appearance
-     */
-    updateThemeToggle(theme: 'light' | 'dark'): void {
-        this.config.theme = theme;
-        this.updateThemeToggleAppearance();
-    }
-
-    /**
-     * Update settings toggle state
-     */
-    updateSettingsToggle(isOpen: boolean): void {
-        if (this.settingsToggle) {
-            this.settingsToggle.textContent = isOpen ? 'v' : '^';
-        }
+    updateSettingsToggle(_isOpen: boolean): void {
+        // Gear emoji stays static regardless of panel state
     }
 
     /**
      * Enable or disable specific controls
      */
-    setControlEnabled(control: 'zoom' | 'reset' | 'theme' | 'settings', enabled: boolean): void {
+    setControlEnabled(control: 'zoom' | 'reset' | 'settings', enabled: boolean): void {
         switch (control) {
             case 'zoom':
                 if (this.zoomInButton) this.zoomInButton.disabled = !enabled;
@@ -221,9 +188,6 @@ export class UIControlsManager {
                 break;
             case 'reset':
                 if (this.resetButton) this.resetButton.disabled = !enabled;
-                break;
-            case 'theme':
-                if (this.themeToggle) this.themeToggle.disabled = !enabled;
                 break;
             case 'settings':
                 if (this.settingsToggle) this.settingsToggle.disabled = !enabled;
@@ -234,14 +198,12 @@ export class UIControlsManager {
     /**
      * Check if a specific control is enabled
      */
-    isControlEnabled(control: 'zoom' | 'reset' | 'theme' | 'settings'): boolean {
+    isControlEnabled(control: 'zoom' | 'reset' | 'settings'): boolean {
         switch (control) {
             case 'zoom':
                 return !(this.zoomInButton?.disabled || this.zoomOutButton?.disabled);
             case 'reset':
                 return !this.resetButton?.disabled;
-            case 'theme':
-                return !this.themeToggle?.disabled;
             case 'settings':
                 return !this.settingsToggle?.disabled;
             default:
@@ -263,10 +225,7 @@ export class UIControlsManager {
             this.destroy();
         }
 
-        // Update theme toggle if theme changed
-        if (newConfig.theme !== undefined) {
-            this.updateThemeToggleAppearance();
-        }
+        // Theme toggle is now in the settings panel, no update needed here
     }
 
     /**
@@ -279,9 +238,7 @@ export class UIControlsManager {
     /**
      * Get specific button element
      */
-    getButton(
-        type: 'zoomIn' | 'zoomOut' | 'reset' | 'theme' | 'settings'
-    ): HTMLButtonElement | null {
+    getButton(type: 'zoomIn' | 'zoomOut' | 'reset' | 'settings'): HTMLButtonElement | null {
         switch (type) {
             case 'zoomIn':
                 return this.zoomInButton;
@@ -289,8 +246,6 @@ export class UIControlsManager {
                 return this.zoomOutButton;
             case 'reset':
                 return this.resetButton;
-            case 'theme':
-                return this.themeToggle;
             case 'settings':
                 return this.settingsToggle;
             default:
@@ -320,7 +275,6 @@ export class UIControlsManager {
         if (this.zoomInButton) count++;
         if (this.zoomOutButton) count++;
         if (this.resetButton) count++;
-        if (this.themeToggle) count++;
         if (this.settingsToggle) count++;
         return count;
     }
@@ -339,7 +293,6 @@ export class UIControlsManager {
         this.zoomInButton = null;
         this.zoomOutButton = null;
         this.resetButton = null;
-        this.themeToggle = null;
         this.settingsToggle = null;
     }
 
@@ -353,7 +306,6 @@ export class UIControlsManager {
         enabledControls: {
             zoom: boolean;
             reset: boolean;
-            theme: boolean;
             settings: boolean;
         };
         isAttached: boolean;
@@ -365,7 +317,6 @@ export class UIControlsManager {
             enabledControls: {
                 zoom: this.isControlEnabled('zoom'),
                 reset: this.isControlEnabled('reset'),
-                theme: this.isControlEnabled('theme'),
                 settings: this.isControlEnabled('settings')
             },
             isAttached: this.controlsContainer?.parentNode !== null

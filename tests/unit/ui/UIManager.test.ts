@@ -323,35 +323,38 @@ describe('UIManager', () => {
         });
     });
 
-    describe('Theme Toggle', () => {
+    describe('Theme Toggle (in Settings Panel)', () => {
         beforeEach(() => {
             uiManager.initialize();
         });
 
-        test('should create theme toggle button', () => {
+        test('should not have a standalone theme toggle button', () => {
             const themeToggle = container.querySelector('.graph-network-theme-toggle');
-            expect(themeToggle).not.toBeNull();
+            expect(themeToggle).toBeNull();
         });
 
-        test('should handle theme toggle click', () => {
-            const themeToggle = container.querySelector(
-                '.graph-network-theme-toggle'
-            ) as HTMLElement;
-            themeToggle.click();
+        test('should have theme toggle inside settings panel', () => {
+            const settingsPanel = container.querySelector('.graph-network-settings');
+            const themeSwitch = settingsPanel?.querySelector('.graph-network-theme-switch');
+            expect(themeSwitch).not.toBeNull();
+        });
+
+        test('should handle theme toggle click in settings panel', () => {
+            const toggleTrack = container.querySelector('.toggle-track') as HTMLElement;
+            expect(toggleTrack).not.toBeNull();
+            toggleTrack.click();
 
             expect(callbacks.onToggleTheme).toHaveBeenCalled();
         });
 
-        test('should update theme toggle appearance', () => {
-            const themeToggle = container.querySelector(
-                '.graph-network-theme-toggle'
-            ) as HTMLElement;
-
-            uiManager.updateThemeToggle('light');
-            expect(themeToggle.textContent).toBe('🌙');
+        test('should update theme toggle state', () => {
+            const toggleTrack = container.querySelector('.toggle-track') as HTMLElement;
 
             uiManager.updateThemeToggle('dark');
-            expect(themeToggle.textContent).toBe('🌞');
+            expect(toggleTrack.classList.contains('active')).toBe(true);
+
+            uiManager.updateThemeToggle('light');
+            expect(toggleTrack.classList.contains('active')).toBe(false);
         });
     });
 
@@ -582,11 +585,11 @@ describe('UIManager', () => {
         test('should add proper ARIA labels to buttons', () => {
             const zoomInBtn = container.querySelector('.graph-network-zoom-in');
             const zoomOutBtn = container.querySelector('.graph-network-zoom-out');
-            const themeToggle = container.querySelector('.graph-network-theme-toggle');
+            const settingsToggle = container.querySelector('.graph-network-settings-toggle');
 
             expect(zoomInBtn?.getAttribute('aria-label')).toEqual(expect.any(String));
             expect(zoomOutBtn?.getAttribute('aria-label')).toEqual(expect.any(String));
-            expect(themeToggle?.getAttribute('aria-label')).toEqual(expect.any(String));
+            expect(settingsToggle?.getAttribute('aria-label')).toBe('Open settings');
         });
 
         test('should support keyboard navigation', () => {

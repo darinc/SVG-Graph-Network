@@ -5,7 +5,9 @@
 [![bundle size](https://img.shields.io/bundlephobia/minzip/svgnet)](https://bundlephobia.com/package/svgnet)
 [![license](https://img.shields.io/npm/l/svgnet.svg)](https://github.com/darinc/SVGnet/blob/main/LICENSE)
 
-A zero-dependency, TypeScript-first graph visualization library. Force-directed layouts, dark/light theming, mobile touch gestures, and crisp SVG rendering — all in ~23KB gzipped.
+A zero-dependency, TypeScript-first graph visualization library. Force-directed layouts, dark/light theming, mobile touch gestures, and crisp SVG rendering — all in ~28KB gzipped.
+
+![SVGnet screenshot](docs/assets/screenshot.png)
 
 **[Live Demo](https://darinc.github.io/SVGnet/)** | **[API Docs](./docs/API.md)** | **[Examples](./docs/EXAMPLES.md)**
 

@@ -10,6 +10,7 @@
  */
 export interface UISettingsConfig {
     showControls: boolean;
+    theme?: 'light' | 'dark';
 }
 
 /**
@@ -17,6 +18,7 @@ export interface UISettingsConfig {
  */
 export interface UISettingsCallbacks {
     onConfigChange?: (key: string, value: unknown) => void;
+    onToggleTheme?: () => void;
 }
 
 /**
@@ -45,6 +47,7 @@ export interface PhysicsControl {
  */
 export class UISettingsManager {
     private settingsPanel: HTMLElement | null = null;
+    private themeToggleTrack: HTMLElement | null = null;
     private readonly container: HTMLElement;
     private config: UISettingsConfig;
     private readonly callbacks: UISettingsCallbacks;
@@ -67,7 +70,7 @@ export class UISettingsManager {
             min: 0,
             max: 30,
             step: 0.5,
-            value: 13,
+            value: 7.5,
             description: 'Node repulsion force'
         },
         {
@@ -76,7 +79,7 @@ export class UISettingsManager {
             min: 0,
             max: 20,
             step: 0.1,
-            value: 10,
+            value: 12.6,
             description: 'Link attraction force'
         },
         {
@@ -116,7 +119,8 @@ export class UISettingsManager {
         if (!this.config.showControls || this.settingsPanel) return;
 
         this.createSettingsPanel();
-        this.createPhysicsControls();
+        this.createThemeToggle();
+        this.createPhysicsSection();
         this.setupEventPrevention();
     }
 
@@ -127,10 +131,6 @@ export class UISettingsManager {
     private createSettingsPanel(): void {
         this.settingsPanel = document.createElement('div');
         this.setElementClass(this.settingsPanel, 'graph-network-settings');
-
-        const title = document.createElement('h3');
-        title.textContent = 'Physics Settings';
-        this.settingsPanel.appendChild(title);
 
         this.container.appendChild(this.settingsPanel);
     }
@@ -148,10 +148,55 @@ export class UISettingsManager {
     }
 
     /**
-     * Create physics control sliders
+     * Create theme toggle section
      * @private
      */
-    private createPhysicsControls(): void {
+    private createThemeToggle(): void {
+        if (!this.settingsPanel) return;
+
+        const toggleRow = document.createElement('div');
+        this.setElementClass(toggleRow, 'graph-network-theme-switch');
+
+        const lightLabel = document.createElement('span');
+        this.setElementClass(lightLabel, 'toggle-label');
+        lightLabel.textContent = 'Light';
+
+        const track = document.createElement('div');
+        this.setElementClass(track, 'toggle-track');
+        if (this.config.theme === 'dark') {
+            track.classList.add('active');
+        }
+
+        const thumb = document.createElement('div');
+        this.setElementClass(thumb, 'toggle-thumb');
+        track.appendChild(thumb);
+
+        const darkLabel = document.createElement('span');
+        this.setElementClass(darkLabel, 'toggle-label');
+        darkLabel.textContent = 'Dark';
+
+        track.addEventListener('click', () => {
+            this.callbacks.onToggleTheme?.();
+        });
+
+        this.themeToggleTrack = track;
+
+        toggleRow.appendChild(lightLabel);
+        toggleRow.appendChild(track);
+        toggleRow.appendChild(darkLabel);
+        this.settingsPanel.appendChild(toggleRow);
+
+        // Divider
+        const divider = document.createElement('div');
+        this.setElementClass(divider, 'graph-network-settings-divider');
+        this.settingsPanel.appendChild(divider);
+    }
+
+    /**
+     * Create physics section with heading and sliders
+     * @private
+     */
+    private createPhysicsSection(): void {
         if (!this.settingsPanel) return;
 
         this.defaultControls.forEach(control => {
@@ -286,6 +331,20 @@ export class UISettingsManager {
             this.hide();
         } else {
             this.show();
+        }
+    }
+
+    /**
+     * Update theme toggle to reflect current theme
+     */
+    updateThemeToggle(theme: 'light' | 'dark'): void {
+        this.config.theme = theme;
+        if (this.themeToggleTrack) {
+            if (theme === 'dark') {
+                this.themeToggleTrack.classList.add('active');
+            } else {
+                this.themeToggleTrack.classList.remove('active');
+            }
         }
     }
 
