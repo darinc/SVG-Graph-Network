@@ -136,6 +136,22 @@ export interface Bounds {
     height: number;
 }
 
+/**
+ * Serialized graph state including node positions and camera transform.
+ * Used by exportState()/importState() for layout persistence.
+ */
+export interface GraphState {
+    nodes: Array<{
+        data: NodeData;
+        position: { x: number; y: number };
+        velocity: { x: number; y: number };
+        isFixed: boolean;
+        size: number;
+    }>;
+    links: LinkData[];
+    transform: TransformState;
+}
+
 // ==================== Event Types ====================
 
 /**

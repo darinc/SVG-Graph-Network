@@ -27,6 +27,7 @@ export type {
     Position,
     TransformState,
     Bounds,
+    GraphState,
 
     // Event types
     BaseEvent,

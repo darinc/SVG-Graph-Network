@@ -8,6 +8,7 @@ import {
     LinkData,
     EdgeData,
     GraphData,
+    GraphState,
     GraphConfig,
     Position,
     EventCallback,
@@ -1472,6 +1473,65 @@ export class GraphNetwork<T extends NodeData = NodeData> {
             nodes: this.getNodes(),
             links: this.getLinks()
         };
+    }
+
+    /**
+     * Export full graph state including node positions and camera transform.
+     * Use with importState() to persist and restore layouts across sessions.
+     * @returns Serializable graph state
+     */
+    exportState(): GraphState {
+        return {
+            nodes: Array.from(this.nodes.values()).map(n => n.toObject()),
+            links: this.getLinks(),
+            transform: this.renderer?.getTransform() ?? { x: 0, y: 0, scale: 1 }
+        };
+    }
+
+    /**
+     * Import a previously exported graph state, restoring node positions
+     * and camera transform. Replaces current graph data.
+     * @param state - Graph state from exportState()
+     */
+    importState(state: GraphState): void {
+        // Extract NodeData and LinkData for setData
+        const graphData: GraphData = {
+            nodes: state.nodes.map(n => n.data),
+            links: state.links
+        };
+
+        // Set data without resetting positions (we'll restore them manually)
+        this.setData(graphData, { preservePositions: true, layout: 'preserve' });
+
+        // Restore exact positions, velocities, and fixed state from serialized nodes
+        for (const serializedNode of state.nodes) {
+            const node = this.nodes.get(serializedNode.data.id);
+            if (node) {
+                node.position.x = serializedNode.position.x;
+                node.position.y = serializedNode.position.y;
+                node.velocity.x = serializedNode.velocity.x;
+                node.velocity.y = serializedNode.velocity.y;
+                if (serializedNode.isFixed) {
+                    node.fix();
+                }
+            }
+        }
+
+        // Restore camera transform
+        if (state.transform) {
+            this.renderer?.setTransform(
+                state.transform.x,
+                state.transform.y,
+                state.transform.scale
+            );
+            this.events?.setTransform(state.transform.x, state.transform.y, state.transform.scale);
+        }
+
+        // Wake physics only if any nodes are unfixed
+        const hasUnfixedNodes = state.nodes.some(n => !n.isFixed);
+        if (hasUnfixedNodes) {
+            this.wakePhysics();
+        }
     }
 
     /**
