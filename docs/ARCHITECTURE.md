@@ -8,19 +8,22 @@
 
 ### GraphNetwork (`src/GraphNetwork.ts`)
 
-The main entry point (~3,400 lines). Owns all subsystem instances, the animation loop, and the public CRUD/query API. Instantiates subsystems in `initializeModules()` and drives the render loop via `requestAnimationFrame`.
+The main entry point (~3,400 lines). Owns all subsystem instances, the animation loop, and the public CRUD/query API. Instantiates subsystems in `initializeModules()` and drives the render loop via `requestAnimationFrame`. Key public methods include `exportState()` / `importState()` for layout persistence and `registerShape()` for custom node shapes.
 
 ### Physics (`src/physics/`)
 
 - **PhysicsEngine** — Force calculations: repulsion (O(n²) pairwise), attraction (per-link), grouping (per-type). Returns `SimulationMetrics` including `totalEnergy` and `maxForce`.
 - **PhysicsManager** — Simulation lifecycle: start/stop/pause/resume, configuration management.
+- **LayoutStrategy** (interface) — Pluggable layout algorithm contract: `tick()`, `isStable()`, `updateConfig()`, `getConfig()`. Two built-in implementations:
+  - **ForceDirectedLayout** — Default. Wraps `PhysicsEngine` for force-directed simulation.
+  - **StaticLayout** — No-op layout for pre-computed positions (useful for tests and server-rendered graphs).
 
-The animation loop in `GraphNetwork.animate()` uses **adaptive cooldown**: when `PhysicsEngine.isInEquilibrium()` detects low energy/force, physics drops to a ~2fps watchdog tick. Interaction (drag, data change, filter reset) calls `wakePhysics()` to resume full simulation.
+The animation loop in `GraphNetwork.animate()` uses **adaptive cooldown**: when `isStable()` detects equilibrium, physics drops to a ~2fps watchdog tick. Interaction (drag, data change, filter reset) calls `wakePhysics()` to resume. Custom layouts can be passed via `options.layout` in the `GraphNetwork` constructor.
 
 ### Rendering (`src/rendering/`)
 
 - **SVGRenderer** — Creates and manages all SVG DOM elements. Layers: links (bottom) → nodes → edge labels (top). Applies CSS transforms for pan/zoom.
-- **NodeShapeFactory** — Factory pattern for node shapes (circle, rectangle, square, triangle).
+- **NodeShapeFactory** — Factory pattern for node shapes. Built-in: circle, rectangle, square, triangle. Extensible via `registerShape(name, creator)` for custom shapes (diamond, hexagon, icons, etc.).
 
 **Viewport culling**: Each frame, `getViewportBoundsInGraphSpace()` computes the visible area. Nodes outside this area get `display: none`, skipping expensive DOM attribute writes. Links where both endpoints are off-screen are also hidden. A 100-unit padding margin prevents visible popping at edges.
 
@@ -75,6 +78,7 @@ A compile-time `__DEV__` flag (Webpack DefinePlugin) enables invariant assertion
 | **State Machine** | `TouchInteractionHandler` for gesture recognition |
 | **Composition** | `UIManager` composes 5 sub-managers; `EventManager` composes mouse/touch handlers |
 | **Callback Delegation** | `GraphNetwork` passes callback objects to subsystems for cross-cutting operations |
+| **Strategy** | `LayoutStrategy` interface for pluggable layout algorithms (`ForceDirectedLayout`, `StaticLayout`) |
 
 ## Testing
 

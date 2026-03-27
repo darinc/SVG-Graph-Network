@@ -529,4 +529,104 @@ if (nodeCount > 500) {
 }
 ```
 
+---
+
+## Layout Persistence
+
+Save and restore graph layouts across sessions using `exportState()` / `importState()`:
+
+```javascript
+// Save layout to localStorage
+document.getElementById('save-btn').addEventListener('click', () => {
+    const state = graph.exportState();
+    localStorage.setItem('my-graph', JSON.stringify(state));
+    console.log('Layout saved!');
+});
+
+// Restore layout
+document.getElementById('load-btn').addEventListener('click', () => {
+    const saved = localStorage.getItem('my-graph');
+    if (saved) {
+        graph.importState(JSON.parse(saved));
+        console.log('Layout restored!');
+    }
+});
+```
+
+## Custom Node Shapes
+
+Register custom shapes beyond the built-in circle, rectangle, square, and triangle:
+
+```javascript
+// Create a diamond shape creator
+const diamondCreator = {
+    supportsShape(shape) { return shape === 'diamond'; },
+    createShape(node) {
+        const size = node.size || 20;
+        const diamond = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        diamond.setAttribute('points', `0,-${size} ${size},0 0,${size} -${size},0`);
+        diamond.setAttribute('fill', '#4CAF50');
+        diamond.setAttribute('stroke', '#388E3C');
+        diamond.setAttribute('stroke-width', '2');
+        return { shapeElement: diamond };
+    }
+};
+
+graph.registerShape('diamond', diamondCreator);
+
+// Use it in your data
+graph.setData({
+    nodes: [
+        { id: '1', name: 'Diamond Node', shape: 'diamond' },
+        { id: '2', name: 'Circle Node', shape: 'circle' }
+    ],
+    links: [{ source: '1', target: '2' }]
+});
+```
+
+## Directed & Undirected Edges
+
+Control arrowheads per-edge or globally:
+
+```javascript
+graph.setData({
+    nodes: [
+        { id: 'a', name: 'Source' },
+        { id: 'b', name: 'Target' },
+        { id: 'c', name: 'Peer' }
+    ],
+    links: [
+        { source: 'a', target: 'b', directed: true, label: 'depends on' },
+        { source: 'b', target: 'c', directed: false, label: 'related to' }
+    ]
+});
+
+// Or set the global default (all edges undirected unless specified)
+const graph = new SVGNet('container', {
+    config: { defaultDirected: false }
+});
+```
+
+## Static Layout (Pre-computed Positions)
+
+Use `StaticLayout` when you have pre-computed node positions and don't want physics simulation:
+
+```javascript
+import { GraphNetwork, StaticLayout } from 'svgnet';
+
+const graph = new GraphNetwork('container', {
+    layout: new StaticLayout(),
+    data: {
+        nodes: [
+            { id: '1', name: 'Fixed A' },
+            { id: '2', name: 'Fixed B' }
+        ],
+        links: [{ source: '1', target: '2' }]
+    }
+});
+
+// Set exact positions
+graph.getStats(); // positions stay where placed, no physics
+```
+
 This guide covers the essential patterns and use cases for implementing the SVG Graph Network library in real applications.

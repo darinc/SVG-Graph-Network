@@ -7,11 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Graph state serialization via `exportState()` / `importState()` for persisting layouts across sessions
+- Custom node shape registration via `registerShape(name, creator)` with `INodeShapeFactory` interface
+- Directed edge support: `LinkData.directed` property with per-edge and global `defaultDirected` config
+- Pluggable layout algorithms: `LayoutStrategy` interface with `ForceDirectedLayout` and `StaticLayout` implementations
+- Viewport culling: off-screen nodes and links hidden to reduce DOM writes on large graphs
+- Adaptive physics cooldown: simulation drops to ~2fps when equilibrium detected, wakes on interaction
+- Dev-mode invariant assertions via compile-time `__DEV__` flag (dead-code-eliminated in production)
+- CI bundle size enforcement (`npm run size` in CI workflow)
+- Centralized coordinate conversion (`screenToGraph`, `screenToContainer`)
+
 ### Changed
+- Project renamed from `svg-graph-network` to `svgnet` (npm package, UMD global `SVGNet`)
+- `NodeData.shape` widened from literal union to `string` to support custom shapes
 - README rewritten for library adoption (removed "educational only" positioning)
 - LICENSE copyright updated to Darin Chambers
 - Removed 25 skipped integration tests that were blocked by jsdom limitations (underlying features work correctly)
 - Added `prepublishOnly` script to ensure build + test pass before every publish
+
+### Removed
+- Dead infrastructure code: DependencyContainer, EventBus, GraphDataManager, GraphAnimationController, RenderingCoordinator, NodeElementManager, LinkElementManager, SVGDOMManager (-4,049 lines)
+- Duplicate CoordinateConverter (-284 lines)
+- Stale styles-backup.css (-1,061 lines)
 
 ## [0.2.0] - 2026-03-15
 

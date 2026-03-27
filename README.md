@@ -16,7 +16,11 @@ A zero-dependency, TypeScript-first graph visualization library. Force-directed 
 - **TypeScript-first** — Designed in strict TypeScript, not retroactively typed. Full type definitions ship with the package.
 - **Mobile-native** — Pinch-to-zoom, touch drag, double-tap filtering built in from day one.
 - **Themeable** — Dark/light modes, automatic color generation for node types, CSS custom properties for full control.
-- **Small** — ~23KB gzipped. Compare to D3 (~90KB) or Cytoscape (~170KB).
+- **Small** — ~28KB gzipped. Compare to D3 (~90KB) or Cytoscape (~170KB).
+- **Layout persistence** — `exportState()` / `importState()` round-trip node positions, so users don't lose manually arranged layouts.
+- **Custom shapes** — Register diamond, hexagon, or any SVG shape via `registerShape()`. Built-in: circle, rectangle, square, triangle.
+- **Directed edges** — Per-edge `directed` flag controls arrowhead rendering. Configurable global default.
+- **Pluggable layouts** — Swap the force-directed engine for tree, radial, or grid layouts via the `LayoutStrategy` interface.
 
 ## Quick Start
 

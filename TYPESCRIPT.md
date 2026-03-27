@@ -671,4 +671,87 @@ newNodes.forEach(node => graph.addNode(node, batchOptions));
 graph.endBatch(); // Single redraw
 ```
 
-This comprehensive TypeScript guide ensures you can leverage the full power of static typing while using the SVG Graph Network library.
+## State Serialization Types
+
+```typescript
+import { GraphNetwork, GraphState } from 'svgnet';
+
+const graph = new GraphNetwork('container');
+
+// Export returns a fully typed GraphState
+const state: GraphState = graph.exportState();
+
+// Import accepts a GraphState — positions, velocities, and transform are restored
+graph.importState(state);
+```
+
+## Custom Shape Types
+
+```typescript
+import { GraphNetwork, INodeShapeFactory, ShapeResult } from 'svgnet';
+import { Node, NodeData } from 'svgnet';
+
+class HexagonCreator implements INodeShapeFactory {
+    supportsShape(shape: string): boolean {
+        return shape === 'hexagon';
+    }
+
+    createShape<T extends NodeData>(node: Node<T>): ShapeResult {
+        const size = node.size || 20;
+        const hex = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        const points = Array.from({ length: 6 }, (_, i) => {
+            const angle = (Math.PI / 3) * i - Math.PI / 6;
+            return `${Math.cos(angle) * size},${Math.sin(angle) * size}`;
+        }).join(' ');
+        hex.setAttribute('points', points);
+        return { shapeElement: hex };
+    }
+}
+
+graph.registerShape('hexagon', new HexagonCreator());
+```
+
+## Custom Layout Types
+
+```typescript
+import { GraphNetwork, LayoutStrategy, SimulationMetrics } from 'svgnet';
+import { Node, NodeData, PhysicsConfig } from 'svgnet';
+import { PhysicsLink } from 'svgnet';
+
+class CircularLayout<T extends NodeData> implements LayoutStrategy<T> {
+    tick(nodes: Map<string, Node<T>>): SimulationMetrics {
+        const radius = 200;
+        let i = 0;
+        const total = nodes.size;
+        nodes.forEach(node => {
+            const angle = (2 * Math.PI * i) / total;
+            node.position.x = Math.cos(angle) * radius;
+            node.position.y = Math.sin(angle) * radius;
+            i++;
+        });
+        return { totalEnergy: 0, maxForce: 0, averageForce: 0, nodeCount: total, activeNodeCount: 0 };
+    }
+
+    isStable(): boolean { return true; }
+    updateConfig(): void {}
+    getConfig(): PhysicsConfig {
+        return { damping: 0, repulsionStrength: 0, attractionStrength: 0, groupingStrength: 0 };
+    }
+}
+
+const graph = new GraphNetwork('container', { layout: new CircularLayout() });
+```
+
+## Directed Edge Types
+
+```typescript
+import { LinkData } from 'svgnet';
+
+const links: LinkData[] = [
+    { source: 'a', target: 'b', directed: true, label: 'depends on' },
+    { source: 'b', target: 'c', directed: false, label: 'related to' },
+    { source: 'c', target: 'd' }  // Falls back to GraphConfig.defaultDirected
+];
+```
+
+This comprehensive TypeScript guide ensures you can leverage the full power of static typing while using the svgnet library.

@@ -541,7 +541,7 @@ interface NodeData {
     id: string;                   // Unique identifier
     name: string;                 // Display name
     type?: string;                // Type for styling/grouping
-    shape?: 'circle' | 'rectangle' | 'square' | 'triangle';
+    shape?: string;               // Built-in: 'circle', 'rectangle', 'square', 'triangle'; custom via registerShape()
     size?: number;                // Size in pixels
     [key: string]: any;          // Custom properties
 }
@@ -553,6 +553,7 @@ interface LinkData {
     weight?: number;              // Visual weight
     line_type?: 'solid' | 'dashed' | 'dotted';
     color?: string;               // Custom color
+    directed?: boolean;           // Show arrowhead (falls back to defaultDirected)
     [key: string]: any;          // Custom properties
 }
 
@@ -739,6 +740,156 @@ mounted() {
 beforeDestroy() {
     this.graph?.destroy();
 }
+```
+
+---
+
+## State Serialization
+
+### exportState()
+
+Export the full graph state including node positions, velocities, and camera transform.
+
+```typescript
+const state = graph.exportState();
+// Save to localStorage, backend, etc.
+localStorage.setItem('graph-layout', JSON.stringify(state));
+```
+
+### importState(state)
+
+Restore a previously exported state, including node positions and camera transform.
+
+```typescript
+const saved = localStorage.getItem('graph-layout');
+if (saved) {
+    graph.importState(JSON.parse(saved));
+}
+```
+
+### GraphState Type
+
+```typescript
+interface GraphState {
+    nodes: Array<{
+        data: NodeData;
+        position: { x: number; y: number };
+        velocity: { x: number; y: number };
+        isFixed: boolean;
+        size: number;
+    }>;
+    links: LinkData[];
+    transform: TransformState;
+}
+```
+
+---
+
+## Custom Shapes
+
+### registerShape(name, creator)
+
+Register a custom node shape. After registration, nodes with `shape: '<name>'` will render using the provided creator.
+
+```typescript
+import { GraphNetwork, INodeShapeFactory, ShapeResult } from 'svgnet';
+
+class DiamondCreator implements INodeShapeFactory {
+    supportsShape(shape: string): boolean {
+        return shape === 'diamond';
+    }
+
+    createShape(node: Node): ShapeResult {
+        const size = node.size || 20;
+        const diamond = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        diamond.setAttribute('points', `0,-${size} ${size},0 0,${size} -${size},0`);
+        diamond.setAttribute('fill', '#4CAF50');
+        return { shapeElement: diamond };
+    }
+}
+
+const graph = new GraphNetwork('container');
+graph.registerShape('diamond', new DiamondCreator());
+graph.setData({
+    nodes: [{ id: '1', name: 'Diamond Node', shape: 'diamond' }],
+    links: []
+});
+```
+
+---
+
+## Directed Edges
+
+Edges support a `directed` property that controls arrowhead rendering.
+
+```typescript
+graph.setData({
+    nodes: [
+        { id: 'a', name: 'A' },
+        { id: 'b', name: 'B' },
+        { id: 'c', name: 'C' }
+    ],
+    links: [
+        { source: 'a', target: 'b', directed: true },   // Has arrowhead
+        { source: 'b', target: 'c', directed: false }    // No arrowhead
+    ]
+});
+```
+
+### GraphConfig.defaultDirected
+
+Set the default for edges that don't specify `directed`. Default is `true` (all edges show arrowheads, preserving existing behavior).
+
+```typescript
+const graph = new GraphNetwork('container', {
+    config: { defaultDirected: false }  // No arrowheads by default
+});
+```
+
+---
+
+## Pluggable Layout Strategies
+
+### LayoutStrategy Interface
+
+Replace the default force-directed physics with a custom layout algorithm.
+
+```typescript
+import { LayoutStrategy, SimulationMetrics } from 'svgnet';
+
+class GridLayout implements LayoutStrategy {
+    tick(nodes, links, filteredNodes): SimulationMetrics {
+        let i = 0;
+        const cols = Math.ceil(Math.sqrt(nodes.size));
+        nodes.forEach(node => {
+            node.position.x = (i % cols) * 100;
+            node.position.y = Math.floor(i / cols) * 100;
+            i++;
+        });
+        return { totalEnergy: 0, maxForce: 0, averageForce: 0, nodeCount: nodes.size, activeNodeCount: 0 };
+    }
+
+    isStable(): boolean { return true; }
+    updateConfig(): void {}
+    getConfig(): PhysicsConfig { return { damping: 0, repulsionStrength: 0, attractionStrength: 0, groupingStrength: 0 }; }
+}
+
+const graph = new GraphNetwork('container', {
+    layout: new GridLayout()
+});
+```
+
+### Built-in Layouts
+
+- **ForceDirectedLayout** — Default. Wraps `PhysicsEngine` for force-directed simulation.
+- **StaticLayout** — No-op. Nodes stay at their initial positions. Useful for pre-computed layouts.
+
+```typescript
+import { StaticLayout } from 'svgnet';
+
+const graph = new GraphNetwork('container', {
+    layout: new StaticLayout()
+});
 ```
 
 This comprehensive API provides full control over every aspect of the graph visualization, from basic data manipulation to advanced theming and performance optimization.

@@ -89,10 +89,17 @@ const graph = new GraphNetwork('container', {
 });
 ```
 
+## Advanced Features
+
+- **Layout persistence** — Save and restore node positions with `exportState()` / `importState()`. See [API docs](API.md#state-serialization).
+- **Custom shapes** — Register diamond, hexagon, or any SVG shape via `registerShape()`. See [Examples](EXAMPLES.md#custom-node-shapes).
+- **Directed edges** — Control arrowheads per-edge with `directed: true/false`. See [API docs](API.md#directed-edges).
+- **Pluggable layouts** — Replace force-directed physics with custom algorithms via `LayoutStrategy`. See [API docs](API.md#pluggable-layout-strategies).
+
 ## Next Steps
 
-- Check out the [full examples](examples/) folder
-- Read the [complete API documentation](README.md#api-reference)
+- Check out the [full examples](EXAMPLES.md)
+- Read the [complete API documentation](API.md)
 - Customize styling with [CSS variables](README.md#styling)
 
 ## Need Help?

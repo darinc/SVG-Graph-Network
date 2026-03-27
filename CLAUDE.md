@@ -29,8 +29,8 @@ npm run docs           # Generate TypeDoc API docs
 
 **Core subsystems:**
 
-- **Physics** (`src/physics/`) — Force simulation: repulsion, attraction, grouping forces. `PhysicsEngine` calculates forces, `PhysicsManager` manages simulation lifecycle. Completely isolated from rendering. Adaptive cooldown drops to ~2fps when equilibrium is detected, wakes on interaction.
-- **Rendering** (`src/rendering/`) — SVG DOM management. `SVGRenderer` and `NodeShapeFactory`. Layers: links (bottom) → nodes → edge labels (top). Viewport culling hides off-screen elements to reduce DOM writes on large graphs.
+- **Physics** (`src/physics/`) — Force simulation: repulsion, attraction, grouping forces. `PhysicsEngine` calculates forces, `PhysicsManager` manages lifecycle. Pluggable via `LayoutStrategy` interface — `ForceDirectedLayout` (default) wraps PhysicsEngine, `StaticLayout` for pre-computed positions. Adaptive cooldown drops to ~2fps at equilibrium, wakes on interaction.
+- **Rendering** (`src/rendering/`) — SVG DOM management. `SVGRenderer` and `NodeShapeFactory` (extensible via `registerShape()` for custom node shapes). Layers: links (bottom) → nodes → edge labels (top). Edges support per-edge `directed` flag for arrowheads. Viewport culling hides off-screen elements to reduce DOM writes.
 - **Interaction** (`src/interaction/`) — Mouse/touch event handling, viewport transforms. Touch uses a state machine pattern for gestures. Coordinate conversion is centralized in `src/interaction/utils/coordinates.ts` (`screenToGraph`, `screenToContainer`).
 - **UI** (`src/ui/`) — Controls, legend, breadcrumbs, title, settings panels via sub-managers under `UIManager`.
 - **Theming** (`src/theming/`) — Dark/light themes, CSS custom properties, `AutoColorGenerator` for node type colors.
@@ -40,7 +40,7 @@ npm run docs           # Generate TypeDoc API docs
 - **Styling** (`src/styling/`) — `StyleManager` for runtime style application.
 - **Errors** (`src/errors/`) — Typed error classes (`NodeNotFoundError`, `EdgeExistsError`, etc.).
 
-**Public API** is defined in `src/index.ts`: default export is `GraphNetwork`, with named exports for `Vector`, `Node`, `AutoColorGenerator`, and all TypeScript types. Changes to exports affect the package's public surface.
+**Public API** is defined in `src/index.ts`: default export is `GraphNetwork`, with named exports for `Vector`, `Node`, `AutoColorGenerator`, `ForceDirectedLayout`, `StaticLayout`, and all TypeScript types (`GraphState`, `LayoutStrategy`, `INodeShapeFactory`, `ShapeResult`, `SimulationMetrics`, etc.). `exportState()` / `importState()` on `GraphNetwork` enable layout persistence.
 
 **Key types** are in `src/types/`: `NodeData`, `LinkData`, `GraphData`, `GraphConfig`, plus event and styling types. The `Node` class (`src/Node.ts`) wraps `NodeData` with physics vectors.
 
