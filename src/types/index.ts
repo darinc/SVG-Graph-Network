@@ -16,8 +16,8 @@ export interface NodeData {
     name: string;
     /** Node type for styling and grouping */
     type?: string;
-    /** Visual shape of the node */
-    shape?: 'circle' | 'rectangle' | 'square' | 'triangle';
+    /** Visual shape of the node (built-in: 'circle', 'rectangle', 'square', 'triangle'; custom shapes via registerShape()) */
+    shape?: string;
     /** Size of the node in pixels */
     size?: number;
     /** Allow additional custom properties */

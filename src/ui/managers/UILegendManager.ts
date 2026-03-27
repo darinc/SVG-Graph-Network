@@ -21,7 +21,7 @@ export interface UILegendConfig {
  */
 export interface LegendItem {
     type: string;
-    shape: 'circle' | 'rectangle' | 'square' | 'triangle';
+    shape: string;
     color: string;
     stroke?: string;
     strokeWidth?: string;

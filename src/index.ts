@@ -89,3 +89,6 @@ export type {
     ElementSelector,
     HighlightStyle
 } from './types/styling';
+
+// Export shape factory types for custom shape registration
+export type { INodeShapeFactory, ShapeResult } from './rendering/NodeShapeFactory';

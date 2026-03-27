@@ -28,7 +28,7 @@ export interface NodeStyles {
     /** Node size in pixels */
     size?: number;
     /** Node shape */
-    shape?: 'circle' | 'rectangle' | 'square' | 'triangle';
+    shape?: string;
     /** Additional CSS class names */
     className?: string;
     /** CSS filter effects */

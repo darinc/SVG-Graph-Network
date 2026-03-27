@@ -221,13 +221,17 @@ export class NodeShapeFactory {
     /**
      * Register a new shape creator
      */
-    registerCreator(creator: INodeShapeFactory): void {
-        // Find which shapes this creator supports
-        const supportedShapes = ['circle', 'rectangle', 'square', 'triangle'];
-
-        for (const shape of supportedShapes) {
-            if (creator.supportsShape(shape)) {
-                this.creators.set(shape, creator);
+    registerCreator(creator: INodeShapeFactory, shapeName?: string): void {
+        if (shapeName) {
+            // Register for a specific custom shape name
+            this.creators.set(shapeName, creator);
+        } else {
+            // Auto-detect supported built-in shapes
+            const builtinShapes = ['circle', 'rectangle', 'square', 'triangle'];
+            for (const shape of builtinShapes) {
+                if (creator.supportsShape(shape)) {
+                    this.creators.set(shape, creator);
+                }
             }
         }
     }

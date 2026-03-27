@@ -2,7 +2,7 @@ import { Node } from '../Node';
 import { Vector } from '../Vector';
 import { NodeData, LinkData, TransformState, SVGElements, Bounds } from '../types/index';
 import { ThemeManager, VisualState } from '../theming/ThemeManager';
-import { NodeShapeFactory } from './NodeShapeFactory';
+import { NodeShapeFactory, INodeShapeFactory } from './NodeShapeFactory';
 import { createLogger } from '../utils/Logger';
 import { devAssert } from '../utils/devAssert';
 import { screenToGraph } from '../interaction/utils/coordinates';
@@ -731,6 +731,15 @@ export class SVGRenderer {
      */
     getTransform(): TransformState {
         return { ...this.transformState };
+    }
+
+    /**
+     * Register a custom node shape creator.
+     * @param shapeName - Name of the shape (e.g., 'diamond', 'hexagon')
+     * @param creator - Shape creator implementing INodeShapeFactory
+     */
+    registerShape(shapeName: string, creator: INodeShapeFactory): void {
+        this.shapeFactory.registerCreator(creator, shapeName);
     }
 
     /**

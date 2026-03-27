@@ -115,7 +115,7 @@ export class Node<T extends NodeData = NodeData> {
      * Get the shape of the node for rendering
      * @returns The node's shape or 'circle' as default
      */
-    getShape(): 'circle' | 'rectangle' | 'square' | 'triangle' {
+    getShape(): string {
         return this.data.shape || 'circle';
     }
 

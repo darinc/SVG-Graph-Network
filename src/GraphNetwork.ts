@@ -1476,6 +1476,19 @@ export class GraphNetwork<T extends NodeData = NodeData> {
     }
 
     /**
+     * Register a custom node shape. After registration, nodes with
+     * `shape: '<shapeName>'` will use the provided creator.
+     * @param shapeName - Name of the shape (e.g., 'diamond', 'hexagon')
+     * @param creator - Shape creator implementing INodeShapeFactory
+     */
+    registerShape(
+        shapeName: string,
+        creator: import('./rendering/NodeShapeFactory').INodeShapeFactory
+    ): void {
+        this.renderer?.registerShape(shapeName, creator);
+    }
+
+    /**
      * Export full graph state including node positions and camera transform.
      * Use with importState() to persist and restore layouts across sessions.
      * @returns Serializable graph state
